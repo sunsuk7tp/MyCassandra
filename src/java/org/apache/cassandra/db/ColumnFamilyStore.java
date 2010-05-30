@@ -22,6 +22,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -426,12 +427,19 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
      * param @ key - key for update/insert
      * param @ columnFamily - columnFamily changes
      */
-    Memtable apply(String key, ColumnFamily columnFamily) throws IOException
+    Memtable apply(String key, ColumnFamily columnFamily) throws IOException, SQLException
     {
         long start = System.nanoTime();
 
         boolean flushRequested = memtable_.isThresholdViolated();
         memtable_.put(key, columnFamily);
+        
+        DBInstance dbi = new DBInstance();
+        try {
+        	dbi.Insert("cassandra_table", key, columnFamily.toString());
+        } catch (SQLException e) {
+        	System.err.println(e);
+        }
         writeStats_.addNano(System.nanoTime() - start);
         
         return flushRequested ? memtable_ : null;
@@ -749,7 +757,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                 if (ssTables_.getRowCache().getCapacity() == 0)
                     return removeDeleted(getTopLevelColumns(filter, gcBefore), gcBefore);
 
-                ColumnFamily cached = cacheRow(filter.key); // memtableもしくはsstableから最新のカラムファミリーを取ってくる
+                ColumnFamily cached = cacheRow(filter.key); // get lastest CF from memtable or sstable. 
                 ColumnIterator ci = filter.getMemColumnIterator(memtable_, cached, getComparator()); // TODO passing memtable here is confusing since it's almost entirely unused
                 ColumnFamily returnCF = ci.getColumnFamily();
                 filter.collectCollatedColumns(returnCF, ci, gcBefore);

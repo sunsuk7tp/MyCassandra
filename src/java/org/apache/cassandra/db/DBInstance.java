@@ -1,3 +1,5 @@
+package org.apache.cassandra.db;
+
 import java.sql.*;
 
 public class DBInstance {
@@ -7,16 +9,17 @@ public class DBInstance {
 		conn = new DBConfigure().connect();
 	}
 	
-	int Insert(String Table, String Value) throws SQLException {
+	int Insert(String Table, String Row_key, String ColumnFamily) throws SQLException {
 		try {
-			String sPrepareSQL = "INSERT INTO "+Table+" (val) VALUES (?)";
+			String sPrepareSQL = "INSERT INTO "+Table+" (Row_Key, ColumnFamily) VALUES (?,?)";
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
 			
-			pst.setString(1, Value);
+			pst.setString(1, Row_key);
+			pst.setString(2, ColumnFamily);
 			
 			return pst.executeUpdate();
 		} catch (SQLException e) {
-			System.out.println("データベース接続エラー　"+ e);
+			System.out.println("db connection error "+ e);
 			return -1;
 		}
 	}
@@ -31,7 +34,7 @@ public class DBInstance {
 			
 			return pst.executeUpdate();
 		} catch (SQLException e) {
-			System.out.println("データベース接続エラー　"+ e);
+			System.out.println("db connection error "+ e);
 			return -1;
 		}
 	}
@@ -45,7 +48,7 @@ public class DBInstance {
 			
 			return pst.executeUpdate();
 		} catch (SQLException e) {
-			System.out.println("データベース接続エラー　"+ e);
+			System.out.println("db connection error "+ e);
 			return -1;
 		}
 	}
@@ -60,7 +63,7 @@ public class DBInstance {
 			
 			return pst.executeQuery();
 		} catch (SQLException e) {
-			System.out.println("データベース接続エラー　"+ e);
+			System.out.println("db connection error "+ e);
 			return null;
 		}		
 	}
