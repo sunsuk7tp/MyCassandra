@@ -48,9 +48,11 @@ import org.apache.cassandra.db.filter.*;
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.dht.AbstractBounds;
 import org.apache.cassandra.dht.Bounds;
+import org.apache.cassandra.dht.IPartitioner;
 import org.apache.cassandra.dht.Range;
 import org.apache.cassandra.dht.Token;
 import org.apache.cassandra.io.*;
+import org.apache.cassandra.io.util.DataOutputBuffer;
 import org.apache.cassandra.io.util.FileUtils;
 import org.apache.cassandra.service.StorageService;
 import org.apache.cassandra.thrift.SliceRange;
@@ -120,6 +122,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     private long maxRowCompactedSize = 0L;
     private long rowsCompactedTotalSize = 0L;
     private long rowsCompactedCount = 0L;
+    
+    private final IPartitioner partitioner = StorageService.getPartitioner();
     
     ColumnFamilyStore(String table, String columnFamilyName, boolean isSuper, int indexValue) throws IOException
     {
@@ -435,8 +439,19 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         memtable_.put(key, columnFamily);
         
         DBInstance dbi = new DBInstance();
+        
+        DecoratedKey decoratedKey = partitioner.decorateKey(key);
+        String Row_Key = partitioner.convertToDiskFormat(decoratedKey);
+        DataOutputBuffer buffer = new DataOutputBuffer();
+
+        ColumnFamily.serializer().serializeWithIndexes(columnFamily, buffer);
+        
+        int length = buffer.getLength();
+        //String data = String.valueOf(length) + new String(buffer.getData(), "UTF-8").substring(0, length);
+        String data = String.valueOf(length) + new String(buffer.getData(), "UTF-8");
+    
         try {
-        	dbi.Insert("cassandra_table", key, columnFamily.toString());
+        	dbi.Insert("cassandra_table", Row_Key, data);
         } catch (SQLException e) {
         	System.err.println(e);
         }
