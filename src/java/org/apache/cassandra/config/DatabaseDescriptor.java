@@ -135,6 +135,12 @@ public class DatabaseDescriptor
     private static IAuthenticator authenticator = new AllowAllAuthenticator();
 
     private final static String STORAGE_CONF_FILE = "storage-conf.xml";
+    
+    public static String sqlHost;
+    public static String sqlPort;
+    public static String sqlInstance;
+    public static String sqlUser;
+    public static String sqlPass;
 
     /**
      * Try the storage-config system property, and then inspect the classpath.
@@ -500,6 +506,13 @@ public class DatabaseDescriptor
             {
                 seeds.add(InetAddress.getByName(seedsxml[i]));
             }
+            
+            /* sql configure */
+            sqlHost = xmlUtils.getNodeValue("/Storage/SQL/SQLHost");
+            sqlPort = xmlUtils.getNodeValue("/Storage/SQL/SQLPort");
+            sqlInstance = xmlUtils.getNodeValue("/Storage/SQL/SQLInstance");
+            sqlUser = xmlUtils.getNodeValue("/Storage/SQL/SQLUser");
+            sqlPass = xmlUtils.getNodeValue("/Storage/SQL/SQLPass");
         }
         catch (ConfigurationException e)
         {
@@ -1208,4 +1221,24 @@ public class DatabaseDescriptor
     {
         return autoBootstrap;
     }
+
+    public static String getSQLHost() {
+    	return sqlHost;
     }
+    
+    public static String getSQLPort() {
+    	return sqlPort;
+    }
+    
+    public static String getSQLInstance() {
+    	return sqlInstance;
+    }
+    
+    public static String getSQLUser() {
+    	return sqlUser;
+    }
+ 
+    public static String getSQLPass() {
+    	return sqlPass;
+    }
+}

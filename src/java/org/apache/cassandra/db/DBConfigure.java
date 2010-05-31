@@ -1,13 +1,15 @@
 package org.apache.cassandra.db;
 import java.sql.*;
 
+import org.apache.cassandra.config.DatabaseDescriptor;
+
 public class DBConfigure {
 	public Connection connect() {
-		String dbHost = "localhost";
-		String dbPort = "3306";
-		String dbInstance = "cassandra_db";
-		String dbUser = "cassandra_user";
-		String dbPass = "********"; /* cassandra_db for pass */
+		String dbHost = DatabaseDescriptor.getSQLHost();
+		String dbPort = DatabaseDescriptor.getSQLPort();
+		String dbInstance = DatabaseDescriptor.getSQLInstance();
+		String dbUser = DatabaseDescriptor.getSQLUser();
+		String dbPass = DatabaseDescriptor.getSQLPass();
 		
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
