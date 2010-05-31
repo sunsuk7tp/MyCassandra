@@ -7,7 +7,7 @@ public class DBConfigure {
 		String dbPort = "3306";
 		String dbInstance = "cassandra_db";
 		String dbUser = "cassandra_user";
-		String dbPass = "QRgJVwH5";
+		String dbPass = "********"; /* cassandra_db for pass */
 		
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
