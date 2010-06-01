@@ -438,20 +438,24 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         boolean flushRequested = memtable_.isThresholdViolated();
         memtable_.put(key, columnFamily);
         
-        DBInstance dbi = new DBInstance();
+        //debug code
+        System.out.println("table: "+table_+", CF:"+columnFamily_);   
+        
+        String instanceName = table_;
+        DBInstance dbi = new DBInstance(instanceName);
+        
+        String tableName = columnFamily_;
         
         DecoratedKey decoratedKey = partitioner.decorateKey(key);
         String Row_Key = partitioner.convertToDiskFormat(decoratedKey);
         DataOutputBuffer buffer = new DataOutputBuffer();
-
-        ColumnFamily.serializer().serializeWithIndexes(columnFamily, buffer);
-        
+        ColumnFamily.serializer().serializeWithIndexes(columnFamily, buffer);        
         int length = buffer.getLength();
-        //String data = String.valueOf(length) + new String(buffer.getData(), "UTF-8").substring(0, length);
-        String data = String.valueOf(length) + new String(buffer.getData(), "UTF-8");
+        assert length > 0;
+        byte[] data = buffer.getData();
     
         try {
-        	dbi.Insert("cassandra_table", Row_Key, data);
+        	dbi.Insert(tableName, Row_Key, length, data);
         } catch (SQLException e) {
         	System.err.println(e);
         }

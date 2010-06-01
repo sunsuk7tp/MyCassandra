@@ -4,10 +4,9 @@ import java.sql.*;
 import org.apache.cassandra.config.DatabaseDescriptor;
 
 public class DBConfigure {
-	public Connection connect() {
+	public Connection connect(String dbInstance) {
 		String dbHost = DatabaseDescriptor.getSQLHost();
 		String dbPort = DatabaseDescriptor.getSQLPort();
-		String dbInstance = DatabaseDescriptor.getSQLInstance();
 		String dbUser = DatabaseDescriptor.getSQLUser();
 		String dbPass = DatabaseDescriptor.getSQLPass();
 		

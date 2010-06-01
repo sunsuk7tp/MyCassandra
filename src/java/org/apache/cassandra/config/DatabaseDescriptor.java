@@ -138,7 +138,6 @@ public class DatabaseDescriptor
     
     public static String sqlHost;
     public static String sqlPort;
-    public static String sqlInstance;
     public static String sqlUser;
     public static String sqlPass;
 
@@ -510,7 +509,6 @@ public class DatabaseDescriptor
             /* sql configure */
             sqlHost = xmlUtils.getNodeValue("/Storage/SQL/SQLHost");
             sqlPort = xmlUtils.getNodeValue("/Storage/SQL/SQLPort");
-            sqlInstance = xmlUtils.getNodeValue("/Storage/SQL/SQLInstance");
             sqlUser = xmlUtils.getNodeValue("/Storage/SQL/SQLUser");
             sqlPass = xmlUtils.getNodeValue("/Storage/SQL/SQLPass");
         }
@@ -1228,10 +1226,6 @@ public class DatabaseDescriptor
     
     public static String getSQLPort() {
     	return sqlPort;
-    }
-    
-    public static String getSQLInstance() {
-    	return sqlInstance;
     }
     
     public static String getSQLUser() {

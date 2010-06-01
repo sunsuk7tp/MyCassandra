@@ -9,23 +9,24 @@ public class DBTest {
 	public final static int    RANDOM_LENGTH    = 16;
 	
 	public static void main(String[] args) throws SQLException, ClassNotFoundException {
-		String dbTable = "cassandra_table";
-		DBInstance dbi = new DBInstance();
+		String dbTable = "LocationInfo";
+		DBInstance dbi = new DBInstance("system");
 		
 		for(int i = 0; i < 100; i++) {
 			String Row_Key = String.valueOf(i);
-			String CF = new String(getRandom());
-			int is = dbi.Insert(dbTable, Row_Key, CF);
+			byte[] CF = getRandom();
+			int length = CF.length;
+			int is = dbi.Insert(dbTable, Row_Key, length, CF);
 			if(is < 0) return;
 		}
-		
+		/*
 		ResultSet rs = dbi.Select(dbTable, null, null);
 		while(rs.next()) {
 			int id = rs.getInt(1);
 			String Row_Key = rs.getString(2);
 			String Val = rs.getString(3);
 			System.out.println(id+": "+Row_Key+"/"+Val);
-		}
+		}*/
 	}
 	
 	public static byte[] getRandom() {

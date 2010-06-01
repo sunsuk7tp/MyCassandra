@@ -5,17 +5,18 @@ import java.sql.*;
 public class DBInstance {
 	Connection conn;
 	
-	public DBInstance() {
-		conn = new DBConfigure().connect();
+	public DBInstance(String dbInstance) {
+		conn = new DBConfigure().connect(dbInstance);
 	}
 	
-	int Insert(String Table, String Row_key, String ColumnFamily) throws SQLException {
+	int Insert(String Table, String Row_key, int CFLength, byte[] ColumnFamily) throws SQLException {
 		try {
-			String sPrepareSQL = "INSERT INTO "+Table+" (Row_Key, ColumnFamily) VALUES (?,?)";
+			String sPrepareSQL = "INSERT INTO "+Table+" (Row_Key, CF_Length, ColumnFamily) VALUES (?,?,?)";
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
 			
 			pst.setString(1, Row_key);
-			pst.setString(2, ColumnFamily);
+			pst.setInt(2, CFLength);
+			pst.setBytes(3, ColumnFamily);
 			
 			return pst.executeUpdate();
 		} catch (SQLException e) {
@@ -24,13 +25,14 @@ public class DBInstance {
 		}
 	}
 	
-	int Update(String Table, int key, String Value) throws SQLException {
+	int Update(String Table, String Row_key, int CFLength, byte[] ColumnFamily) throws SQLException {
 		try {
-			String sPrepareSQL = "UPDATE "+Table+" SET val = ? Where id = ?";
+			String sPrepareSQL = "UPDATE "+Table+" SET CFLength = CFLength + ?, ColumnFamily = ColumnFamily + ? Where Row_key = ?";
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
 			
-			pst.setString(1, Value);
-			pst.setInt(2, key);
+			pst.setInt(1, CFLength);
+			pst.setBytes(2, ColumnFamily);
+			pst.setString(3, Row_key);
 			
 			return pst.executeUpdate();
 		} catch (SQLException e) {
