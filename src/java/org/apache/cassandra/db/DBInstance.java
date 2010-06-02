@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.apache.cassandra.io.util.DataInputBuffer;
 import org.apache.cassandra.io.util.DataOutputBuffer;
+import org.apache.cassandra.db.filter.*;
 
 public class DBInstance {
 	Connection conn;
@@ -13,29 +14,29 @@ public class DBInstance {
 		conn = new DBConfigure().connect(dbInstance);
 	}
 	
-	int insertOrUpdate(String Table, String Row_key, ColumnFamily cf) throws SQLException, IOException{
+	int insertOrUpdate(String table, String rowKey, ColumnFamily cf) throws SQLException, IOException{
 		int id;
-		if((id = rowSearch(Table, Row_key)) > 0) {
-			return update(Table, id, cf);
+		if((id = rowSearch(table, rowKey)) > 0) {
+			return update(table, id, cf);
 		} else {
-			return insert(Table, Row_key, cf);
+			return insert(table, rowKey, cf);
 		}
 	}
 	
-	int insert(String Table, String Row_key, ColumnFamily cf) throws SQLException {
+	int insert(String table, String rowKey, ColumnFamily cf) throws SQLException {
 		try {
 			DataOutputBuffer buffer = new DataOutputBuffer();
 	        ColumnFamily.serializer().serialize(cf, buffer);
-	        int CFLength = buffer.getLength();
-	        assert CFLength > 0;
-	        byte[] CFValue = buffer.getData();
+	        int cfLength = buffer.getLength();
+	        assert cfLength > 0;
+	        byte[] cfValue = buffer.getData();
 			
-			String sPrepareSQL = "INSERT INTO "+Table+" (Row_Key, CF_Length, ColumnFamily) VALUES (?,?,?)";
+			String sPrepareSQL = "INSERT INTO "+table+" (Row_Key, CF_Length, ColumnFamily) VALUES (?,?,?)";
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
 			
-			pst.setString(1, Row_key);
-			pst.setInt(2, CFLength);
-			pst.setBytes(3, CFValue);
+			pst.setString(1, rowKey);
+			pst.setInt(2, cfLength);
+			pst.setBytes(3, cfValue);
 			
 			return pst.executeUpdate();
 		} catch (SQLException e) {
@@ -44,12 +45,12 @@ public class DBInstance {
 		}
 	}
 	
-	int update(String Table, int PrimaryID, ColumnFamily newcf) throws SQLException, IOException {
+	int update(String table, int primaryID, ColumnFamily newcf) throws SQLException, IOException {
 		try {
 			
-			String gPrepareSQL = "SELECT ColumnFamily from "+Table+" Where id = ?";
+			String gPrepareSQL = "SELECT ColumnFamily from "+table+" Where id = ?";
 			PreparedStatement gst = conn.prepareStatement(gPrepareSQL);
-			gst.setInt(1, PrimaryID);
+			gst.setInt(1, primaryID);
 			ResultSet rs = gst.executeQuery();
 			byte[] b = null;
 			while(rs.next()) {
@@ -60,18 +61,18 @@ public class DBInstance {
 			ColumnFamily cf = new ColumnFamilySerializer().deserialize(inputBuffer);
 			cf.addAll(newcf);
 			
-			String sPrepareSQL = "UPDATE "+Table+" SET CF_Length = ?, ColumnFamily = ? Where id = ?";
+			String sPrepareSQL = "UPDATE "+table+" SET CF_Length = ?, ColumnFamily = ? Where id = ?";
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
 			
 			DataOutputBuffer outputBuffer = new DataOutputBuffer();
 	        ColumnFamily.serializer().serialize(cf, outputBuffer);
-	        int CFLength = outputBuffer.getLength();
-	        assert CFLength > 0;
-	        byte[] CFValue = outputBuffer.getData();
+	        int cfLength = outputBuffer.getLength();
+	        assert cfLength > 0;
+	        byte[] cfValue = outputBuffer.getData();
 			
-			pst.setInt(1, CFLength);
-			pst.setBytes(2, CFValue);
-			pst.setInt(3, PrimaryID);
+			pst.setInt(1, cfLength);
+			pst.setBytes(2, cfValue);
+			pst.setInt(3, primaryID);
 			
 			return pst.executeUpdate();
 		} catch (SQLException e) {
@@ -80,9 +81,9 @@ public class DBInstance {
 		}
 	}
 	
-	int delete(String Table, String columnName, String columnValue) throws SQLException {
+	int delete(String table, String columnName, String columnValue) throws SQLException {
 		try {
-			String sPrepareSQL = "DELETE FROM "+Table+" Where "+columnName+" = ?";
+			String sPrepareSQL = "DELETE FROM "+table+" Where "+columnName+" = ?";
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
 			
 			pst.setString(1, columnValue);
@@ -94,29 +95,35 @@ public class DBInstance {
 		}
 	}
 	
-	ResultSet select(String Table, String columnName, String columnValue) throws SQLException {
+	ColumnFamily select(String table, String rowKey, QueryFilter filter) throws SQLException, IOException {
 		try {
-			String sPrepareSQL = "SELECT * FROM "+Table;
-			if(columnName != null) sPrepareSQL += " Where "+columnName+" = ?";
+			String sPrepareSQL = "SELECT ColumnFamily FROM "+table+" WHERE Row_Key = ?";
 			
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
-			if(columnName != null) pst.setString(1, columnValue);
+			pst.setString(1, rowKey);
+			ResultSet rs = pst.executeQuery();
+			byte[] b = null;
+			while(rs.next()) {
+				b = rs.getBytes(1);
+			}
+			DataInputBuffer inputBuffer = new DataInputBuffer(b, 0, b.length);
 			
-			return pst.executeQuery();
+			ColumnFamily cf = new ColumnFamilySerializer().deserialize(inputBuffer);
+			return cf;
 		} catch (SQLException e) {
 			System.out.println("db connection error "+ e);
 			return null;
 		}		
 	}
 	
-	int rowSearch(String Table, String Row_Key) throws SQLException {
+	int rowSearch(String table, String rowKey) throws SQLException {
 		int id = -1;
 		
 		try {
-			String sPrepareSQL = "SELECT id FROM "+Table+" Where Row_Key = ?";
+			String sPrepareSQL = "SELECT id FROM "+table+" Where Row_Key = ?";
 			
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
-			pst.setString(1, Row_Key);
+			pst.setString(1, rowKey);
 			
 			ResultSet rs = pst.executeQuery();
 			while(rs.next()) {
@@ -146,10 +153,5 @@ public class DBInstance {
 			System.out.println("db connection error "+ e);
 			return -1;
 		}
-	}
-	
-	byte[] escape(byte[] val) {
-		
-		return val;
 	}
 }
