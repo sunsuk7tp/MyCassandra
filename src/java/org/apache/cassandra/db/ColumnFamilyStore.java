@@ -440,22 +440,15 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         
         //debug code
         System.out.println("table: "+table_+", CF:"+columnFamily_);   
-        
-        String instanceName = table_;
-        DBInstance dbi = new DBInstance(instanceName);
-        
-        String tableName = columnFamily_;
+        // sql instance setup
+        DBInstance dbi = new DBInstance(table_);
         
         DecoratedKey decoratedKey = partitioner.decorateKey(key);
         String Row_Key = partitioner.convertToDiskFormat(decoratedKey);
-        DataOutputBuffer buffer = new DataOutputBuffer();
-        ColumnFamily.serializer().serializeWithIndexes(columnFamily, buffer);        
-        int length = buffer.getLength();
-        assert length > 0;
-        byte[] data = buffer.getData();
     
         try {
-        	dbi.Insert(tableName, Row_Key, length, data);
+        	if(dbi.insertOrUpdate(columnFamily_, Row_Key, columnFamily) < 0)
+        		System.err.println("can't insert or update to mysql.");
         } catch (SQLException e) {
         	System.err.println(e);
         }
