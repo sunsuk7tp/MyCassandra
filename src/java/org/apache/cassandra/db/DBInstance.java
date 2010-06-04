@@ -9,9 +9,11 @@ import org.apache.cassandra.db.filter.*;
 
 public class DBInstance {
 	Connection conn;
+	String instanceName;
 	int debug = 1;
 	
 	public DBInstance(String dbInstance) {
+		instanceName = dbInstance;
 		conn = new DBConfigure().connect(dbInstance);
 	}
 	
@@ -27,6 +29,19 @@ public class DBInstance {
 	int insert(String table, String rowKey, ColumnFamily cf) throws SQLException {
 		if(debug > 0) System.out.print("SQLInsert: ");
 		try {
+			/*String tPrepareSQL = "SELECT COUNT(*) FROM  information_schema.tables WHERE table_name = ? AND table_schema = ?";
+			PreparedStatement tst = conn.prepareStatement(tPrepareSQL);
+			
+			tst.setString(1,table);
+			tst.setString(2, instanceName);
+			ResultSet rs = tst.executeQuery();
+
+			while(rs.next()) {
+				if(rs.getInt(1) < 1) {
+					create(table);
+				}
+			}*/
+			
 			DataOutputBuffer buffer = new DataOutputBuffer();
 	        ColumnFamily.serializer().serialize(cf, buffer);
 	        int cfLength = buffer.getLength();
@@ -57,7 +72,7 @@ public class DBInstance {
 	
 	int update(String table, int primaryID, ColumnFamily newcf) throws SQLException, IOException {
 		if(debug > 0) System.out.print("SQLUpdate: ");
-		try {			
+		try {	
 			String gPrepareSQL = "SELECT ColumnFamily from "+table+" Where id = ?";
 			PreparedStatement gst = conn.prepareStatement(gPrepareSQL);
 			gst.setInt(1, primaryID);
@@ -83,8 +98,9 @@ public class DBInstance {
 			pst.setInt(1, cfLength);
 			pst.setBytes(2, cfValue);
 			pst.setInt(3, primaryID);
-			
+			conn.setAutoCommit(false);
 			int result = pst.executeUpdate();
+			conn.commit();
 			if(debug > 0) { 
 				if(result > 0) {
 					System.out.println(cf.toString());
@@ -126,7 +142,8 @@ public class DBInstance {
 			while(rs.next()) {
 				b = rs.getBytes(1);
 			}
-			if(b.length > 0) {
+			
+			if(b != null) {
 				DataInputBuffer inputBuffer = new DataInputBuffer(b, 0, b.length);
 				
 				ColumnFamily cf = new ColumnFamilySerializer().deserialize(inputBuffer);

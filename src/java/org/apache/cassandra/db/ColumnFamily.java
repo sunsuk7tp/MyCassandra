@@ -193,14 +193,14 @@ public class ColumnFamily implements IColumnContainer
         IColumn oldColumn = columns_.putIfAbsent(name, column);
         if (oldColumn != null)
         {
-            if (oldColumn instanceof SuperColumn) // oldColumnがsupercolumnかどうか
+            if (oldColumn instanceof SuperColumn) // oldColumn is supercolumn or column
             {
                 ((SuperColumn) oldColumn).putColumn(column);
             }
             else
             {
-                while (((Column) oldColumn).comparePriority((Column)column) <= 0) // comparePriority=>timestampを比較(oldcolumn time-column time)
-                { // columnよりoldcolumnが新しかったら
+                while (((Column) oldColumn).comparePriority((Column)column) <= 0) // comparePriority=>timestamp commpare(oldcolumn time-column time)
+                { // oldColumn newer than ofcolumn
                     if (columns_.replace(name, oldColumn, column))
                         break;
                     oldColumn = columns_.get(name);

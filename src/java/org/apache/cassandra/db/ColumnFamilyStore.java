@@ -125,6 +125,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     
     private final IPartitioner partitioner = StorageService.getPartitioner();
     
+    private DBInstance dbi;
+    
     ColumnFamilyStore(String table, String columnFamilyName, boolean isSuper, int indexValue) throws IOException
     {
         table_ = table;
@@ -191,6 +193,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         }
         ssTables_ = new SSTableTracker(table, columnFamilyName);
         ssTables_.add(sstables);
+        
+        dbi = new DBInstance(table_);
     }
 
     public void addToCompactedRowStats(Long rowsize)
@@ -431,21 +435,18 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
      * param @ key - key for update/insert
      * param @ columnFamily - columnFamily changes
      */
-    Memtable apply(String key, ColumnFamily columnFamily) throws IOException, SQLException
+    Memtable apply(String key, ColumnFamily columnFamily) throws IOException
     {
         long start = System.nanoTime();
        
-        if(table_.equals("system")) {
+        /*if(table_.equals("system")) {
         	boolean flushRequested = memtable_.isThresholdViolated();
         	memtable_.put(key, columnFamily);
         	
         	writeStats_.addNano(System.nanoTime() - start);
         	 
         	return flushRequested ? memtable_ : null;
-        } else {
-            // sql instance setup
-            DBInstance dbi = new DBInstance(table_);
-            
+        } else {*/
             DecoratedKey decoratedKey = partitioner.decorateKey(key);
             String rowKey = partitioner.convertToDiskFormat(decoratedKey);
         
@@ -459,7 +460,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             writeStats_.addNano(System.nanoTime() - start);
             
             return null;
-        }
+        //}
     }
 
     /*
@@ -768,40 +769,22 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
         long start = System.nanoTime();
         try
-        {	
-        	DBInstance dbi = new DBInstance(table_);
+        {
+        	
             if (filter.path.superColumnName == null)
             {
             	ColumnFamily returnCF;
-            	if(!table_.equals("system")) {
-            		DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
-                    String rowKey = partitioner.convertToDiskFormat(decoratedKey);
-            		try {
-            			returnCF = dbi.select(columnFamily_, rowKey, filter);
-            			return returnCF;
-            		} catch (SQLException e) {
-            			System.err.println(e);
-            		}
-                }
-            	
-            	System.out.print("notSQLSelect: ");
-            	
-                if (ssTables_.getRowCache().getCapacity() == 0) {
-                    returnCF = removeDeleted(getTopLevelColumns(filter, gcBefore), gcBefore);
-                    System.out.println(returnCF);
-                    return returnCF;
-                }
-            	
-                ColumnFamily cached = cacheRow(filter.key); // get lastest CF from memtable or sstable. 
-                ColumnIterator ci = filter.getMemColumnIterator(memtable_, cached, getComparator()); // TODO passing memtable here is confusing since it's almost entirely unused
-                
-                returnCF = ci.getColumnFamily();
-                filter.collectCollatedColumns(returnCF, ci, gcBefore);
-                return removeDeleted(returnCF, gcBefore);
+            	DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
+                String rowKey = partitioner.convertToDiskFormat(decoratedKey);
+            	try {
+            		return dbi.select(columnFamily_, rowKey, filter);
+            	} catch (SQLException e) {
+            		System.err.println(e);
+            	}
             }
 
             // we are querying subcolumns of a supercolumn: fetch the supercolumn with NQF, then filter in-memory.
-            ColumnFamily cf;
+            /*ColumnFamily cf;
             SuperColumn sc;
             if (ssTables_.getRowCache().getCapacity() == 0)
             {
@@ -822,25 +805,16 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                 if (sc == null)
                     return null;
                 sc = (SuperColumn)sc.cloneMe();
-            }
-            ColumnFamily cfFiltered = null;
-            /*
-            SuperColumn scFiltered = filter.filterSuperColumn(sc, gcBefore);
-            
-            cfFiltered = cf.cloneMeShallow();
-            cfFiltered.addColumn(scFiltered);
-            */
+            }*/
             DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
             String rowKey = partitioner.convertToDiskFormat(decoratedKey);
             try {
-            	cfFiltered = dbi.select(columnFamily_, rowKey, filter);
-            	System.out.println(cfFiltered.toString());
+            	return dbi.select(columnFamily_, rowKey, filter);
             } catch (SQLException e) {
             	System.err.println(e);
             }
             
-            return cfFiltered;
-            //return removeDeleted(cfFiltered, gcBefore);
+            return null;
         }
         finally
         {
