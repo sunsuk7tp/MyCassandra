@@ -770,7 +770,6 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         long start = System.nanoTime();
         try
         {
-        	
             if (filter.path.superColumnName == null)
             {
             	ColumnFamily returnCF;
@@ -782,34 +781,19 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             		System.err.println(e);
             	}
             }
-
-            // we are querying subcolumns of a supercolumn: fetch the supercolumn with NQF, then filter in-memory.
-            /*ColumnFamily cf;
-            SuperColumn sc;
-            if (ssTables_.getRowCache().getCapacity() == 0)
-            {
-                QueryFilter nameFilter = new NamesQueryFilter(filter.key, new QueryPath(columnFamily_), filter.path.superColumnName);
-                cf = getTopLevelColumns(nameFilter, gcBefore);
-                if (cf == null || cf.getColumnCount() == 0)
-                    return cf;
-
-                assert cf.getSortedColumns().size() == 1;
-                sc = (SuperColumn)cf.getSortedColumns().iterator().next();
-            }
-            else
-            {
-                cf = cacheRow(filter.key);
-                if (cf == null)
-                    return null;
-                sc = (SuperColumn)cf.getColumn(filter.path.superColumnName);
-                if (sc == null)
-                    return null;
-                sc = (SuperColumn)sc.cloneMe();
-            }*/
+            
             DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
             String rowKey = partitioner.convertToDiskFormat(decoratedKey);
             try {
-            	return dbi.select(columnFamily_, rowKey, filter);
+            	ColumnFamily cf = dbi.select(columnFamily_, rowKey, filter);
+            	SuperColumn sc = (SuperColumn)cf.getColumn(filter.path.superColumnName);
+            	sc = (SuperColumn)sc.cloneMe();
+            	
+            	SuperColumn scFiltered = filter.filterSuperColumn(sc, gcBefore);
+            	ColumnFamily cfFiltered = cf.cloneMeShallow();
+            	cfFiltered.addColumn(scFiltered);
+            	
+            	return cfFiltered;
             } catch (SQLException e) {
             	System.err.println(e);
             }

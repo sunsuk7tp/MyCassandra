@@ -8,6 +8,7 @@ import org.apache.cassandra.io.util.DataOutputBuffer;
 import org.apache.cassandra.db.filter.*;
 
 public class DBInstance {
+	
 	Connection conn;
 	String instanceName;
 	int debug = 1;
@@ -18,9 +19,8 @@ public class DBInstance {
 	}
 	
 	int insertOrUpdate(String table, String rowKey, ColumnFamily cf) throws SQLException, IOException{
-		int id;
-		if((id = rowSearch(table, rowKey)) > 0) {
-			return update(table, id, cf);
+		if(rowSearch(table, rowKey) > 0) {
+			return update(table, rowKey, cf);
 		} else {
 			return insert(table, rowKey, cf);
 		}
@@ -70,23 +70,13 @@ public class DBInstance {
 		}
 	}
 	
-	int update(String table, int primaryID, ColumnFamily newcf) throws SQLException, IOException {
+	int update(String table, String rowKey, ColumnFamily newcf) throws SQLException, IOException {
 		if(debug > 0) System.out.print("SQLUpdate: ");
-		try {	
-			String gPrepareSQL = "SELECT ColumnFamily from "+table+" Where id = ?";
-			PreparedStatement gst = conn.prepareStatement(gPrepareSQL);
-			gst.setInt(1, primaryID);
-			ResultSet rs = gst.executeQuery();
-			byte[] b = null;
-			while(rs.next()) {
-				b = rs.getBytes(1);
-			}
-			DataInputBuffer inputBuffer = new DataInputBuffer(b, 0, b.length);
-			
-			ColumnFamily cf = new ColumnFamilySerializer().deserialize(inputBuffer);
+		try {
+			ColumnFamily cf = select(table, rowKey, null);
 			cf.addAll(newcf);
 			
-			String sPrepareSQL = "UPDATE "+table+" SET CF_Length = ?, ColumnFamily = ? Where id = ?";
+			String sPrepareSQL = "UPDATE "+table+" SET CF_Length = ?, ColumnFamily = ? Where Row_Key = ?";
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
 			
 			DataOutputBuffer outputBuffer = new DataOutputBuffer();
@@ -97,7 +87,7 @@ public class DBInstance {
 			
 			pst.setInt(1, cfLength);
 			pst.setBytes(2, cfValue);
-			pst.setInt(3, primaryID);
+			pst.setString(3, rowKey);
 			conn.setAutoCommit(false);
 			int result = pst.executeUpdate();
 			conn.commit();
@@ -134,7 +124,6 @@ public class DBInstance {
 		if(debug > 0) System.out.print("SQLSelect: ");
 		try {
 			String sPrepareSQL = "SELECT ColumnFamily FROM "+table+" WHERE Row_Key = ?";
-			
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
 			pst.setString(1, rowKey);
 			ResultSet rs = pst.executeQuery();
@@ -196,5 +185,13 @@ public class DBInstance {
 			System.out.println("db connection error "+ e);
 			return -1;
 		}
+	}
+	
+	// transaction method
+	void beginTransaction() throws SQLException {
+	    String sql = "BEGIN;";
+	    Statement statement = conn.createStatement ();
+	    statement.executeUpdate(sql);
+	    statement.close();
 	}
 }
