@@ -9,6 +9,7 @@ import org.apache.cassandra.db.filter.*;
 
 public class DBInstance {
 	Connection conn;
+	int debug = 1;
 	
 	public DBInstance(String dbInstance) {
 		conn = new DBConfigure().connect(dbInstance);
@@ -24,6 +25,7 @@ public class DBInstance {
 	}
 	
 	int insert(String table, String rowKey, ColumnFamily cf) throws SQLException {
+		if(debug > 0) System.out.print("SQLInsert: ");
 		try {
 			DataOutputBuffer buffer = new DataOutputBuffer();
 	        ColumnFamily.serializer().serialize(cf, buffer);
@@ -38,7 +40,15 @@ public class DBInstance {
 			pst.setInt(2, cfLength);
 			pst.setBytes(3, cfValue);
 			
-			return pst.executeUpdate();
+			int result = pst.executeUpdate();
+			if(debug > 0) { 
+				if(result > 0) {
+					System.out.println(cf.toString());
+				} else {
+					System.out.println("can't insert");
+				}
+			}
+			return result;
 		} catch (SQLException e) {
 			System.out.println("db connection error "+ e);
 			return -1;
@@ -46,8 +56,8 @@ public class DBInstance {
 	}
 	
 	int update(String table, int primaryID, ColumnFamily newcf) throws SQLException, IOException {
-		try {
-			
+		if(debug > 0) System.out.print("SQLUpdate: ");
+		try {			
 			String gPrepareSQL = "SELECT ColumnFamily from "+table+" Where id = ?";
 			PreparedStatement gst = conn.prepareStatement(gPrepareSQL);
 			gst.setInt(1, primaryID);
@@ -74,6 +84,15 @@ public class DBInstance {
 			pst.setBytes(2, cfValue);
 			pst.setInt(3, primaryID);
 			
+			int result = pst.executeUpdate();
+			if(debug > 0) { 
+				if(result > 0) {
+					System.out.println(cf.toString());
+				} else {
+					System.out.println("can't update");
+				}
+			}
+			
 			return pst.executeUpdate();
 		} catch (SQLException e) {
 			System.out.println("db connection error: "+ e);
@@ -96,6 +115,7 @@ public class DBInstance {
 	}
 	
 	ColumnFamily select(String table, String rowKey, QueryFilter filter) throws SQLException, IOException {
+		if(debug > 0) System.out.print("SQLSelect: ");
 		try {
 			String sPrepareSQL = "SELECT ColumnFamily FROM "+table+" WHERE Row_Key = ?";
 			
@@ -106,10 +126,16 @@ public class DBInstance {
 			while(rs.next()) {
 				b = rs.getBytes(1);
 			}
-			DataInputBuffer inputBuffer = new DataInputBuffer(b, 0, b.length);
-			
-			ColumnFamily cf = new ColumnFamilySerializer().deserialize(inputBuffer);
-			return cf;
+			if(b.length > 0) {
+				DataInputBuffer inputBuffer = new DataInputBuffer(b, 0, b.length);
+				
+				ColumnFamily cf = new ColumnFamilySerializer().deserialize(inputBuffer);
+				if(debug > 0) System.out.println(cf.toString());
+				return cf;
+			} else {
+				if(debug > 0) System.out.println("cant't select");
+				return null;
+			}
 		} catch (SQLException e) {
 			System.out.println("db connection error "+ e);
 			return null;

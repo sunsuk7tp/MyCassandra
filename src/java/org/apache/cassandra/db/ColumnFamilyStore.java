@@ -434,27 +434,32 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     Memtable apply(String key, ColumnFamily columnFamily) throws IOException, SQLException
     {
         long start = System.nanoTime();
-
-        boolean flushRequested = memtable_.isThresholdViolated();
-        memtable_.put(key, columnFamily);
+       
+        if(table_.equals("system")) {
+        	boolean flushRequested = memtable_.isThresholdViolated();
+        	memtable_.put(key, columnFamily);
+        	
+        	writeStats_.addNano(System.nanoTime() - start);
+        	 
+        	return flushRequested ? memtable_ : null;
+        } else {
+            // sql instance setup
+            DBInstance dbi = new DBInstance(table_);
+            
+            DecoratedKey decoratedKey = partitioner.decorateKey(key);
+            String rowKey = partitioner.convertToDiskFormat(decoratedKey);
         
-        //debug code
-        System.out.println("table: "+table_+", CF:"+columnFamily_);   
-        // sql instance setup
-        DBInstance dbi = new DBInstance(table_);
-        
-        DecoratedKey decoratedKey = partitioner.decorateKey(key);
-        String rowKey = partitioner.convertToDiskFormat(decoratedKey);
-    
-        try {
-        	if(dbi.insertOrUpdate(columnFamily_, rowKey, columnFamily) < 0)
-        		System.err.println("can't insert or update to mysql.");
-        } catch (SQLException e) {
-        	System.err.println(e);
+            try {
+            	if(dbi.insertOrUpdate(columnFamily_, rowKey, columnFamily) < 0)
+            		System.err.println("can't insert or update to mysql.");
+            } catch (SQLException e) {
+            	System.err.println(e);
+            }
+            
+            writeStats_.addNano(System.nanoTime() - start);
+            
+            return null;
         }
-        writeStats_.addNano(System.nanoTime() - start);
-        
-        return flushRequested ? memtable_ : null;
     }
 
     /*
@@ -773,14 +778,13 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                     String rowKey = partitioner.convertToDiskFormat(decoratedKey);
             		try {
             			returnCF = dbi.select(columnFamily_, rowKey, filter);
-            			System.out.println("rowKey:"+rowKey+", CF:"+returnCF.toString());
             			return returnCF;
             		} catch (SQLException e) {
             			System.err.println(e);
             		}
                 }
             	
-            	System.out.println("sql not allow");
+            	System.out.print("notSQLSelect: ");
             	
                 if (ssTables_.getRowCache().getCapacity() == 0) {
                     returnCF = removeDeleted(getTopLevelColumns(filter, gcBefore), gcBefore);
@@ -819,23 +823,24 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                     return null;
                 sc = (SuperColumn)sc.cloneMe();
             }
-            
-            SuperColumn scFiltered = filter.filterSuperColumn(sc, gcBefore);
             ColumnFamily cfFiltered = null;
+            /*
+            SuperColumn scFiltered = filter.filterSuperColumn(sc, gcBefore);
+            
             cfFiltered = cf.cloneMeShallow();
             cfFiltered.addColumn(scFiltered);
-            
-            /*DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
+            */
+            DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
             String rowKey = partitioner.convertToDiskFormat(decoratedKey);
             try {
             	cfFiltered = dbi.select(columnFamily_, rowKey, filter);
             	System.out.println(cfFiltered.toString());
             } catch (SQLException e) {
             	System.err.println(e);
-            }*/
+            }
             
-            //return cfFiltered;
-            return removeDeleted(cfFiltered, gcBefore);
+            return cfFiltered;
+            //return removeDeleted(cfFiltered, gcBefore);
         }
         finally
         {
