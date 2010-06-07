@@ -11,7 +11,7 @@ public class DBInstance {
 	
 	Connection conn;
 	String instanceName;
-	int debug = 1;
+	int debug = 0;
 	
 	public DBInstance(String dbInstance) {
 		instanceName = dbInstance;
@@ -48,12 +48,11 @@ public class DBInstance {
 	        assert cfLength > 0;
 	        byte[] cfValue = buffer.getData();
 			
-			String sPrepareSQL = "INSERT INTO "+table+" (Row_Key, CF_Length, ColumnFamily) VALUES (?,?,?)";
+			String sPrepareSQL = "INSERT INTO "+table+" (Row_Key, ColumnFamily) VALUES (?,?)";
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
 			
 			pst.setString(1, rowKey);
-			pst.setInt(2, cfLength);
-			pst.setBytes(3, cfValue);
+			pst.setBytes(2, cfValue);
 			
 			int result = pst.executeUpdate();
 			if(debug > 0) { 
@@ -76,7 +75,7 @@ public class DBInstance {
 			ColumnFamily cf = select(table, rowKey, null);
 			cf.addAll(newcf);
 			
-			String sPrepareSQL = "UPDATE "+table+" SET CF_Length = ?, ColumnFamily = ? Where Row_Key = ?";
+			String sPrepareSQL = "UPDATE "+table+" SET ColumnFamily = ? Where Row_Key = ?";
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
 			
 			DataOutputBuffer outputBuffer = new DataOutputBuffer();
@@ -85,12 +84,11 @@ public class DBInstance {
 	        assert cfLength > 0;
 	        byte[] cfValue = outputBuffer.getData();
 			
-			pst.setInt(1, cfLength);
-			pst.setBytes(2, cfValue);
-			pst.setString(3, rowKey);
-			conn.setAutoCommit(false);
+			pst.setBytes(1, cfValue);
+			pst.setString(2, rowKey);
+			//conn.setAutoCommit(false);
 			int result = pst.executeUpdate();
-			conn.commit();
+			//conn.commit();
 			if(debug > 0) { 
 				if(result > 0) {
 					System.out.println(cf.toString());
@@ -149,23 +147,23 @@ public class DBInstance {
 	}
 	
 	int rowSearch(String table, String rowKey) throws SQLException {
-		int id = -1;
+		int count = -1;
 		
 		try {
-			String sPrepareSQL = "SELECT id FROM "+table+" Where Row_Key = ?";
+			String sPrepareSQL = "SELECT COUNT(Row_Key) FROM "+table+" Where Row_Key = ?";
 			
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
 			pst.setString(1, rowKey);
 			
 			ResultSet rs = pst.executeQuery();
 			while(rs.next()) {
-				id = rs.getInt(1);
+				count = rs.getInt(1);
 			}
 		} catch (SQLException e) {
 			System.out.println("db connection error "+ e);
 		}
 		
-		return id;
+		return count;
 	}
 	
 	int create(String tableName) throws SQLException {

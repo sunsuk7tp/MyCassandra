@@ -439,28 +439,19 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     {
         long start = System.nanoTime();
        
-        /*if(table_.equals("system")) {
-        	boolean flushRequested = memtable_.isThresholdViolated();
-        	memtable_.put(key, columnFamily);
-        	
-        	writeStats_.addNano(System.nanoTime() - start);
-        	 
-        	return flushRequested ? memtable_ : null;
-        } else {*/
-            DecoratedKey decoratedKey = partitioner.decorateKey(key);
-            String rowKey = partitioner.convertToDiskFormat(decoratedKey);
+        //DecoratedKey decoratedKey = partitioner.decorateKey(key);
+        //String rowKey = partitioner.convertToDiskFormat(decoratedKey);
         
-            try {
-            	if(dbi.insertOrUpdate(columnFamily_, rowKey, columnFamily) < 0)
-            		System.err.println("can't insert or update to mysql.");
-            } catch (SQLException e) {
-            	System.err.println(e);
-            }
+        try {
+            if(dbi.insertOrUpdate(columnFamily_, key, columnFamily) < 0)
+            	System.err.println("can't insert or update to mysql.");
+        } catch (SQLException e) {
+            System.err.println(e);
+        }
             
-            writeStats_.addNano(System.nanoTime() - start);
+        writeStats_.addNano(System.nanoTime() - start);
             
-            return null;
-        //}
+        return null;
     }
 
     /*
@@ -773,10 +764,10 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             if (filter.path.superColumnName == null)
             {
             	ColumnFamily returnCF;
-            	DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
-                String rowKey = partitioner.convertToDiskFormat(decoratedKey);
+            	//DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
+                //String rowKey = partitioner.convertToDiskFormat(decoratedKey);
             	try {
-            		return dbi.select(columnFamily_, rowKey, filter);
+            		return dbi.select(columnFamily_, filter.key, filter);
             	} catch (SQLException e) {
             		System.err.println(e);
             	}
