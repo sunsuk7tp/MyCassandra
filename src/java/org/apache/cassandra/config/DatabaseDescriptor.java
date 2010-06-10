@@ -25,6 +25,7 @@ import org.apache.cassandra.db.commitlog.CommitLog;
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.db.marshal.UTF8Type;
+import org.apache.cassandra.db.DBInstance;
 import org.apache.cassandra.dht.IPartitioner;
 import org.apache.cassandra.locator.IEndPointSnitch;
 import org.apache.cassandra.locator.AbstractReplicationStrategy;
@@ -42,6 +43,8 @@ import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -464,7 +467,13 @@ public class DatabaseDescriptor
                 if (datadir.equals(logFileDirectory))
                     throw new ConfigurationException("CommitLogDirectory must not be the same as any DataFileDirectory");
             }
-
+            
+            /* sql configure */
+            sqlHost = xmlUtils.getNodeValue("/Storage/SQL/SQLHost");
+            sqlPort = xmlUtils.getNodeValue("/Storage/SQL/SQLPort");
+            sqlUser = xmlUtils.getNodeValue("/Storage/SQL/SQLUser");
+            sqlPass = xmlUtils.getNodeValue("/Storage/SQL/SQLPass");
+            
             /* threshold after which commit log should be rotated. */
             String value = xmlUtils.getNodeValue("/Storage/CommitLogRotationThresholdInMB");
             if ( value != null)
@@ -505,12 +514,6 @@ public class DatabaseDescriptor
             {
                 seeds.add(InetAddress.getByName(seedsxml[i]));
             }
-            
-            /* sql configure */
-            sqlHost = xmlUtils.getNodeValue("/Storage/SQL/SQLHost");
-            sqlPort = xmlUtils.getNodeValue("/Storage/SQL/SQLPort");
-            sqlUser = xmlUtils.getNodeValue("/Storage/SQL/SQLUser");
-            sqlPass = xmlUtils.getNodeValue("/Storage/SQL/SQLPass");
         }
         catch (ConfigurationException e)
         {
@@ -665,7 +668,14 @@ public class DatabaseDescriptor
                     {
                         throw new ConfigurationException("ColumnSort is no longer an accepted attribute.  Use CompareWith instead.");
                     }
-
+                    
+                    // make sql table
+                    DBInstance dbi = new DBInstance(ksName);
+                    try {
+                    	dbi.create(cfName);
+                    } catch (SQLException e) {
+                    	System.out.println("db connection error "+ e);
+                    }
                     // Parse out the column comparator
                     AbstractType comparator = getComparator(columnFamily, "CompareWith");
                     AbstractType subcolumnComparator = null;
@@ -817,18 +827,19 @@ public class DatabaseDescriptor
             System.exit(1);
         }
         /* make sure we have a directory for each table */
-        for (String dataFile : dataFileDirectories)
+        /*for (String dataFile : dataFileDirectories)
         {
             FileUtils.createDirectory(dataFile + File.separator + Table.SYSTEM_TABLE);
-            for (String table : tables.keySet())
+        	for (String table : tables.keySet())
             {
                 String oneDir = dataFile + File.separator + table;
                 FileUtils.createDirectory(oneDir);
                 File streamingDir = new File(oneDir, STREAMING_SUBDIR);
-                if (streamingDir.exists())
+                if (streamingDir.exists()) {
                     FileUtils.deleteDir(streamingDir);
+                }
             }
-        }
+        }*/
     }
 
     /**

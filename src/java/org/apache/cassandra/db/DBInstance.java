@@ -166,19 +166,28 @@ public class DBInstance {
 		return count;
 	}
 	
-	int create(String tableName) throws SQLException {
+	// Init MySQL Table for Keyspaces
+	public int create(String tableName) throws SQLException {
 		try {
-			String sPrepareSQL = "CREATE Table "+tableName + "(" +
-				"`id` int(11) NOT NULL AUTO_INCREMENT," +
-				"`Row_Key` text NOT NULL," +
-				"`CF_Length` int NOT NULL," +
-				"`ColumnFamily` VARBINARY(65276)," +
-				"PRIMARY KEY (`id`)"+
+			Statement stmt = conn.createStatement();
+			
+			if(debug > 0) {
+				stmt.executeUpdate("TRUNCATE TABLE "+tableName);
+			}
+			
+			ResultSet rs = stmt.executeQuery("show tables");
+			while(rs.next()) {
+				if(rs.getString(1).equals(tableName)) {
+					return 0;
+				}
+			}
+			
+			String sql = "CREATE Table "+tableName + "(" +
+				"`Row_Key` CHAR(64) NOT NULL," +
+				"`ColumnFamily` VARBINARY(16384)," +
+				"PRIMARY KEY (`Row_Key`)"+
 			")";
-			
-			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
-			
-			return pst.executeUpdate();
+			return stmt.executeUpdate(sql);
 		} catch (SQLException e) {
 			System.out.println("db connection error "+ e);
 			return -1;
@@ -192,4 +201,5 @@ public class DBInstance {
 	    statement.executeUpdate(sql);
 	    statement.close();
 	}
+	
 }
