@@ -7,6 +7,8 @@ import org.apache.cassandra.io.util.DataInputBuffer;
 import org.apache.cassandra.io.util.DataOutputBuffer;
 import org.apache.cassandra.db.filter.*;
 
+
+
 public class DBInstance {
 	
 	Connection conn;
@@ -168,6 +170,11 @@ public class DBInstance {
 	
 	// Init MySQL Table for Keyspaces
 	public int create(String tableName) throws SQLException {
+		int rowKeySize = 64;
+		int columnFamilySize = 16*1024;
+		String columnFamilyType = "VARBINARY";
+		String storageEngineType = "InnoDB";
+		
 		try {
 			Statement stmt = conn.createStatement();
 			
@@ -175,19 +182,26 @@ public class DBInstance {
 				stmt.executeUpdate("TRUNCATE TABLE "+tableName);
 			}
 			
-			ResultSet rs = stmt.executeQuery("show tables");
+			ResultSet rs = stmt.executeQuery("SHOW TABLES");
 			while(rs.next()) {
 				if(rs.getString(1).equals(tableName)) {
 					return 0;
 				}
 			}
 			
-			String sql = "CREATE Table "+tableName + "(" +
-				"`Row_Key` CHAR(64) NOT NULL," +
-				"`ColumnFamily` VARBINARY(16384)," +
-				"PRIMARY KEY (`Row_Key`)"+
-			")";
-			return stmt.executeUpdate(sql);
+			String sPrepareSQL = "CREATE Table "+tableName + "(" +
+				"`Row_Key` CHAR(?) NOT NULL," +
+				"`ColumnFamily` VARBINARY(?)," +
+				"PRIMARY KEY (`Row_Key`)" +
+			") ENGINE = ?";
+			
+			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
+			pst.setInt(1,rowKeySize);
+			pst.setInt(2,columnFamilySize);
+			pst.setString(3, storageEngineType);
+			
+			
+			return pst.executeUpdate();
 		} catch (SQLException e) {
 			System.out.println("db connection error "+ e);
 			return -1;

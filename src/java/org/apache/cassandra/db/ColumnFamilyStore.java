@@ -773,10 +773,10 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             	}
             }
             
-            DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
-            String rowKey = partitioner.convertToDiskFormat(decoratedKey);
+            //DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
+            //String rowKey = partitioner.convertToDiskFormat(decoratedKey);
             try {
-            	ColumnFamily cf = dbi.select(columnFamily_, rowKey, filter);
+            	ColumnFamily cf = dbi.select(columnFamily_, filter.key, filter);
             	SuperColumn sc = (SuperColumn)cf.getColumn(filter.path.superColumnName);
             	sc = (SuperColumn)sc.cloneMe();
             	
