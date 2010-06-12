@@ -138,61 +138,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
         if (logger_.isDebugEnabled())
             logger_.debug("Starting CFS " + columnFamily_);
-        // scan for data files corresponding to this CF
-        List<File> sstableFiles = new ArrayList<File>();
-        Pattern auxFilePattern = Pattern.compile("(.*)(-Filter\\.db$|-Index\\.db$)");
-        for (File file : files())
-        {
-            String filename = file.getName();
 
-            /* look for and remove orphans. An orphan is a -Filter.db or -Index.db with no corresponding -Data.db. */
-            Matcher matcher = auxFilePattern.matcher(file.getAbsolutePath());
-            if (matcher.matches())
-            {
-                String basePath = matcher.group(1);
-                if (!new File(basePath + "-Data.db").exists())
-                {
-                    logger_.info(String.format("Removing orphan %s", file.getAbsolutePath()));
-                    FileUtils.deleteWithConfirm(file);
-                    continue;
-                }
-            }
-
-            if (((file.length() == 0 && !filename.endsWith("-Compacted")) || (filename.contains("-" + SSTable.TEMPFILE_MARKER))))
-            {
-                FileUtils.deleteWithConfirm(file);
-                continue;
-            }
-
-            if (filename.contains("-Data.db"))
-            {
-                sstableFiles.add(file.getAbsoluteFile());
-            }
-        }
-        Collections.sort(sstableFiles, new FileUtils.FileComparator());
-
-        /* Load the index files and the Bloom Filters associated with them. */
-        List<SSTableReader> sstables = new ArrayList<SSTableReader>();
-        for (File file : sstableFiles)
-        {
-            String filename = file.getAbsolutePath();
-            if (SSTable.deleteIfCompacted(filename))
-                continue;
-
-            SSTableReader sstable;
-            try
-            {
-                sstable = SSTableReader.open(filename);
-            }
-            catch (IOException ex)
-            {
-                logger_.error("Corrupt file " + filename + "; skipped", ex);
-                continue;
-            }
-            sstables.add(sstable);
-        }
         ssTables_ = new SSTableTracker(table, columnFamilyName);
-        ssTables_.add(sstables);
         
         dbi = new DBInstance(table_);
     }
@@ -233,7 +180,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
          * the max which in this case is n and increment it to use it for next
          * index.
          */
-        List<Integer> generations = new ArrayList<Integer>();
+        /*List<Integer> generations = new ArrayList<Integer>();
         String[] dataFileDirectories = DatabaseDescriptor.getAllDataFileLocationsForTable(table);
         for (String directory : dataFileDirectories)
         {
@@ -252,7 +199,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             }
         }
         Collections.sort(generations);
-        int value = (generations.size() > 0) ? (generations.get(generations.size() - 1)) : 0;
+        int value = (generations.size() > 0) ? (generations.get(generations.size() - 1)) : 0;*/
+    	int value = 0;
 
         ColumnFamilyStore cfs = new ColumnFamilyStore(table, columnFamily, "Super".equals(DatabaseDescriptor.getColumnType(table, columnFamily)), value);
 

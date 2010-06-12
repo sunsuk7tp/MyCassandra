@@ -169,11 +169,7 @@ public class DBInstance {
 	}
 	
 	// Init MySQL Table for Keyspaces
-	public int create(String tableName) throws SQLException {
-		int rowKeySize = 64;
-		int columnFamilySize = 16*1024;
-		String columnFamilyType = "VARBINARY";
-		String storageEngineType = "InnoDB";
+	public int create(String tableName, int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType) throws SQLException {
 		
 		try {
 			Statement stmt = conn.createStatement();
@@ -190,9 +186,10 @@ public class DBInstance {
 			}
 			
 			String sPrepareSQL = "CREATE Table "+tableName + "(" +
-				"`Row_Key` CHAR(?) NOT NULL," +
+				"`ID` INT NOT NULL AUTO_INCREMENT," + 
+				"`Row_Key` VARCHAR(?) NOT NULL," +
 				"`ColumnFamily` VARBINARY(?)," +
-				"PRIMARY KEY (`Row_Key`)" +
+				"PRIMARY KEY (`ID`)" +
 			") ENGINE = ?";
 			
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);

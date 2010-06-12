@@ -139,6 +139,11 @@ public class DatabaseDescriptor
 
     private final static String STORAGE_CONF_FILE = "storage-conf.xml";
     
+    public static final String defaultStorageEngineType = "InnoDB";
+    public static final int defaultRowKeySize = 64;
+    public static final String defaultColumnFamilyType = "VARBINARY";
+    public static final int defaultColumnFamilySize = 6 * 1024; // 6KB
+    
     public static String sqlHost;
     public static String sqlPort;
     public static String sqlUser;
@@ -669,10 +674,33 @@ public class DatabaseDescriptor
                         throw new ConfigurationException("ColumnSort is no longer an accepted attribute.  Use CompareWith instead.");
                     }
                     
+                    // sql table config
+                    int rowKeySize = defaultRowKeySize;
+                    int columnFamilySize = defaultColumnFamilySize;
+                    String columnFamilyType = defaultColumnFamilyType;
+                    String storageEngineType = defaultStorageEngineType;
+            		
+                    if ((value = XMLUtils.getAttributeValue(columnFamily, "RowKeySize")) != null)
+                    {
+                    	rowKeySize = Integer.parseInt(value);
+                    }
+                    if ((value = XMLUtils.getAttributeValue(columnFamily, "ColumnFamilySize")) != null)
+                    {
+                    	columnFamilySize = Integer.parseInt(value);
+                    }
+                    if ((value = XMLUtils.getAttributeValue(columnFamily, "ColumnFamilyType")) != null)
+                    {
+                    	columnFamilyType = value;
+                    }
+                    if ((value = XMLUtils.getAttributeValue(columnFamily, "StorageEngineType")) != null)
+                    {
+                    	storageEngineType = value;
+                    }
+                    
                     // make sql table
                     DBInstance dbi = new DBInstance(ksName);
                     try {
-                    	dbi.create(cfName);
+                    	dbi.create(cfName, rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
                     } catch (SQLException e) {
                     	System.out.println("db connection error "+ e);
                     }
