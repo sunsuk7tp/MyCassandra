@@ -186,10 +186,10 @@ public class DBInstance {
 			}
 			
 			String sPrepareSQL = "CREATE Table "+tableName + "(" +
-				"`ID` INT NOT NULL AUTO_INCREMENT," + 
+				//"`ID` INT NOT NULL AUTO_INCREMENT," + 
 				"`Row_Key` VARCHAR(?) NOT NULL," +
 				"`ColumnFamily` VARBINARY(?)," +
-				"PRIMARY KEY (`ID`)" +
+				"PRIMARY KEY (`Row_Key`)" +
 			") ENGINE = ?";
 			
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);

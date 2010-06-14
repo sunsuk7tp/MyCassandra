@@ -396,7 +396,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         } catch (SQLException e) {
             System.err.println(e);
         }
-            
+           
+        System.out.println("put: "+(System.nanoTime() - start));
         writeStats_.addNano(System.nanoTime() - start);
             
         return null;
@@ -711,36 +712,28 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         {
             if (filter.path.superColumnName == null)
             {
-            	ColumnFamily returnCF;
             	//DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
                 //String rowKey = partitioner.convertToDiskFormat(decoratedKey);
-            	try {
-            		return dbi.select(columnFamily_, filter.key, filter);
-            	} catch (SQLException e) {
-            		System.err.println(e);
-            	}
+            	return dbi.select(columnFamily_, filter.key, filter);
             }
             
             //DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
             //String rowKey = partitioner.convertToDiskFormat(decoratedKey);
-            try {
-            	ColumnFamily cf = dbi.select(columnFamily_, filter.key, filter);
-            	SuperColumn sc = (SuperColumn)cf.getColumn(filter.path.superColumnName);
-            	sc = (SuperColumn)sc.cloneMe();
+            ColumnFamily cf = dbi.select(columnFamily_, filter.key, filter);
+            SuperColumn sc = (SuperColumn)cf.getColumn(filter.path.superColumnName);
+            sc = (SuperColumn)sc.cloneMe();
             	
-            	SuperColumn scFiltered = filter.filterSuperColumn(sc, gcBefore);
-            	ColumnFamily cfFiltered = cf.cloneMeShallow();
-            	cfFiltered.addColumn(scFiltered);
+            SuperColumn scFiltered = filter.filterSuperColumn(sc, gcBefore);
+            ColumnFamily cfFiltered = cf.cloneMeShallow();
+            cfFiltered.addColumn(scFiltered);
             	
-            	return cfFiltered;
-            } catch (SQLException e) {
-            	System.err.println(e);
-            }
-            
-            return null;
+            return cfFiltered;
+        } catch (SQLException e) {
+        	System.err.println(e);
         }
         finally
-        {
+        {	
+        	System.out.println("get: "+(System.nanoTime() - start));
             readStats_.addNano(System.nanoTime() - start);
         }
     }
