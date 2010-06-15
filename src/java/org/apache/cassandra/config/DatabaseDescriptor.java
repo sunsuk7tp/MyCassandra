@@ -698,7 +698,7 @@ public class DatabaseDescriptor
                     }
                     
                     // make sql table
-                    DBInstance dbi = new DBInstance(ksName);
+                    DBInstance dbi = new DBInstance(ksName, cfName);
                     try {
                     	dbi.create(cfName, rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
                     } catch (SQLException e) {

@@ -141,7 +141,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
         ssTables_ = new SSTableTracker(table, columnFamilyName);
         
-        dbi = new DBInstance(table_);
+        dbi = new DBInstance(table_, columnFamily_);
     }
 
     public void addToCompactedRowStats(Long rowsize)
@@ -391,13 +391,13 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         //String rowKey = partitioner.convertToDiskFormat(decoratedKey);
         
         try {
-            if(dbi.insertOrUpdate(columnFamily_, key, columnFamily) < 0)
+            if(dbi.insertOrUpdate(key, columnFamily) < 0)
             	System.err.println("can't insert or update to mysql.");
         } catch (SQLException e) {
             System.err.println(e);
         }
            
-        System.out.println("put: "+(System.nanoTime() - start));
+        //System.out.println("put: "+(System.nanoTime() - start));
         writeStats_.addNano(System.nanoTime() - start);
             
         return null;
@@ -714,12 +714,12 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             {
             	//DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
                 //String rowKey = partitioner.convertToDiskFormat(decoratedKey);
-            	return dbi.select(columnFamily_, filter.key, filter);
+            	return dbi.select(filter.key, filter);
             }
             
             //DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
             //String rowKey = partitioner.convertToDiskFormat(decoratedKey);
-            ColumnFamily cf = dbi.select(columnFamily_, filter.key, filter);
+            ColumnFamily cf = dbi.select(filter.key, filter);
             SuperColumn sc = (SuperColumn)cf.getColumn(filter.path.superColumnName);
             sc = (SuperColumn)sc.cloneMe();
             	
@@ -730,10 +730,11 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             return cfFiltered;
         } catch (SQLException e) {
         	System.err.println(e);
+        	return null;
         }
         finally
         {	
-        	System.out.println("get: "+(System.nanoTime() - start));
+        	//System.out.println("get: "+(System.nanoTime() - start));
             readStats_.addNano(System.nanoTime() - start);
         }
     }

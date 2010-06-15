@@ -12,51 +12,45 @@ import org.apache.cassandra.db.filter.*;
 public class DBInstance {
 	
 	Connection conn;
-	String instanceName;
+	String instanceName, table;
+	PreparedStatement pstInsert, pstSelect, pstSearch, pstUpdate;
+	
 	int debug = 0;
 	
-	public DBInstance(String dbInstance) {
+	public DBInstance(String dbInstance, String cfName) {
 		instanceName = dbInstance;
 		conn = new DBConfigure().connect(dbInstance);
-	}
-	
-	int insertOrUpdate(String table, String rowKey, ColumnFamily cf) throws SQLException, IOException{
-		if(rowSearch(table, rowKey) > 0) {
-			return update(table, rowKey, cf);
-		} else {
-			return insert(table, rowKey, cf);
+		table = cfName;
+		
+		try {
+			pstInsert = conn.prepareStatement("INSERT INTO "+table+" (Row_Key, ColumnFamily) VALUES (?,?)");
+			pstSelect = conn.prepareStatement("SELECT ColumnFamily FROM "+table+" WHERE Row_Key = ?");
+			pstSearch = conn.prepareStatement("SELECT COUNT(Row_Key) FROM "+table+" Where Row_Key = ?");
+			pstUpdate = conn.prepareStatement("UPDATE "+table+" SET ColumnFamily = ? Where Row_Key = ?");
+		} catch (SQLException e) {
+			System.out.println("db prepare state error "+ e);
 		}
 	}
 	
-	int insert(String table, String rowKey, ColumnFamily cf) throws SQLException {
+	int insertOrUpdate(String rowKey, ColumnFamily cf) throws SQLException, IOException{
+		if(rowSearch(rowKey) > 0) {
+			return update(rowKey, cf);
+		} else {
+			return insert(rowKey, cf);
+		}
+	}
+	
+	int insert(String rowKey, ColumnFamily cf) throws SQLException {
 		if(debug > 0) System.out.print("SQLInsert: ");
 		try {
-			/*String tPrepareSQL = "SELECT COUNT(*) FROM  information_schema.tables WHERE table_name = ? AND table_schema = ?";
-			PreparedStatement tst = conn.prepareStatement(tPrepareSQL);
-			
-			tst.setString(1,table);
-			tst.setString(2, instanceName);
-			ResultSet rs = tst.executeQuery();
-
-			while(rs.next()) {
-				if(rs.getInt(1) < 1) {
-					create(table);
-				}
-			}*/
-			
 			DataOutputBuffer buffer = new DataOutputBuffer();
 	        ColumnFamily.serializer().serialize(cf, buffer);
 	        int cfLength = buffer.getLength();
 	        assert cfLength > 0;
 	        byte[] cfValue = buffer.getData();
 			
-			String sPrepareSQL = "INSERT INTO "+table+" (Row_Key, ColumnFamily) VALUES (?,?)";
-			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
+			int result = doInsert(rowKey,cfValue);
 			
-			pst.setString(1, rowKey);
-			pst.setBytes(2, cfValue);
-			
-			int result = pst.executeUpdate();
 			if(debug > 0) { 
 				if(result > 0) {
 					System.out.println(cf.toString());
@@ -71,14 +65,11 @@ public class DBInstance {
 		}
 	}
 	
-	int update(String table, String rowKey, ColumnFamily newcf) throws SQLException, IOException {
+	int update(String rowKey, ColumnFamily newcf) throws SQLException, IOException {
 		if(debug > 0) System.out.print("SQLUpdate: ");
 		try {
-			ColumnFamily cf = select(table, rowKey, null);
+			ColumnFamily cf = select(rowKey, null);
 			cf.addAll(newcf);
-			
-			String sPrepareSQL = "UPDATE "+table+" SET ColumnFamily = ? Where Row_Key = ?";
-			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
 			
 			DataOutputBuffer outputBuffer = new DataOutputBuffer();
 	        ColumnFamily.serializer().serialize(cf, outputBuffer);
@@ -86,11 +77,7 @@ public class DBInstance {
 	        assert cfLength > 0;
 	        byte[] cfValue = outputBuffer.getData();
 			
-			pst.setBytes(1, cfValue);
-			pst.setString(2, rowKey);
-			//conn.setAutoCommit(false);
-			int result = pst.executeUpdate();
-			//conn.commit();
+	        int result = doUpdate(rowKey, cfValue);
 			if(debug > 0) { 
 				if(result > 0) {
 					System.out.println(cf.toString());
@@ -99,7 +86,7 @@ public class DBInstance {
 				}
 			}
 			
-			return pst.executeUpdate();
+			return result;
 		} catch (SQLException e) {
 			System.out.println("db connection error: "+ e);
 			return -1;
@@ -120,13 +107,11 @@ public class DBInstance {
 		}
 	}
 	
-	ColumnFamily select(String table, String rowKey, QueryFilter filter) throws SQLException, IOException {
+	ColumnFamily select(String rowKey, QueryFilter filter) throws SQLException, IOException {
 		if(debug > 0) System.out.print("SQLSelect: ");
 		try {
-			String sPrepareSQL = "SELECT ColumnFamily FROM "+table+" WHERE Row_Key = ?";
-			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
-			pst.setString(1, rowKey);
-			ResultSet rs = pst.executeQuery();
+			ResultSet rs = doSelect(rowKey);
+			
 			byte[] b = null;
 			while(rs.next()) {
 				b = rs.getBytes(1);
@@ -136,6 +121,7 @@ public class DBInstance {
 				DataInputBuffer inputBuffer = new DataInputBuffer(b, 0, b.length);
 				
 				ColumnFamily cf = new ColumnFamilySerializer().deserialize(inputBuffer);
+				
 				if(debug > 0) System.out.println(cf.toString());
 				return cf;
 			} else {
@@ -148,19 +134,17 @@ public class DBInstance {
 		}		
 	}
 	
-	int rowSearch(String table, String rowKey) throws SQLException {
+	synchronized int rowSearch(String rowKey) throws SQLException {
 		int count = -1;
 		
 		try {
-			String sPrepareSQL = "SELECT COUNT(Row_Key) FROM "+table+" Where Row_Key = ?";
 			
-			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
-			pst.setString(1, rowKey);
+			ResultSet rs = doSearch(rowKey);
 			
-			ResultSet rs = pst.executeQuery();
 			while(rs.next()) {
 				count = rs.getInt(1);
 			}
+			
 		} catch (SQLException e) {
 			System.out.println("db connection error "+ e);
 		}
@@ -205,12 +189,26 @@ public class DBInstance {
 		}
 	}
 	
-	// transaction method
-	void beginTransaction() throws SQLException {
-	    String sql = "BEGIN;";
-	    Statement statement = conn.createStatement ();
-	    statement.executeUpdate(sql);
-	    statement.close();
+	synchronized int doInsert(String rowKey, byte[] cfValue) throws SQLException {
+		pstInsert.setString(1, rowKey);
+		pstInsert.setBytes(2, cfValue);
+		
+		return pstInsert.executeUpdate();
 	}
 	
+	ResultSet doSelect(String rowKey) throws SQLException {
+		pstSelect.setString(1, rowKey);
+		return pstSelect.executeQuery();
+	}
+
+	ResultSet doSearch(String rowKey) throws SQLException {
+		pstSearch.setString(1, rowKey);
+		return pstSearch.executeQuery();
+	}
+	
+	synchronized int doUpdate(String rowKey, byte[] cfValue) throws SQLException {
+		pstUpdate.setBytes(1, cfValue);
+		pstUpdate.setString(2, rowKey);
+		return pstUpdate.executeUpdate();
+	}	
 }
