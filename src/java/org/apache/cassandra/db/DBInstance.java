@@ -7,13 +7,11 @@ import org.apache.cassandra.io.util.DataInputBuffer;
 import org.apache.cassandra.io.util.DataOutputBuffer;
 import org.apache.cassandra.db.filter.*;
 
-
-
 public class DBInstance {
 	
 	Connection conn;
 	String instanceName, table;
-	PreparedStatement pstInsert, pstSelect, pstSearch, pstUpdate;
+	PreparedStatement pstInsert, pstSelect, pstSearch, pstUpdate, pstDelete;
 	
 	int debug = 0;
 	
@@ -27,12 +25,13 @@ public class DBInstance {
 			pstSelect = conn.prepareStatement("SELECT ColumnFamily FROM "+table+" WHERE Row_Key = ?");
 			pstSearch = conn.prepareStatement("SELECT COUNT(Row_Key) FROM "+table+" Where Row_Key = ?");
 			pstUpdate = conn.prepareStatement("UPDATE "+table+" SET ColumnFamily = ? Where Row_Key = ?");
+			pstDelete = conn.prepareStatement("DELETE FROM "+table+" Where Row_Key = ?");
 		} catch (SQLException e) {
 			System.out.println("db prepare state error "+ e);
 		}
 	}
 	
-	int insertOrUpdate(String rowKey, ColumnFamily cf) throws SQLException, IOException{
+	int insertOrUpdate(String rowKey, ColumnFamily cf) throws SQLException, IOException {
 		if(rowSearch(rowKey) > 0) {
 			return update(rowKey, cf);
 		} else {
@@ -95,12 +94,8 @@ public class DBInstance {
 	
 	int delete(String table, String columnName, String columnValue) throws SQLException {
 		try {
-			String sPrepareSQL = "DELETE FROM "+table+" Where "+columnName+" = ?";
-			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
-			
-			pst.setString(1, columnValue);
-			
-			return pst.executeUpdate();
+			pstDelete.setString(1, columnValue);			
+			return pstDelete.executeUpdate();
 		} catch (SQLException e) {
 			System.out.println("db connection error "+ e);
 			return -1;
@@ -137,14 +132,11 @@ public class DBInstance {
 	synchronized int rowSearch(String rowKey) throws SQLException {
 		int count = -1;
 		
-		try {
-			
-			ResultSet rs = doSearch(rowKey);
-			
+		try {		
+			ResultSet rs = doSearch(rowKey);			
 			while(rs.next()) {
 				count = rs.getInt(1);
 			}
-			
 		} catch (SQLException e) {
 			System.out.println("db connection error "+ e);
 		}
@@ -156,7 +148,7 @@ public class DBInstance {
 	public int create(String tableName, int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType) throws SQLException {
 		
 		try {
-			Statement stmt = conn.createStatement();
+			Statement stmt = conn.createStatement();			
 			
 			if(debug > 0) {
 				stmt.executeUpdate("TRUNCATE TABLE "+tableName);
@@ -179,8 +171,7 @@ public class DBInstance {
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
 			pst.setInt(1,rowKeySize);
 			pst.setInt(2,columnFamilySize);
-			pst.setString(3, storageEngineType);
-			
+			pst.setString(3, storageEngineType);			
 			
 			return pst.executeUpdate();
 		} catch (SQLException e) {
@@ -198,17 +189,20 @@ public class DBInstance {
 	
 	ResultSet doSelect(String rowKey) throws SQLException {
 		pstSelect.setString(1, rowKey);
+
 		return pstSelect.executeQuery();
 	}
 
 	ResultSet doSearch(String rowKey) throws SQLException {
 		pstSearch.setString(1, rowKey);
+
 		return pstSearch.executeQuery();
 	}
 	
 	synchronized int doUpdate(String rowKey, byte[] cfValue) throws SQLException {
 		pstUpdate.setBytes(1, cfValue);
 		pstUpdate.setString(2, rowKey);
+
 		return pstUpdate.executeUpdate();
-	}	
+	}
 }
