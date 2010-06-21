@@ -25,7 +25,7 @@ import org.apache.cassandra.db.commitlog.CommitLog;
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.db.marshal.UTF8Type;
-import org.apache.cassandra.db.DBInstance;
+import org.apache.cassandra.db.MySQLInstance;
 import org.apache.cassandra.dht.IPartitioner;
 import org.apache.cassandra.locator.IEndPointSnitch;
 import org.apache.cassandra.locator.AbstractReplicationStrategy;
@@ -139,10 +139,16 @@ public class DatabaseDescriptor
 
     private final static String STORAGE_CONF_FILE = "storage-conf.xml";
     
+    public static final int MYSQL = 1;
+    public static final int REDIS = 2;
+    public static final int defaultDataBase = MYSQL;
+    
     public static final String defaultStorageEngineType = "InnoDB";
     public static final int defaultRowKeySize = 64;
     public static final String defaultColumnFamilyType = "VARBINARY";
     public static final int defaultColumnFamilySize = 6 * 1024; // 6KB
+    
+    public static int dataBase;
     
     public static String sqlHost;
     public static String sqlPort;
@@ -473,6 +479,18 @@ public class DatabaseDescriptor
                     throw new ConfigurationException("CommitLogDirectory must not be the same as any DataFileDirectory");
             }
             
+            // database setup
+            dataBase = defaultDataBase;
+            String val;
+            if ((val = xmlUtils.getNodeValue("/Storage/DataBase")) != null)
+            {
+            	if(val.equals("MySQL")) {
+            		dataBase = MYSQL;
+            	} else if (val.equals("Redis")){
+            		dataBase = REDIS;
+            	}
+            }
+            
             /* sql configure */
             sqlHost = xmlUtils.getNodeValue("/Storage/SQL/SQLHost");
             sqlPort = xmlUtils.getNodeValue("/Storage/SQL/SQLPort");
@@ -697,12 +715,14 @@ public class DatabaseDescriptor
                     	storageEngineType = value;
                     }
                     
-                    // make sql table
-                    DBInstance dbi = new DBInstance(ksName, cfName);
-                    try {
-                    	dbi.create(cfName, rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
-                    } catch (SQLException e) {
-                    	System.out.println("db connection error "+ e);
+                    if(dataBase == MYSQL) {
+                    	// make sql table
+                    	MySQLInstance dbi = new MySQLInstance(ksName, cfName);
+                    	try {
+                    		dbi.create(cfName, rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
+                    	} catch (SQLException e) {
+                    		System.out.println("db connection error "+ e);
+                    	}
                     }
                     // Parse out the column comparator
                     AbstractType comparator = getComparator(columnFamily, "CompareWith");

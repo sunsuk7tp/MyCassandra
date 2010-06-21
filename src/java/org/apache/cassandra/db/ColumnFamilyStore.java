@@ -141,7 +141,15 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
         ssTables_ = new SSTableTracker(table, columnFamilyName);
         
-        dbi = new DBInstance(table_, columnFamily_);
+        switch(DatabaseDescriptor.dataBase) {
+        	case DatabaseDescriptor.REDIS:
+        		dbi = new RedisInstance(table_, columnFamily_);
+        		break;
+        	case DatabaseDescriptor.MYSQL:
+        	default:
+        		dbi = new MySQLInstance(table_, columnFamily_);
+        		break;
+        }
     }
 
     public void addToCompactedRowStats(Long rowsize)
