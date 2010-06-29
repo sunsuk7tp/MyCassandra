@@ -24,7 +24,7 @@ public class RedisInstance implements DBInstance {
 	
 	public RedisInstance(String dbInstance, String cfName) {
 		instanceName = dbInstance;
-		conn = new RedisConfigure().connect(dbInstance);
+		conn = new RedisConfigure().connect();
 		table = cfName;
 		
 		try {
@@ -53,7 +53,7 @@ public class RedisInstance implements DBInstance {
 	        assert cfLength > 0;
 	        byte[] cfValue = buffer.getData();
 			
-	        pstInsert.setString(1, table+KEYSEPARATOR+rowKey);
+	        pstInsert.setString(1, instanceName+KEYSEPARATOR+table+KEYSEPARATOR+rowKey);
 	        pstInsert.setObject(2, cf);
 	        boolean result = pstInsert.execute();
 	        return result ? 1 : -1; 

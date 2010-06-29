@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import org.apache.cassandra.config.DatabaseDescriptor;
 
 public class RedisConfigure {
-	public Connection connect(String dbInstance) {
+	public Connection connect() {
 		String dbHost = DatabaseDescriptor.getSQLHost();
 		String dbPort = DatabaseDescriptor.getSQLPort();
 		

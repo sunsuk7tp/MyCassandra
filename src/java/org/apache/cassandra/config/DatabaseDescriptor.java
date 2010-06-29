@@ -141,6 +141,7 @@ public class DatabaseDescriptor
     
     public static final int MYSQL = 1;
     public static final int REDIS = 2;
+    public static final int JREDIS = 3;
     public static final int defaultDataBase = MYSQL;
     
     public static final String defaultStorageEngineType = "InnoDB";
@@ -488,6 +489,8 @@ public class DatabaseDescriptor
             		dataBase = MYSQL;
             	} else if (val.equals("Redis")){
             		dataBase = REDIS;
+            	} else if (val.equals("JRedis")){
+            		dataBase = JREDIS;
             	}
             }
             
