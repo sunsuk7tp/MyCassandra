@@ -145,6 +145,9 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         	case DatabaseDescriptor.REDIS:
         		dbi = new RedisInstance(table_, columnFamily_);
         		break;
+        	case DatabaseDescriptor.JREDIS:
+        		dbi = new JRedisInstance(table_, columnFamily_);
+        		break;
         	case DatabaseDescriptor.MYSQL:
         	default:
         		dbi = new MySQLInstance(table_, columnFamily_);
