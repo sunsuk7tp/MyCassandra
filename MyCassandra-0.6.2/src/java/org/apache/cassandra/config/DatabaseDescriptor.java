@@ -658,7 +658,13 @@ public class DatabaseDescriptor
                 {
                     throw new ConfigurationException("Invalid endpointsnitch class " + endPointSnitchClassName + " " + e.getMessage());
                 }
-
+                /* System Table Configure */
+                try {
+                    new MySQLInstance("system", "LocationInfo").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
+                } catch (SQLException e) {
+                	System.out.println("db connection error "+ e);
+                }
+                
                 String xqlTable = "/Storage/Keyspaces/Keyspace[@Name='" + ksName + "']/";
                 NodeList columnFamilies = xmlUtils.getRequestedNodeList(xqlTable + "ColumnFamily");
 
@@ -666,7 +672,6 @@ public class DatabaseDescriptor
 
                 //NodeList columnFamilies = xmlUtils.getRequestedNodeList(table, "ColumnFamily");
                 int size2 = columnFamilies.getLength();
-
                 for ( int j = 0; j < size2; ++j )
                 {
                     Node columnFamily = columnFamilies.item(j);
@@ -720,9 +725,10 @@ public class DatabaseDescriptor
                     
                     if(dataBase == MYSQL) {
                     	// make sql table
+                    	System.out.println(ksName+"#"+cfName);
                     	MySQLInstance dbi = new MySQLInstance(ksName, cfName);
                     	try {
-                    		dbi.create(cfName, rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
+                    		dbi.create(rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
                     	} catch (SQLException e) {
                     		System.out.println("db connection error "+ e);
                     	}

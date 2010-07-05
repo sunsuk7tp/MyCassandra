@@ -145,23 +145,23 @@ public class MySQLInstance implements DBInstance {
 	}
 	
 	// Init MySQL Table for Keyspaces
-	public int create(String tableName, int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType) throws SQLException {
+	public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType) throws SQLException {
 		
 		try {
-			Statement stmt = conn.createStatement();			
+			Statement stmt = conn.createStatement();
 			
 			if(debug > 0) {
-				stmt.executeUpdate("TRUNCATE TABLE "+tableName);
+				stmt.executeUpdate("TRUNCATE TABLE "+table);
 			}
 			
 			ResultSet rs = stmt.executeQuery("SHOW TABLES");
 			while(rs.next()) {
-				if(rs.getString(1).equals(tableName)) {
+				if(rs.getString(1).equals(table)) {
 					return 0;
 				}
 			}
 			
-			String sPrepareSQL = "CREATE Table "+tableName + "(" +
+			String sPrepareSQL = "CREATE Table "+table + "(" +
 				//"`ID` INT NOT NULL AUTO_INCREMENT," + 
 				"`Row_Key` VARCHAR(?) NOT NULL," +
 				"`ColumnFamily` VARBINARY(?)," +
