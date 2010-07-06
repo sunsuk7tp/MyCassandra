@@ -11,9 +11,12 @@ public class MySQLInstance implements DBInstance {
 	
 	Connection conn;
 	String instanceName, table;
-	PreparedStatement pstInsert, pstSelect, pstSearch, pstUpdate, pstDelete;
+	PreparedStatement pstInsert, pstSelect, pstSearch, pstUpdate, pstDelete, pstMultiInsert;
 	
 	int debug = 0;
+	
+	int multiMax = 100;
+	int multiCount = 0;
 	
 	public MySQLInstance(String dbInstance, String cfName) {
 		instanceName = dbInstance;
@@ -23,9 +26,19 @@ public class MySQLInstance implements DBInstance {
 		try {
 			pstInsert = conn.prepareStatement("INSERT INTO "+table+" (Row_Key, ColumnFamily) VALUES (?,?)");
 			pstSelect = conn.prepareStatement("SELECT ColumnFamily FROM "+table+" WHERE Row_Key = ?");
-			pstSearch = conn.prepareStatement("SELECT COUNT(Row_Key) FROM "+table+" Where Row_Key = ?");
-			pstUpdate = conn.prepareStatement("UPDATE "+table+" SET ColumnFamily = ? Where Row_Key = ?");
-			pstDelete = conn.prepareStatement("DELETE FROM "+table+" Where Row_Key = ?");
+			pstSearch = conn.prepareStatement("SELECT COUNT(Row_Key) FROM "+table+" WHERE Row_Key = ?");
+			pstUpdate = conn.prepareStatement("UPDATE "+table+" SET ColumnFamily = ? WHERE Row_Key = ?");
+			pstDelete = conn.prepareStatement("DELETE FROM "+table+" WHERE Row_Key = ?");
+			
+			String sql = "INSERT INTO "+table + " (Row_Key, ColumnFamily) VALUES";
+			for(int i=0; i< multiMax; i++) {
+				sql += " (?, ?)";
+				if(i < multiMax - 1) {
+					sql += ",";
+				}
+			}
+			
+			pstMultiInsert = conn.prepareStatement(sql);
 		} catch (SQLException e) {
 			System.out.println("db prepare state error "+ e);
 		}
@@ -48,7 +61,8 @@ public class MySQLInstance implements DBInstance {
 	        assert cfLength > 0;
 	        byte[] cfValue = buffer.getData();
 			
-			int result = doInsert(rowKey,cfValue);
+			int result = doInsert(rowKey, cfValue);
+			//int result = doMultipleInsert(rowKey, cfValue);
 			
 			if(debug > 0) { 
 				if(result > 0) {
@@ -94,7 +108,7 @@ public class MySQLInstance implements DBInstance {
 	
 	public int delete(String table, String columnName, String columnValue) throws SQLException {
 		try {
-			pstDelete.setString(1, columnValue);			
+			pstDelete.setString(1, columnValue);
 			return pstDelete.executeUpdate();
 		} catch (SQLException e) {
 			System.out.println("db connection error "+ e);
@@ -133,7 +147,7 @@ public class MySQLInstance implements DBInstance {
 		int count = -1;
 		
 		try {		
-			ResultSet rs = doSearch(rowKey);			
+			ResultSet rs = doSearch(rowKey);
 			while(rs.next()) {
 				count = rs.getInt(1);
 			}
@@ -171,13 +185,26 @@ public class MySQLInstance implements DBInstance {
 			PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
 			pst.setInt(1,rowKeySize);
 			pst.setInt(2,columnFamilySize);
-			//pst.setString(3, storageEngineType);			
+			//pst.setString(3, storageEngineType);
 			
 			return pst.executeUpdate();
 		} catch (SQLException e) {
 			System.out.println("db connection error "+ e);
 			return -1;
 		}
+	}
+	
+	int doMultipleInsert(String rowKey, byte[] cfValue) throws SQLException {
+		if(multiCount < multiMax) {
+			pstMultiInsert.setString(2*multiCount+1, rowKey);
+			pstMultiInsert.setBytes(2*multiCount+2, cfValue);
+			multiCount++;
+		}
+		if(multiCount == multiMax) {
+			multiCount = 0;
+			return pstMultiInsert.executeUpdate();
+		}
+		return 1;
 	}
 	
 	synchronized int doInsert(String rowKey, byte[] cfValue) throws SQLException {

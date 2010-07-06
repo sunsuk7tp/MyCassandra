@@ -661,6 +661,7 @@ public class DatabaseDescriptor
                 /* System Table Configure */
                 try {
                     new MySQLInstance("system", "LocationInfo").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
+                    new MySQLInstance("system", "HintsColumnFamily").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
                 } catch (SQLException e) {
                 	System.out.println("db connection error "+ e);
                 }
@@ -725,7 +726,6 @@ public class DatabaseDescriptor
                     
                     if(dataBase == MYSQL) {
                     	// make sql table
-                    	System.out.println(ksName+"#"+cfName);
                     	MySQLInstance dbi = new MySQLInstance(ksName, cfName);
                     	try {
                     		dbi.create(rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
