@@ -11,16 +11,25 @@ public class MySQLInstance implements DBInstance {
 	
 	Connection conn;
 	String instanceName, table;
-	PreparedStatement pstInsert, pstSelect, pstSearch, pstUpdate, pstDelete, pstMultiInsert;
+	PreparedStatement pstInsert, pstSelect, pstSearch, pstUpdate, pstDelete;
+	PreparedStatement pstBatchInsert, pstMultiInsert;
 	
 	int debug = 0;
 	
-	int multiMax = 100;
-	int multiCount = 0;
+	int BATCH_SIZE = 100;
+	int COMMIT_SIZE = 1000;
+	int bcount = 0;
+	
+	String bsql;
 	
 	public MySQLInstance(String dbInstance, String cfName) {
 		instanceName = dbInstance;
 		conn = new MySQLConfigure().connect(dbInstance);
+		try {
+		conn.setAutoCommit(false);
+		}catch(SQLException e) {
+			System.out.println(e);
+		}
 		table = cfName;
 		
 		try {
@@ -29,16 +38,16 @@ public class MySQLInstance implements DBInstance {
 			pstSearch = conn.prepareStatement("SELECT COUNT(Row_Key) FROM "+table+" WHERE Row_Key = ?");
 			pstUpdate = conn.prepareStatement("UPDATE "+table+" SET ColumnFamily = ? WHERE Row_Key = ?");
 			pstDelete = conn.prepareStatement("DELETE FROM "+table+" WHERE Row_Key = ?");
-			
-			String sql = "INSERT INTO "+table + " (Row_Key, ColumnFamily) VALUES";
-			for(int i=0; i< multiMax; i++) {
-				sql += " (?, ?)";
+			pstBatchInsert = conn.prepareStatement("INSERT INTO "+table+" (Row_Key, ColumnFamily) VALUES (?,?)");			
+			bsql = "INSERT INTO "+table + " (Row_Key, ColumnFamily) VALUES (?,?)";
+			/*for(int i=0; i< multiMax; i++) {
+				bsql += " (?, ?)";
 				if(i < multiMax - 1) {
-					sql += ",";
+					bsql += ",";
 				}
-			}
+			}*/
 			
-			pstMultiInsert = conn.prepareStatement(sql);
+			pstMultiInsert = conn.prepareStatement(bsql);
 		} catch (SQLException e) {
 			System.out.println("db prepare state error "+ e);
 		}
@@ -56,14 +65,20 @@ public class MySQLInstance implements DBInstance {
 		if(debug > 0) System.out.print("SQLInsert: ");
 		try {
 			DataOutputBuffer buffer = new DataOutputBuffer();
-	        ColumnFamily.serializer().serialize(cf, buffer);
-	        int cfLength = buffer.getLength();
-	        assert cfLength > 0;
-	        byte[] cfValue = buffer.getData();
+			ColumnFamily.serializer().serialize(cf, buffer);
+			int cfLength = buffer.getLength();
+			assert cfLength > 0;
+			byte[] cfValue = buffer.getData();
+			int result = -1;
 			
-			int result = doInsert(rowKey, cfValue);
-			//int result = doMultipleInsert(rowKey, cfValue);
-			
+			if(instanceName.equals("system")) {
+				result = doInsert(rowKey, cfValue);
+			} else {
+				//int result = doInsert(rowKey, cfValue);
+				//result = doMultipleInsert(rowKey, cfValue);
+				//result = doBatchInsert(rowKey, cfValue);
+				result = doMultipleBatchInsert(rowKey,cfValue);
+			}
 			if(debug > 0) { 
 				if(result > 0) {
 					System.out.println(cf.toString());
@@ -85,12 +100,12 @@ public class MySQLInstance implements DBInstance {
 			cf.addAll(newcf);
 			
 			DataOutputBuffer outputBuffer = new DataOutputBuffer();
-	        ColumnFamily.serializer().serialize(cf, outputBuffer);
-	        int cfLength = outputBuffer.getLength();
-	        assert cfLength > 0;
-	        byte[] cfValue = outputBuffer.getData();
+			ColumnFamily.serializer().serialize(cf, outputBuffer);
+			int cfLength = outputBuffer.getLength();
+			assert cfLength > 0;
+			byte[] cfValue = outputBuffer.getData();
 			
-	        int result = doUpdate(rowKey, cfValue);
+			int result = doUpdate(rowKey, cfValue);
 			if(debug > 0) { 
 				if(result > 0) {
 					System.out.println(cf.toString());
@@ -193,6 +208,20 @@ public class MySQLInstance implements DBInstance {
 			return -1;
 		}
 	}
+	/*
+    int doBatchInsert(String rowKey, byte[] cfValue) throws SQLException {
+    	if(multiCount < multiMax) {
+    		pstBatchInsert.setString(1, rowKey);
+    		pstBatchInsert.setBytes(2, cfValue);
+    		pstBatchInsert.addBatch();
+    		multiCount++;
+    	}
+    	if(multiCount == multiMax) {
+    		multiCount = 0;
+    		pstMultiInsert.executeBatch();
+    	}
+    	return 1;
+    }
 	
 	int doMultipleInsert(String rowKey, byte[] cfValue) throws SQLException {
 		if(multiCount < multiMax) {
@@ -204,6 +233,23 @@ public class MySQLInstance implements DBInstance {
 			multiCount = 0;
 			return pstMultiInsert.executeUpdate();
 		}
+		return 1;
+	}*/
+	
+	int doMultipleBatchInsert(String rowKey, byte[] cfValue) throws SQLException {
+		pstMultiInsert.setString(1, rowKey);
+		pstMultiInsert.setBytes(2, cfValue);
+		pstMultiInsert.addBatch();
+		
+		if(bcount % BATCH_SIZE == BATCH_SIZE-1) {
+			pstMultiInsert.executeBatch();
+		}
+		bcount++;
+		if(bcount % COMMIT_SIZE == 0) {
+			System.out.println(bcount);
+			conn.commit();
+		}
+		//System.out.println(bcount);
 		return 1;
 	}
 	
