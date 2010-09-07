@@ -1287,20 +1287,29 @@ public class DatabaseDescriptor
     {
         return autoBootstrap;
     }
+    
+    public static int getDatabase()
+    {
+        return dataBase;
+    }
 
-    public static String getSQLHost() {
-    	return sqlHost;
+    public static String getSQLHost()
+    {
+        return sqlHost;
     }
     
-    public static String getSQLPort() {
-    	return sqlPort;
+    public static String getSQLPort()
+    {
+        return sqlPort;
     }
     
-    public static String getSQLUser() {
-    	return sqlUser;
+    public static String getSQLUser()
+    {
+        return sqlUser;
     }
  
-    public static String getSQLPass() {
-    	return sqlPass;
+    public static String getSQLPass()
+    {
+        return sqlPass;
     }
 }
