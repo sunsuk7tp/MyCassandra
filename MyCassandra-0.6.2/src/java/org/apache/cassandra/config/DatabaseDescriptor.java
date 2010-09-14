@@ -139,10 +139,11 @@ public class DatabaseDescriptor
 
     private final static String STORAGE_CONF_FILE = "storage-conf.xml";
     
+    public static final int MSTable = 0;
     public static final int MYSQL = 1;
     public static final int REDIS = 2;
     public static final int JREDIS = 3;
-    public static final int defaultDataBase = MYSQL;
+    public static final int defaultDataBase = MSTable;
     
     public static final String defaultStorageEngineType = "InnoDB";
     public static final int defaultRowKeySize = 64;
@@ -499,7 +500,6 @@ public class DatabaseDescriptor
             sqlPort = xmlUtils.getNodeValue("/Storage/SQL/SQLPort");
             sqlUser = xmlUtils.getNodeValue("/Storage/SQL/SQLUser");
             sqlPass = xmlUtils.getNodeValue("/Storage/SQL/SQLPass");
-            
             /* threshold after which commit log should be rotated. */
             String value = xmlUtils.getNodeValue("/Storage/CommitLogRotationThresholdInMB");
             if ( value != null)
@@ -659,11 +659,13 @@ public class DatabaseDescriptor
                     throw new ConfigurationException("Invalid endpointsnitch class " + endPointSnitchClassName + " " + e.getMessage());
                 }
                 /* System Table Configure */
-                try {
-                    new MySQLInstance("system", "LocationInfo").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
-                    new MySQLInstance("system", "HintsColumnFamily").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
-                } catch (SQLException e) {
-                	System.out.println("db connection error "+ e);
+                if (dataBase == MYSQL) {
+                    try {
+                        new MySQLInstance("system", "LocationInfo").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
+                        new MySQLInstance("system", "HintsColumnFamily").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
+                    } catch (SQLException e) {
+                        System.out.println("db connection error "+ e);
+                    }
                 }
                 
                 String xqlTable = "/Storage/Keyspaces/Keyspace[@Name='" + ksName + "']/";
@@ -1288,7 +1290,7 @@ public class DatabaseDescriptor
         return autoBootstrap;
     }
     
-    public static int getDatabase()
+    public static int getStorageType()
     {
         return dataBase;
     }
