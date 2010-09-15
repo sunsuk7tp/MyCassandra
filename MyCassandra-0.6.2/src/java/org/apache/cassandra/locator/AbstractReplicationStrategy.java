@@ -105,7 +105,8 @@ public abstract class AbstractReplicationStrategy
 
             InetAddress destination = map.isEmpty()
                                     ? localAddress
-                                    : endPointSnitch.getSortedListByProximity(localAddress, map.keySet()).get(0);
+                                    //: endPointSnitch.getSortedListByProximity(localAddress, map.keySet()).get(0);
+                                    : endPointSnitch.getSortedListByStorageType(1, map.keySet()).get(0);
             map.put(destination, ep);
         }
 

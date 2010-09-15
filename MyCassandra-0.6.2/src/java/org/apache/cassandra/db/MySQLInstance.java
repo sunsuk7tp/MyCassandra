@@ -25,11 +25,11 @@ public class MySQLInstance implements DBInstance {
 	public MySQLInstance(String dbInstance, String cfName) {
 		instanceName = dbInstance;
 		conn = new MySQLConfigure().connect(dbInstance);
-		try {
-		conn.setAutoCommit(false);
+		/*try {
+			conn.setAutoCommit(false);
 		}catch(SQLException e) {
 			System.out.println(e);
-		}
+		}*/
 		table = cfName;
 		
 		try {
@@ -74,10 +74,10 @@ public class MySQLInstance implements DBInstance {
 			if(instanceName.equals("system")) {
 				result = doInsert(rowKey, cfValue);
 			} else {
-				//int result = doInsert(rowKey, cfValue);
+				result = doInsert(rowKey, cfValue);
 				//result = doMultipleInsert(rowKey, cfValue);
 				//result = doBatchInsert(rowKey, cfValue);
-				result = doMultipleBatchInsert(rowKey,cfValue);
+				//result = doMultipleBatchInsert(rowKey,cfValue);
 			}
 			if(debug > 0) { 
 				if(result > 0) {

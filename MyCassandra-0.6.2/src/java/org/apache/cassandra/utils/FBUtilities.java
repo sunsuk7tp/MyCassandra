@@ -52,6 +52,8 @@ public class FBUtilities
 
     private static volatile InetAddress localInetAddress_;
 
+    private static volatile int localStorageType_ = -1;
+
     public static String[] strip(String string, String token)
     {
         StringTokenizer st = new StringTokenizer(string, token);
@@ -94,6 +96,13 @@ public class FBUtilities
         return localInetAddress_;
     }
 
+    public static int getStorageType()
+    {
+        if (localStorageType_ < 0) {
+            localStorageType_ = DatabaseDescriptor.getStorageType();
+        }
+        return localStorageType_;
+    }
     /**
      * @param fractOrAbs A double that may represent a fraction or absolute value.
      * @param total If fractionOrAbs is a fraction, the total to take the fraction from
@@ -462,5 +471,5 @@ public class FBUtilities
             return false;
         else
             return a.equals(b);
-}
+    }
 }

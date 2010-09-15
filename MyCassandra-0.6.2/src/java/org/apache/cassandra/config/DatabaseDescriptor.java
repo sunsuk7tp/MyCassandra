@@ -139,11 +139,11 @@ public class DatabaseDescriptor
 
     private final static String STORAGE_CONF_FILE = "storage-conf.xml";
     
-    public static final int MSTable = 0;
+    public static final int MSTABLE = 0;
     public static final int MYSQL = 1;
     public static final int REDIS = 2;
     public static final int JREDIS = 3;
-    public static final int defaultDataBase = MSTable;
+    public static final int defaultDataBase = MSTABLE;
     
     public static final String defaultStorageEngineType = "InnoDB";
     public static final int defaultRowKeySize = 64;
@@ -486,13 +486,22 @@ public class DatabaseDescriptor
             String val;
             if ((val = xmlUtils.getNodeValue("/Storage/DataBase")) != null)
             {
-            	if(val.equals("MySQL")) {
-            		dataBase = MYSQL;
-            	} else if (val.equals("Redis")){
-            		dataBase = REDIS;
-            	} else if (val.equals("JRedis")){
-            		dataBase = JREDIS;
-            	}
+                if(val.equals("MSTable"))
+                {
+                    dataBase = MSTABLE;
+                }
+                else if(val.equals("MySQL"))
+                {
+                    dataBase = MYSQL;
+                }
+                else if (val.equals("Redis"))
+                {
+                    dataBase = REDIS;
+                }
+                else if (val.equals("JRedis"))
+                {
+                    dataBase = JREDIS;
+                }
             }
             
             /* sql configure */
@@ -885,20 +894,23 @@ public class DatabaseDescriptor
             System.err.println("Bad configuration; unable to start server");
             System.exit(1);
         }
-        /* make sure we have a directory for each table */
-        /*for (String dataFile : dataFileDirectories)
+        if (dataBase == MSTABLE)
         {
-            FileUtils.createDirectory(dataFile + File.separator + Table.SYSTEM_TABLE);
-        	for (String table : tables.keySet())
+            /* make sure we have a directory for each table */
+            for (String dataFile : dataFileDirectories)
             {
-                String oneDir = dataFile + File.separator + table;
-                FileUtils.createDirectory(oneDir);
-                File streamingDir = new File(oneDir, STREAMING_SUBDIR);
-                if (streamingDir.exists()) {
-                    FileUtils.deleteDir(streamingDir);
+                FileUtils.createDirectory(dataFile + File.separator + Table.SYSTEM_TABLE);
+                for (String table : tables.keySet())
+                {
+                    String oneDir = dataFile + File.separator + table;
+                    FileUtils.createDirectory(oneDir);
+                    File streamingDir = new File(oneDir, STREAMING_SUBDIR);
+                    if (streamingDir.exists()) {
+                        FileUtils.deleteDir(streamingDir);
+                    }
                 }
             }
-        }*/
+        }
     }
 
     /**

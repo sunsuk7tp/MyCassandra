@@ -197,7 +197,11 @@ public class RowMutation
     */
     public void apply() throws IOException
     {
-        Table.open(table_).apply(this, getSerializedBuffer(), true);
+        if(DatabaseDescriptor.dataBase == DatabaseDescriptor.MSTABLE) {
+            Table.open(table_).apply(this, getSerializedBuffer(), true);
+        } else {
+            Table.open(table_).apply(this, getSerializedBuffer(), false);
+        }
     }
 
     /*

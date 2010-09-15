@@ -45,5 +45,14 @@ public interface IEndPointSnitch
      * This method will sort the List<InetAddress> according to the proximity of the given address.
      */
     public List<InetAddress> sortByProximity(InetAddress address, List<InetAddress> addresses);
+    /**
+     * returns a new List<InetAddress> sorted by storageType to the given queryType ( and proximity to the given address)
+     */
+    public List<InetAddress> getSortedListByStorageType(int queryType, Collection<InetAddress> unsortedAddress);
+
+    /**
+     * This method will sort the List<InetAddress> according to the storageType of the given queryType.
+     */
+    public List<InetAddress> sortByStorageType(int queryType, List<InetAddress> addresses);
 }
 

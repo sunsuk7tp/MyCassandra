@@ -244,7 +244,12 @@ public class CommitLog
                         }
                         if (!rm.isEmpty())
                         {
-                            Table.open(rm.getTable()).apply(rm, null, false);
+                            if(DatabaseDescriptor.dataBase == DatabaseDescriptor.MSTABLE)
+                            {
+                                Table.open(rm.getTable()).apply(rm, null, true);
+                            } else {
+                                Table.open(rm.getTable()).apply(rm, null, false);
+                            }
                         }
                         counter.decrementAndGet();
                     }

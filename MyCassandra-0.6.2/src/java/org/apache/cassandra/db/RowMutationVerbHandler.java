@@ -31,6 +31,8 @@ import org.apache.log4j.Logger;
 import org.apache.cassandra.net.*;
 import org.apache.cassandra.utils.FBUtilities;
 
+import org.apache.cassandra.config.DatabaseDescriptor;
+
 public class RowMutationVerbHandler implements IVerbHandler
 {
     private static Logger logger_ = Logger.getLogger(RowMutationVerbHandler.class);
@@ -64,9 +66,11 @@ public class RowMutationVerbHandler implements IVerbHandler
                     hintedMutation.apply();
                 }
             }
-
-            Table.open(rm.getTable()).apply(rm, bytes, true); // memtableへ書き込み
-
+            if(DatabaseDescriptor.dataBase == DatabaseDescriptor.MSTABLE) {
+                Table.open(rm.getTable()).apply(rm, bytes, true);
+            } else {
+                Table.open(rm.getTable()).apply(rm, bytes, false);
+            }
             WriteResponse response = new WriteResponse(rm.getTable(), rm.key(), true);
             Message responseMessage = WriteResponse.makeWriteResponseMessage(message, response);
             if (logger_.isDebugEnabled())

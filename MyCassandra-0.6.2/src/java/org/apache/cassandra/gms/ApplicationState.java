@@ -47,19 +47,24 @@ public class ApplicationState implements Comparable<ApplicationState>
     
     int version_;
     String state_;
+    int stype_;
 
-        
     ApplicationState(String state, int version)
     {
         state_ = state;
         version_ = version;
     }
 
+    ApplicationState(String state, int version, int stype) {
+        state_ = state;
+        version_ = version;
+        stype_ = stype;
+    }
+
     public static ICompactSerializer<ApplicationState> serializer()
     {
         return serializer_;
     }
-    
     /**
      * Wraps the specified state into a ApplicationState instance.
      * @param state string representation of arbitrary state.
@@ -69,15 +74,25 @@ public class ApplicationState implements Comparable<ApplicationState>
         state_ = state;
         version_ = VersionGenerator.getNextVersion();
     }
-        
+
     public String getValue()
     {
         return state_;
     }
-    
+
     int getStateVersion()
     {
         return version_;
+    }
+
+    public int getStorageType()
+    {
+        return stype_;
+    }
+
+    public void setStorageType(int storageType)
+    {
+        stype_ = storageType;
     }
 
     public int compareTo(ApplicationState apState)
@@ -92,13 +107,15 @@ class ApplicationStateSerializer implements ICompactSerializer<ApplicationState>
     {
         dos.writeUTF(appState.state_);
         dos.writeInt(appState.version_);
+        dos.writeInt(appState.stype_);
     }
 
     public ApplicationState deserialize(DataInputStream dis) throws IOException
     {
         String state = dis.readUTF();
         int version = dis.readInt();
-        return new ApplicationState(state, version);
+        int stype = dis.readInt();
+        return new ApplicationState(state, version, stype);
     }
 }
 

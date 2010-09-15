@@ -30,6 +30,8 @@ import org.apache.cassandra.net.Message;
 import org.apache.cassandra.net.MessagingService;
 import org.apache.cassandra.service.StorageService;
 
+import org.apache.cassandra.utils.FBUtilities;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -121,10 +123,9 @@ public class Gossiper implements IFailureDetectionEventListener, IEndPointStateC
 
     /* initial seeds for joining the cluster */
     private Set<InetAddress> seeds_ = new HashSet<InetAddress>();
-
     /* map where key is the endpoint and value is the state associated with the endpoint */
     Map<InetAddress, EndPointState> endPointStateMap_ = new Hashtable<InetAddress, EndPointState>();
-
+    Map<InetAddress, Integer> storageMap_ = new Hashtable<InetAddress, Integer>();
     /* map where key is endpoint and value is timestamp when this endpoint was removed from
      * gossip. We will ignore any gossip regarding these endpoints for Streaming.RING_DELAY time
      * after removal to prevent nodes from falsely reincarnating during the time when removal
@@ -321,7 +322,10 @@ public class Gossiper implements IFailureDetectionEventListener, IEndPointStateC
         MessagingService.instance.sendOneWay(message, to);
         return seeds_.contains(to);
     }
-
+    boolean sendStorageGossip(Message message, Set<InetAddress> epSet)
+    {
+        return sendGossip(message, epSet);
+    }
     /* Sends a Gossip message to a live member and returns true if the recipient was a seed */
     boolean doGossipToLiveMember(Message message)
     {
@@ -450,7 +454,7 @@ public class Gossiper implements IFailureDetectionEventListener, IEndPointStateC
             int localHbVersion = epState.getHeartBeatState().getHeartBeatVersion();
             if ( localHbVersion > version )
             {
-                reqdEndPointState = new EndPointState(epState.getHeartBeatState());
+                reqdEndPointState = new EndPointState(epState.getHeartBeatState(), epState.getStorageType());
             }
             Map<String, ApplicationState> appStateMap = epState.getApplicationStateMap();
             /* Accumulate all application states whose versions are greater than "version" variable */
@@ -461,12 +465,13 @@ public class Gossiper implements IFailureDetectionEventListener, IEndPointStateC
                 {
                     if ( reqdEndPointState == null )
                     {
-                        reqdEndPointState = new EndPointState(epState.getHeartBeatState());
+                        reqdEndPointState = new EndPointState(epState.getHeartBeatState(), epState.getStorageType());
                     }
                     final String key = entry.getKey();
                     if (logger_.isTraceEnabled())
                         logger_.trace("Adding state " + key + ": " + appState.getValue());
                     reqdEndPointState.addApplicationState(key, appState);
+                    System.out.println(forEndpoint+":"+appState.getStorageType());
                 }
             }
         }
@@ -681,6 +686,7 @@ public class Gossiper implements IFailureDetectionEventListener, IEndPointStateC
             if ( localAppState == null )
             {
                 localStatePtr.addApplicationState(remoteKey, remoteAppState);
+                System.out.println(addr+":"+remoteAppState.getStorageType());
                 doNotifications(addr, remoteKey, remoteAppState);
                 continue;
             }
@@ -693,6 +699,7 @@ public class Gossiper implements IFailureDetectionEventListener, IEndPointStateC
             if ( remoteGeneration > localGeneration )
             {
                 localStatePtr.addApplicationState(remoteKey, remoteAppState);
+                System.out.println(addr+":"+remoteAppState.getStorageType());
                 doNotifications(addr, remoteKey, remoteAppState);
                 continue;
             }
@@ -706,6 +713,7 @@ public class Gossiper implements IFailureDetectionEventListener, IEndPointStateC
                 if ( remoteVersion > localVersion )
                 {
                     localStatePtr.addApplicationState(remoteKey, remoteAppState);
+                    System.out.println(addr+":"+remoteAppState.getStorageType());
                     doNotifications(addr, remoteKey, remoteAppState);
                 }
             }
@@ -841,7 +849,7 @@ public class Gossiper implements IFailureDetectionEventListener, IEndPointStateC
         if ( localState == null )
         {
             HeartBeatState hbState = new HeartBeatState(generationNbr);
-            localState = new EndPointState(hbState);
+            localState = new EndPointState(hbState, FBUtilities.getStorageType());
             localState.isAlive(true);
             localState.isAGossiper(true);
             endPointStateMap_.put(localEndPoint_, localState);

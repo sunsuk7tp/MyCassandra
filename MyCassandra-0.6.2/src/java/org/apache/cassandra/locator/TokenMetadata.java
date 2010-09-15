@@ -36,6 +36,7 @@ public class TokenMetadata
 {
     /* Maintains token to endpoint map of every node in the cluster. */
     private BiMap<Token, InetAddress> tokenToEndPointMap;
+    private Map<InetAddress, Integer> endPointToStypeMap;
 
     // Suppose that there is a ring of nodes A, C and E, with replication factor 3.
     // Node D bootstraps between C and E, so its pending ranges will be E-A, A-C and C-D.
@@ -93,6 +94,13 @@ public class TokenMetadata
         return n;
     }
 
+    public void updateNormalToken(Token token, InetAddress endpoint, int apStorageType)
+    {
+        endPointToStypeMap.remove(endpoint);
+        endPointToStypeMap.put(endpoint, apStorageType);
+        updateNormalToken(token, endpoint);
+    }
+
     public void updateNormalToken(Token token, InetAddress endpoint)
     {
         assert token != null;
@@ -113,6 +121,13 @@ public class TokenMetadata
         {
             lock.writeLock().unlock();
         }
+    }
+
+    public void addBootstrapToken(Token token, InetAddress endpoint, int apStorageType)
+    {
+        endPointToStypeMap.remove(endpoint);
+        endPointToStypeMap.put(endpoint, apStorageType);
+        addBootstrapToken(token, endpoint);
     }
 
     public void addBootstrapToken(Token token, InetAddress endpoint)
@@ -308,6 +323,19 @@ public class TokenMetadata
         try
         {
             return tokenToEndPointMap.get(token);
+        }
+        finally
+        {
+            lock.readLock().unlock();
+        }
+    }
+
+    public int getStorageType(InetAddress address)
+    {
+        lock.readLock().lock();
+        try
+        {
+            return endPointToStypeMap.get(address);
         }
         finally
         {

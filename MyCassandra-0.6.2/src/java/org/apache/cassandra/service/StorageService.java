@@ -474,18 +474,19 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
         String apStateValue = apState.getValue();
         int index = apStateValue.indexOf(Delimiter);
         assert (index != -1);
+        int apStorageType = apState.getStorageType();
 
         String moveName = apStateValue.substring(0, index);
         String moveValue = apStateValue.substring(index+1);
 
         if (moveName.equals(STATE_BOOTSTRAPPING))
-            handleStateBootstrap(endpoint, moveValue);
+            handleStateBootstrap(endpoint, moveValue, apStorageType);
         else if (moveName.equals(STATE_NORMAL))
-            handleStateNormal(endpoint, moveValue);
+            handleStateNormal(endpoint, moveValue, apStorageType);
         else if (moveName.equals(STATE_LEAVING))
-            handleStateLeaving(endpoint, moveValue);
+            handleStateLeaving(endpoint, moveValue, apStorageType);
         else if (moveName.equals(STATE_LEFT))
-            handleStateLeft(endpoint, moveValue);
+            handleStateLeft(endpoint, moveValue, apStorageType);
     }
 
     /**
@@ -494,7 +495,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
      * @param endPoint bootstrapping node
      * @param moveValue bootstrap token as string
      */
-    private void handleStateBootstrap(InetAddress endPoint, String moveValue)
+    private void handleStateBootstrap(InetAddress endPoint, String moveValue, int apStorageType)
     {
         Token token = getPartitioner().getTokenFactory().fromString(moveValue);
 
@@ -516,7 +517,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
             tokenMetadata_.removeEndpoint(endPoint);
         }
 
-        tokenMetadata_.addBootstrapToken(token, endPoint);
+        tokenMetadata_.addBootstrapToken(token, endPoint, apStorageType);
         calculatePendingRanges();
     }
 
@@ -527,7 +528,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
      * @param endPoint node
      * @param moveValue token as string
      */
-    private void handleStateNormal(InetAddress endPoint, String moveValue)
+    private void handleStateNormal(InetAddress endPoint, String moveValue, int apStorageType)
     {
         Token token = getPartitioner().getTokenFactory().fromString(moveValue);
 
@@ -537,7 +538,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
         if (tokenMetadata_.isMember(endPoint))
             logger_.info("Node " + endPoint + " state jump to normal");
 
-        tokenMetadata_.updateNormalToken(token, endPoint);
+        tokenMetadata_.updateNormalToken(token, endPoint, apStorageType);
         calculatePendingRanges();
         if (!isClientMode)
             SystemTable.updateToken(endPoint, token);
@@ -549,7 +550,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
      * @param endPoint node
      * @param moveValue token as string
      */
-    private void handleStateLeaving(InetAddress endPoint, String moveValue)
+    private void handleStateLeaving(InetAddress endPoint, String moveValue, int apStorageType)
     {
         Token token = getPartitioner().getTokenFactory().fromString(moveValue);
 
@@ -585,7 +586,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
      * parameter is ignored and the operation is based on the token inside moveValue.
      * @param moveValue (REMOVE_TOKEN|LEFT_NORMALLY)<Delimiter><token>
      */
-    private void handleStateLeft(InetAddress endPoint, String moveValue)
+    private void handleStateLeft(InetAddress endPoint, String moveValue, int apStorageType)
     {
         int index = moveValue.indexOf(Delimiter);
         assert (index != -1);
@@ -771,7 +772,8 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
                 // find alive sources for our new ranges
                 for (Range myNewRange : myNewRanges)
                 {
-                    List<InetAddress> sources = DatabaseDescriptor.getEndPointSnitch(table).getSortedListByProximity(myAddress, rangeAddresses.get(myNewRange));
+//                    List<InetAddress> sources = DatabaseDescriptor.getEndPointSnitch(table).getSortedListByProximity(myAddress, rangeAddresses.get(myNewRange));
+                    List<InetAddress> sources = DatabaseDescriptor.getEndPointSnitch(table).getSortedListByStorageType(1, rangeAddresses.get(myNewRange));
 
                     assert (!sources.contains(myAddress));
 
@@ -1194,7 +1196,8 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
     public InetAddress findSuitableEndPoint(String table, String key) throws IOException, UnavailableException
     {
         List<InetAddress> endpoints = getNaturalEndpoints(table, key);
-        DatabaseDescriptor.getEndPointSnitch(table).sortByProximity(FBUtilities.getLocalAddress(), endpoints);
+//        DatabaseDescriptor.getEndPointSnitch(table).sortByProximity(FBUtilities.getLocalAddress(), endpoints);
+        DatabaseDescriptor.getEndPointSnitch(table).sortByStorageType(2, endpoints);
         for (InetAddress endpoint : endpoints)
         {
             if (FailureDetector.instance.isAlive(endpoint))

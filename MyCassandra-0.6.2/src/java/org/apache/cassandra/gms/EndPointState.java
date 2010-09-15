@@ -54,16 +54,28 @@ public class EndPointState
     // fat client and will be removed automatically from gossip.
     boolean hasToken_;
 
+    int storageType_;
+
     public static ICompactSerializer<EndPointState> serializer()
     {
         return serializer_;
     }
     
     EndPointState(HeartBeatState hbState) 
+    {
+        hbState_ = hbState;
+        updateTimestamp_ = System.currentTimeMillis();
+        isAlive_ = true;
+        isAGossiper_ = false;
+        hasToken_ = false;
+    }
+    
+    EndPointState(HeartBeatState hbState, int storageType) 
     { 
+        storageType_ = storageType;
         hbState_ = hbState; 
         updateTimestamp_ = System.currentTimeMillis(); 
-        isAlive_ = true; 
+        isAlive_ = true;
         isAGossiper_ = false;
         hasToken_ = false;
     }
@@ -91,7 +103,8 @@ public class EndPointState
     
     void addApplicationState(String key, ApplicationState appState)
     {
-        applicationState_.put(key, appState);        
+        appState.setStorageType(storageType_);
+        applicationState_.put(key, appState);
     }
     
     /* getters and setters */
@@ -136,6 +149,16 @@ public class EndPointState
     {
         return hasToken_;
     }
+    
+    public void setStorageType(int value)
+    {
+        storageType_ = value;
+    }
+    
+    public int getStorageType()
+    {
+        return storageType_;
+    }
 
     public List<Map.Entry<String,ApplicationState>> getSortedApplicationStates()
     {
@@ -165,6 +188,7 @@ class EndPointStateSerializer implements ICompactSerializer<EndPointState>
 
         /* serialize the HeartBeatState */
         HeartBeatState hbState = epState.getHeartBeatState();
+        int storageType = epState.getStorageType();
         HeartBeatState.serializer().serialize(hbState, dos);
 
         /* serialize the map of ApplicationState objects */
@@ -186,6 +210,8 @@ class EndPointStateSerializer implements ICompactSerializer<EndPointState>
                 {
                     int pre = dos.size();
                     dos.writeUTF(key);
+                    //System.out.println("serialize:"+storageType);
+                    dos.writeInt(storageType);
                     ApplicationState.serializer().serialize(appState, dos);                    
                     int post = dos.size();
                     estimate = post - pre;
@@ -207,9 +233,12 @@ class EndPointStateSerializer implements ICompactSerializer<EndPointState>
                 break;
             }
             
-            String key = dis.readUTF();    
+            String key = dis.readUTF();
+            int storageType = dis.readInt();
+            //System.out.println("deserialize:"+storageType);
             ApplicationState appState = ApplicationState.serializer().deserialize(dis);            
-            epState.addApplicationState(key, appState);            
+            epState.addApplicationState(key, appState);
+            epState.setStorageType(storageType);
         }
         return epState;
     }

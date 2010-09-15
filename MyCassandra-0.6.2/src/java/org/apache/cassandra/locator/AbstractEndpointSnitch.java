@@ -94,4 +94,44 @@ public abstract class AbstractEndpointSnitch implements IEndPointSnitch
         });
         return addresses;
     }
+    
+    // queryType: 1=>write, 2=>read
+    public List<InetAddress> getSortedListByStorageType(int queryType, Collection<InetAddress> unsortedAddress)
+    {
+        List<InetAddress> preferred = new ArrayList<InetAddress>(unsortedAddress);
+        sortByStorageType(queryType, preferred);
+        return preferred;
+    }
+    
+    public List<InetAddress> sortByStorageType(int queryType, List<InetAddress> addresses)
+    {
+        Collections.sort(addresses, new Comparator<InetAddress>()
+        {
+            public int compare(InetAddress a1, InetAddress a2)
+            {/*
+                try
+                {
+                    if (address.equals(a1) && !address.equals(a2))
+                        return -1;
+                    if (address.equals(a2) && !address.equals(a1))
+                        return 1;
+                    if (isOnSameRack(address, a1) && !isOnSameRack(address, a2))
+                        return -1;
+                    if (isOnSameRack(address, a2) && !isOnSameRack(address, a1))
+                        return 1;
+                    if (isInSameDataCenter(address, a1) && !isInSameDataCenter(address, a2))
+                        return -1;
+                    if (isInSameDataCenter(address, a2) && !isInSameDataCenter(address, a1))
+                        return 1;
+                    return 0;
+                }
+                catch (UnknownHostException e)
+                {
+                    throw new RuntimeException(e);
+                }*/
+                return 0;
+            }
+        });
+        return addresses;
+    }
 }

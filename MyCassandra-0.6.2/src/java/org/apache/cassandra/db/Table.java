@@ -391,9 +391,6 @@ public class Table
     {
         HashMap<ColumnFamilyStore,Memtable> memtablesToFlush = new HashMap<ColumnFamilyStore, Memtable>(2);
         
-        //temp
-        writeCommitLog = false;
-        
         // write the mutation to the commitlog and memtables
         flusherLock.readLock().lock();
         try

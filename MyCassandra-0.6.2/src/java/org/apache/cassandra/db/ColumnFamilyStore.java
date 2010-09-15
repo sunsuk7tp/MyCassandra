@@ -42,6 +42,8 @@ import com.google.common.collect.Iterators;
 import org.apache.cassandra.concurrent.JMXEnabledThreadPoolExecutor;
 import org.apache.cassandra.concurrent.NamedThreadFactory;
 import org.apache.cassandra.config.DatabaseDescriptor;
+import org.apache.cassandra.db.ColumnFamily;
+import org.apache.cassandra.db.SuperColumn;
 import org.apache.cassandra.db.commitlog.CommitLog;
 import org.apache.cassandra.db.commitlog.CommitLogSegment;
 import org.apache.cassandra.db.filter.*;
@@ -138,20 +140,79 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
         if (logger_.isDebugEnabled())
             logger_.debug("Starting CFS " + columnFamily_);
-
         ssTables_ = new SSTableTracker(table, columnFamilyName);
+        if (DatabaseDescriptor.dataBase == DatabaseDescriptor.MSTABLE)
+        {
+            // scan for data files corresponding to this CF
+            List<File> sstableFiles = new ArrayList<File>();
+            Pattern auxFilePattern = Pattern.compile("(.*)(-Filter\\.db$|-Index\\.db$)");
+            for (File file : files())
+            {
+                String filename = file.getName();
+    
+                /* look for and remove orphans. An orphan is a -Filter.db or -Index.db with no corresponding -Data.db. */
+                Matcher matcher = auxFilePattern.matcher(file.getAbsolutePath());
+                if (matcher.matches())
+                {
+                    String basePath = matcher.group(1);
+                    if (!new File(basePath + "-Data.db").exists())
+                    {
+                        logger_.info(String.format("Removing orphan %s", file.getAbsolutePath()));
+                        FileUtils.deleteWithConfirm(file);
+                        continue;
+                    }
+                }
+    
+                if (((file.length() == 0 && !filename.endsWith("-Compacted")) || (filename.contains("-" + SSTable.TEMPFILE_MARKER))))
+                {
+                    FileUtils.deleteWithConfirm(file);
+                    continue;
+                }
+    
+                if (filename.contains("-Data.db"))
+                {
+                    sstableFiles.add(file.getAbsoluteFile());
+                }
+            }
+            Collections.sort(sstableFiles, new FileUtils.FileComparator());
+    
+            /* Load the index files and the Bloom Filters associated with them. */
+            List<SSTableReader> sstables = new ArrayList<SSTableReader>();
+            for (File file : sstableFiles)
+            {
+                String filename = file.getAbsolutePath();
+                if (SSTable.deleteIfCompacted(filename))
+                    continue;
+    
+                SSTableReader sstable;
+                try
+                {
+                    sstable = SSTableReader.open(filename);
+                }
+                catch (IOException ex)
+                {
+                    logger_.error("Corrupt file " + filename + "; skipped", ex);
+                    continue;
+                }
+                sstables.add(sstable);
+            }
+            ssTables_.add(sstables);
+        }
         
         switch(DatabaseDescriptor.dataBase) {
-        	case DatabaseDescriptor.REDIS:
-        		dbi = new RedisInstance(table_, columnFamily_);
-        		break;
-        	case DatabaseDescriptor.JREDIS:
-        		dbi = new JRedisInstance(table_, columnFamily_);
-        		break;
-        	case DatabaseDescriptor.MYSQL:
-        	default:
-        		dbi = new MySQLInstance(table_, columnFamily_);
-        		break;
+            case DatabaseDescriptor.MSTABLE:
+                //dbi = new MSTableInstance(table_, columnFamily_);
+                break;
+            case DatabaseDescriptor.REDIS:
+                dbi = new RedisInstance(table_, columnFamily_);
+                break;
+            case DatabaseDescriptor.JREDIS:
+                dbi = new JRedisInstance(table_, columnFamily_);
+                break;
+            case DatabaseDescriptor.MYSQL:
+            default:
+                dbi = new MySQLInstance(table_, columnFamily_);
+                break;
         }
     }
 
@@ -191,28 +252,31 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
          * the max which in this case is n and increment it to use it for next
          * index.
          */
-        /*List<Integer> generations = new ArrayList<Integer>();
-        String[] dataFileDirectories = DatabaseDescriptor.getAllDataFileLocationsForTable(table);
-        for (String directory : dataFileDirectories)
+    	int value = 0;
+        if (DatabaseDescriptor.dataBase == DatabaseDescriptor.MSTABLE)
         {
-            File fileDir = new File(directory);
-            File[] files = fileDir.listFiles();
-            
-            for (File file : files)
+            List<Integer> generations = new ArrayList<Integer>();
+            String[] dataFileDirectories = DatabaseDescriptor.getAllDataFileLocationsForTable(table);
+            for (String directory : dataFileDirectories)
             {
-                String filename = file.getName();
-                String cfName = getColumnFamilyFromFileName(filename);
-
-                if (cfName.equals(columnFamily))
+                File fileDir = new File(directory);
+                File[] files = fileDir.listFiles();
+                
+                for (File file : files)
                 {
-                    generations.add(getGenerationFromFileName(filename));
+                    String filename = file.getName();
+                    String cfName = getColumnFamilyFromFileName(filename);
+    
+                    if (cfName.equals(columnFamily))
+                    {
+                        generations.add(getGenerationFromFileName(filename));
+                    }
                 }
             }
+            Collections.sort(generations);
+            value = (generations.size() > 0) ? (generations.get(generations.size() - 1)) : 0;
         }
-        Collections.sort(generations);
-        int value = (generations.size() > 0) ? (generations.get(generations.size() - 1)) : 0;*/
-    	int value = 0;
-
+        
         ColumnFamilyStore cfs = new ColumnFamilyStore(table, columnFamily, "Super".equals(DatabaseDescriptor.getColumnType(table, columnFamily)), value);
 
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -396,22 +460,27 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
      */
     Memtable apply(String key, ColumnFamily columnFamily) throws IOException
     {
+        boolean flushRequested = false;
         long start = System.nanoTime();
-       
-        //DecoratedKey decoratedKey = partitioner.decorateKey(key);
-        //String rowKey = partitioner.convertToDiskFormat(decoratedKey);
         
-        try {
-            if(dbi.insertOrUpdate(key, columnFamily) < 0)
-            	System.err.println("can't insert or update to mysql.");
-        } catch (SQLException e) {
-            System.err.println(e);
+        if (DatabaseDescriptor.dataBase == DatabaseDescriptor.MSTABLE)
+        {
+            flushRequested = memtable_.isThresholdViolated();
+            memtable_.put(key, columnFamily);
+        } else {
+            try {
+                if(dbi.insertOrUpdate(key, columnFamily) < 0) {
+                    System.err.println("can't insert or update to mysql.");
+                }
+            } catch (SQLException e) {
+                System.err.println(e);
+            }
         }
            
         //System.out.println("put: "+(System.nanoTime() - start));
         writeStats_.addNano(System.nanoTime() - start);
             
-        return null;
+        return flushRequested ? memtable_ : null;
     }
 
     /*
@@ -718,34 +787,103 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     {
         assert columnFamily_.equals(filter.getColumnFamilyName());
 
+        if (DatabaseDescriptor.dataBase == DatabaseDescriptor.MSTABLE) {
+            return doGetCFMSTable(filter, gcBefore);
+        } else {
+            return doGetCFDB(filter, gcBefore);
+        }
+    }
+
+    public ColumnFamily doGetCFMSTable(QueryFilter filter, int gcBefore) throws IOException
+    {
         long start = System.nanoTime();
         try
         {
             if (filter.path.superColumnName == null)
             {
-            	//DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
-                //String rowKey = partitioner.convertToDiskFormat(decoratedKey);
-            	return dbi.select(filter.key, filter);
+                if (ssTables_.getRowCache().getCapacity() == 0)
+                    return removeDeleted(getTopLevelColumns(filter, gcBefore), gcBefore);
+
+                ColumnFamily cached = cacheRow(filter.key);
+                ColumnIterator ci = filter.getMemColumnIterator(memtable_, cached, getComparator()); // TODO passing memtable here is confusing since it's almost entirely unused
+                ColumnFamily returnCF = ci.getColumnFamily();
+                filter.collectCollatedColumns(returnCF, ci, gcBefore);
+                return removeDeleted(returnCF, gcBefore);
             }
-            
+
+            // we are querying subcolumns of a supercolumn: fetch the supercolumn with NQF, then filter in-memory.
+            ColumnFamily cf;
+            SuperColumn sc;
+            if (ssTables_.getRowCache().getCapacity() == 0)
+            {
+                QueryFilter nameFilter = new NamesQueryFilter(filter.key, new QueryPath(columnFamily_), filter.path.superColumnName);
+                cf = getTopLevelColumns(nameFilter, gcBefore);
+                if (cf == null || cf.getColumnCount() == 0)
+                    return cf;
+
+                assert cf.getSortedColumns().size() == 1;
+                sc = (SuperColumn)cf.getSortedColumns().iterator().next();
+            }
+            else
+            {
+                cf = cacheRow(filter.key);
+                if (cf == null)
+                    return null;
+                sc = (SuperColumn)cf.getColumn(filter.path.superColumnName);
+                if (sc == null)
+                    return null;
+                sc = (SuperColumn)sc.cloneMe();
+            }
+
+            // filterSuperColumn only looks at immediate parent (the supercolumn) when determining if a subcolumn
+            // is still live, i.e., not shadowed by the parent's tombstone.  so, bump it up temporarily to the tombstone
+            // time of the cf, if that is greater.
+            long deletedAt = sc.getMarkedForDeleteAt();
+            if (cf.getMarkedForDeleteAt() > deletedAt)
+                sc.markForDeleteAt(sc.getLocalDeletionTime(), cf.getMarkedForDeleteAt());
+
+            SuperColumn scFiltered = filter.filterSuperColumn(sc, gcBefore);
+            ColumnFamily cfFiltered = cf.cloneMeShallow();
+            scFiltered.markForDeleteAt(sc.getLocalDeletionTime(), deletedAt); // reset sc tombstone time to what it should be
+            cfFiltered.addColumn(scFiltered);
+
+            return removeDeleted(cfFiltered, gcBefore);
+        }
+        finally
+        {
+	    //System.out.println("get: "+(System.nanoTime() - start));
+            readStats_.addNano(System.nanoTime() - start);
+        }
+    }
+    
+    public ColumnFamily doGetCFDB(QueryFilter filter, int gcBefore) throws IOException
+    {
+        long start = System.nanoTime();
+        try
+        {
             //DecoratedKey decoratedKey = partitioner.decorateKey(filter.key);
             //String rowKey = partitioner.convertToDiskFormat(decoratedKey);
+            if (filter.path.superColumnName == null)
+            {
+                return dbi.select(filter.key, filter);
+            }
+            
             ColumnFamily cf = dbi.select(filter.key, filter);
             SuperColumn sc = (SuperColumn)cf.getColumn(filter.path.superColumnName);
             sc = (SuperColumn)sc.cloneMe();
-            	
+                
             SuperColumn scFiltered = filter.filterSuperColumn(sc, gcBefore);
             ColumnFamily cfFiltered = cf.cloneMeShallow();
             cfFiltered.addColumn(scFiltered);
-            	
+                
             return cfFiltered;
         } catch (SQLException e) {
-        	System.err.println(e);
-        	return null;
+            System.err.println(e);
+            return null;
         }
         finally
-        {	
-        	//System.out.println("get: "+(System.nanoTime() - start));
+        {
+	    //System.out.println("get: "+(System.nanoTime() - start));
             readStats_.addNano(System.nanoTime() - start);
         }
     }
