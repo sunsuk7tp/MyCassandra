@@ -454,7 +454,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
         Map<Range, List<InetAddress>> rangeToEndPointMap = new HashMap<Range, List<InetAddress>>();
         for (Range range : ranges)
         {
-            rangeToEndPointMap.put(range, getReplicationStrategy(keyspace).getNaturalEndpoints(range.right, keyspace));
+            rangeToEndPointMap.put(range, (List<InetAddress>)getReplicationStrategy(keyspace).getNaturalEndpoints(range.right, keyspace).keySet());
         }
         return rangeToEndPointMap;
     }
@@ -704,8 +704,8 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
         // all leaving nodes are gone.
         for (Range range : affectedRanges)
         {
-            List<InetAddress> currentEndPoints = strategy.getNaturalEndpoints(range.right, tm, table);
-            List<InetAddress> newEndPoints = strategy.getNaturalEndpoints(range.right, allLeftMetadata, table);
+            List<InetAddress> currentEndPoints = (List<InetAddress>)strategy.getNaturalEndpoints(range.right, tm, table).keySet();
+            List<InetAddress> newEndPoints = (List<InetAddress>)strategy.getNaturalEndpoints(range.right, allLeftMetadata, table).keySet();
             newEndPoints.removeAll(currentEndPoints);
             pendingRanges.putAll(range, newEndPoints);
         }
@@ -773,7 +773,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
                 for (Range myNewRange : myNewRanges)
                 {
 //                    List<InetAddress> sources = DatabaseDescriptor.getEndPointSnitch(table).getSortedListByProximity(myAddress, rangeAddresses.get(myNewRange));
-                    List<InetAddress> sources = DatabaseDescriptor.getEndPointSnitch(table).getSortedListByStorageType(1, rangeAddresses.get(myNewRange));
+                    List<InetAddress> sources = DatabaseDescriptor.getEndPointSnitch(table).sortByStorageType(1, tokenMetadata_.getAddrToStypeMap((ArrayList<InetAddress>)rangeAddresses.get(myNewRange)));
 
                     assert (!sources.contains(myAddress));
 
@@ -815,7 +815,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
 
         // Find (for each range) all nodes that store replicas for these ranges as well
         for (Range range : ranges)
-            currentReplicaEndpoints.put(range, getReplicationStrategy(table).getNaturalEndpoints(range.right, tokenMetadata_, table));
+            currentReplicaEndpoints.put(range, (ArrayList<InetAddress>)getReplicationStrategy(table).getNaturalEndpoints(range.right, tokenMetadata_, table).keySet());
 
         TokenMetadata temp = tokenMetadata_.cloneAfterAllLeft();
 
@@ -833,7 +833,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
         // range.
         for (Range range : ranges)
         {
-            ArrayList<InetAddress> newReplicaEndpoints = getReplicationStrategy(table).getNaturalEndpoints(range.right, temp, table);
+            ArrayList<InetAddress> newReplicaEndpoints = (ArrayList<InetAddress>)getReplicationStrategy(table).getNaturalEndpoints(range.right, temp, table).keySet();
             newReplicaEndpoints.removeAll(currentReplicaEndpoints.get(range));
             if (logger_.isDebugEnabled())
                 if (newReplicaEndpoints.isEmpty())
@@ -1151,6 +1151,10 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
     {
         return getNaturalEndpoints(table, partitioner_.getToken(key));
     }
+    public Map<InetAddress, Integer> getNaturalMap(String table, String key)
+    {
+        return getNaturalMap(table, partitioner_.getToken(key));
+    }
 
     /**
      * This method returns the N endpoints that are responsible for storing the
@@ -1160,6 +1164,11 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
      * the endpoint responsible for this token
      */
     public List<InetAddress> getNaturalEndpoints(String table, Token token)
+    {
+        return (List<InetAddress>)getReplicationStrategy(table).getNaturalEndpoints(token, table).keySet();
+    }
+    
+    public Map<InetAddress, Integer> getNaturalMap(String table, Token token)
     {
         return getReplicationStrategy(table).getNaturalEndpoints(token, table);
     }
@@ -1179,7 +1188,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
     public List<InetAddress> getLiveNaturalEndpoints(String table, Token token)
     {
         List<InetAddress> liveEps = new ArrayList<InetAddress>();
-        List<InetAddress> endpoints = getReplicationStrategy(table).getNaturalEndpoints(token, table);
+        Set<InetAddress> endpoints = getReplicationStrategy(table).getNaturalEndpoints(token, table).keySet();
 
         for (InetAddress endpoint : endpoints)
         {
@@ -1189,16 +1198,29 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
 
         return liveEps;
     }
+    
+    public Map<InetAddress, Integer> getLiveMap(String table, Token token)
+    {
+        Map<InetAddress, Integer> liveEps = new HashMap<InetAddress, Integer>();
+        Map<InetAddress, Integer> map = getReplicationStrategy(table).getNaturalEndpoints(token, table);
 
+        for (InetAddress endpoint : map.keySet())
+        {
+            if (FailureDetector.instance.isAlive(endpoint))
+                liveEps.put(endpoint, map.get(endpoint));
+        }
+
+        return liveEps;
+    }
     /**
      * This function finds the closest live endpoint that contains a given key.
      */
     public InetAddress findSuitableEndPoint(String table, String key) throws IOException, UnavailableException
     {
-        List<InetAddress> endpoints = getNaturalEndpoints(table, key);
+        Map<InetAddress, Integer> endpointToStypeMap = getNaturalMap(table, key);
 //        DatabaseDescriptor.getEndPointSnitch(table).sortByProximity(FBUtilities.getLocalAddress(), endpoints);
-        DatabaseDescriptor.getEndPointSnitch(table).sortByStorageType(2, endpoints);
-        for (InetAddress endpoint : endpoints)
+        DatabaseDescriptor.getEndPointSnitch(table).sortByStorageType(2, endpointToStypeMap);
+        for (InetAddress endpoint : endpointToStypeMap.keySet())
         {
             if (FailureDetector.instance.isAlive(endpoint))
                 return endpoint;

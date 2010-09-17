@@ -20,6 +20,8 @@ package org.apache.cassandra.locator;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -45,10 +47,10 @@ public class RackAwareStrategy extends AbstractReplicationStrategy
             throw new IllegalArgumentException(("RackAwareStrategy requires EndPointSnitch."));
     }
 
-    public ArrayList<InetAddress> getNaturalEndpoints(Token token, TokenMetadata metadata, String table)
+    public Map<InetAddress, Integer> getNaturalEndpoints(Token token, TokenMetadata metadata, String table)
     {
         int replicas = DatabaseDescriptor.getReplicationFactor(table);
-        ArrayList<InetAddress> endpoints = new ArrayList<InetAddress>(replicas);
+        Map<InetAddress, Integer> endpoints = new HashMap<InetAddress, Integer>(replicas);
         List<Token> tokens = metadata.sortedTokens();
 
         if (tokens.isEmpty())
@@ -56,7 +58,8 @@ public class RackAwareStrategy extends AbstractReplicationStrategy
 
         Iterator<Token> iter = TokenMetadata.ringIterator(tokens, token);
         Token primaryToken = iter.next();
-        endpoints.add(metadata.getEndPoint(primaryToken));
+        InetAddress address = metadata.getEndPoint(primaryToken);
+        endpoints.put(address, metadata.getStorageType(address));
 
         boolean bDataCenter = false;
         boolean bOtherRack = false;
@@ -71,7 +74,8 @@ public class RackAwareStrategy extends AbstractReplicationStrategy
                     // If we have already found something in a diff datacenter no need to find another
                     if (!bDataCenter)
                     {
-                        endpoints.add(metadata.getEndPoint(t));
+                        InetAddress addr = metadata.getEndPoint(t);
+                        endpoints.put(addr, metadata.getStorageType(addr));
                         bDataCenter = true;
                     }
                     continue;
@@ -83,7 +87,8 @@ public class RackAwareStrategy extends AbstractReplicationStrategy
                     // If we have already found something in a diff rack no need to find another
                     if (!bOtherRack)
                     {
-                        endpoints.add(metadata.getEndPoint(t));
+                        InetAddress addr = metadata.getEndPoint(t);
+                        endpoints.put(addr, metadata.getStorageType(addr));
                         bOtherRack = true;
                     }
                 }
@@ -103,8 +108,10 @@ public class RackAwareStrategy extends AbstractReplicationStrategy
             while (endpoints.size() < replicas && iter.hasNext())
             {
                 Token t = iter.next();
-                if (!endpoints.contains(metadata.getEndPoint(t)))
-                    endpoints.add(metadata.getEndPoint(t));
+                if (!endpoints.containsKey(metadata.getEndPoint(t))) {
+                    InetAddress addr = metadata.getEndPoint(t);
+                    endpoints.put(addr, metadata.getStorageType(addr));
+                }
             }
         }
 

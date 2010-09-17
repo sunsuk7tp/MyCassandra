@@ -57,14 +57,14 @@ public abstract class AbstractReplicationStrategy
      * Note that while the endpoints are conceptually a Set (no duplicates will be included),
      * we return a List to avoid an extra allocation when sorting by proximity later.
      */
-    public abstract ArrayList<InetAddress> getNaturalEndpoints(Token token, TokenMetadata metadata, String table);
+    public abstract Map<InetAddress, Integer> getNaturalEndpoints(Token token, TokenMetadata metadata, String table);
     
     public WriteResponseHandler getWriteResponseHandler(int blockFor, ConsistencyLevel consistency_level, String table)
     {
         return new WriteResponseHandler(blockFor, table);
     }
 
-    public ArrayList<InetAddress> getNaturalEndpoints(Token token, String table)
+    public Map<InetAddress, Integer> getNaturalEndpoints(Token token, String table)
     {
         return getNaturalEndpoints(token, tokenMetadata_, table);
     }
@@ -106,7 +106,7 @@ public abstract class AbstractReplicationStrategy
             InetAddress destination = map.isEmpty()
                                     ? localAddress
                                     //: endPointSnitch.getSortedListByProximity(localAddress, map.keySet()).get(0);
-                                    : endPointSnitch.getSortedListByStorageType(1, map.keySet()).get(0);
+                                    : endPointSnitch.sortByStorageType(1, tokenMetadata_.getAddrToStypeMap((ArrayList<InetAddress>)map.keySet())).get(0);
             map.put(destination, ep);
         }
 
@@ -154,7 +154,7 @@ public abstract class AbstractReplicationStrategy
         for (Token token : metadata.sortedTokens())
         {
             Range range = metadata.getPrimaryRangeFor(token);
-            for (InetAddress ep : getNaturalEndpoints(token, metadata, table))
+            for (InetAddress ep : getNaturalEndpoints(token, metadata, table).keySet())
             {
                 map.put(ep, range);
             }
@@ -170,7 +170,7 @@ public abstract class AbstractReplicationStrategy
         for (Token token : metadata.sortedTokens())
         {
             Range range = metadata.getPrimaryRangeFor(token);
-            for (InetAddress ep : getNaturalEndpoints(token, metadata, table))
+            for (InetAddress ep : getNaturalEndpoints(token, metadata, table).keySet())
             {
                 map.put(range, ep);
             }

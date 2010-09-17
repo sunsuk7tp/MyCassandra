@@ -343,6 +343,24 @@ public class TokenMetadata
         }
     }
 
+    public Map<InetAddress, Integer> getAddrToStypeMap(List<InetAddress> addrs)
+    {
+        lock.readLock().lock();
+        try
+        {
+            Map<InetAddress, Integer> map = new HashMap<InetAddress, Integer>(addrs.size());
+            for (InetAddress addr : addrs)
+            {
+                map.put(addr, endPointToStypeMap.get(addr));
+            }
+            return map;
+        }
+        finally
+        {
+            lock.readLock().unlock();
+        }
+    }
+
     public Range getPrimaryRangeFor(Token right)
     {
         return new Range(getPredecessor(right), right);

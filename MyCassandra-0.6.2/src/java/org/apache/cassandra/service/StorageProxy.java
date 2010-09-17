@@ -676,11 +676,12 @@ public class StorageProxy implements StorageProxyMBean
         {
             Token nodeToken = iter.next();
             Range nodeRange = new Range(tokenMetadata.getPredecessor(nodeToken), nodeToken);
-            List<InetAddress> endpoints = StorageService.instance.getLiveNaturalEndpoints(keyspace, nodeToken);
+            Map<InetAddress, Integer> map = StorageService.instance.getLiveMap(keyspace, nodeToken);
+            List<InetAddress> endpoints = (List<InetAddress>)map.keySet();
             if (endpoints.size() < responseCount)
                 throw new UnavailableException();
 
-            DatabaseDescriptor.getEndPointSnitch(keyspace).sortByStorageType(2, endpoints);
+            DatabaseDescriptor.getEndPointSnitch(keyspace).sortByStorageType(2, map);
             //DatabaseDescriptor.getEndPointSnitch(keyspace).sortByProximity(FBUtilities.getLocalAddress(), endpoints);
             List<InetAddress> endpointsForCL = endpoints.subList(0, responseCount);
             Set<AbstractBounds> restrictedRanges = queryRange.restrictTo(nodeRange);

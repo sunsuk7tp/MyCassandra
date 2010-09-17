@@ -106,6 +106,6 @@ public class RingCache
         if (tokenMetadata == null)
             throw new RuntimeException("Must refresh endpoints before looking up a key.");
         AbstractReplicationStrategy strat = StorageService.getReplicationStrategy(tokenMetadata, table);
-        return strat.getNaturalEndpoints(partitioner_.getToken(key), table);
+        return (List<InetAddress>)strat.getNaturalEndpoints(partitioner_.getToken(key), table).keySet();
     }
 }

@@ -21,6 +21,7 @@ package org.apache.cassandra.locator;
 import java.net.UnknownHostException;
 
 import java.net.InetAddress;
+import java.util.Map;
 import java.util.Set;
 import java.util.List;
 import java.util.Collection;
@@ -53,6 +54,7 @@ public interface IEndPointSnitch
     /**
      * This method will sort the List<InetAddress> according to the storageType of the given queryType.
      */
+    public List<InetAddress> sortByStorageType(int queryType, Map<InetAddress, Integer> map);
     public List<InetAddress> sortByStorageType(int queryType, List<InetAddress> addresses);
 }
 

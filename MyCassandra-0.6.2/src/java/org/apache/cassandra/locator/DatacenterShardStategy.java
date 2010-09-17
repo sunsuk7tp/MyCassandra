@@ -116,7 +116,7 @@ public class DatacenterShardStategy extends AbstractReplicationStrategy
         }
     }
 
-    public ArrayList<InetAddress> getNaturalEndpoints(Token token, TokenMetadata metadata, String table)
+    public Map<InetAddress, Integer> getNaturalEndpoints(Token token, TokenMetadata metadata, String table)
     {
         try
         {
@@ -128,9 +128,9 @@ public class DatacenterShardStategy extends AbstractReplicationStrategy
         }
     }
 
-    private ArrayList<InetAddress> getNaturalEndpointsInternal(Token searchToken, TokenMetadata metadata) throws IOException
+    private Map<InetAddress, Integer> getNaturalEndpointsInternal(Token searchToken, TokenMetadata metadata) throws IOException
     {
-        ArrayList<InetAddress> endpoints = new ArrayList<InetAddress>();
+        Map<InetAddress, Integer> endpoints = new HashMap<InetAddress, Integer>();
 
         if (metadata.sortedTokens().size() == 0)
             return endpoints;
@@ -199,7 +199,9 @@ public class DatacenterShardStategy extends AbstractReplicationStrategy
                     }
                 }
             }
-            endpoints.addAll(forloopReturn);
+            for (InetAddress addr : forloopReturn) {
+                endpoints.put(addr, metadata.getStorageType(addr));
+            }
         }
 
         return endpoints;

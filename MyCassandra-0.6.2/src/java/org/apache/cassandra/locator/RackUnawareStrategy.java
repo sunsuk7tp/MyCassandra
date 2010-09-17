@@ -19,6 +19,8 @@
 package org.apache.cassandra.locator;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -40,11 +42,11 @@ public class RackUnawareStrategy extends AbstractReplicationStrategy
         super(tokenMetadata, snitch);
     }
 
-    public ArrayList<InetAddress> getNaturalEndpoints(Token token, TokenMetadata metadata, String table)
+    public Map<InetAddress, Integer> getNaturalEndpoints(Token token, TokenMetadata metadata, String table)
     {
         int replicas = DatabaseDescriptor.getReplicationFactor(table);
         List<Token> tokens = metadata.sortedTokens();
-        ArrayList<InetAddress> endpoints = new ArrayList<InetAddress>(replicas);
+        Map<InetAddress, Integer> endpoints = new HashMap<InetAddress, Integer>(replicas);
 
         if (tokens.isEmpty())
             return endpoints;
@@ -53,7 +55,8 @@ public class RackUnawareStrategy extends AbstractReplicationStrategy
         Iterator<Token> iter = TokenMetadata.ringIterator(tokens, token);
         while (endpoints.size() < replicas && iter.hasNext())
         {
-            endpoints.add(metadata.getEndPoint(iter.next()));
+            InetAddress address = metadata.getEndPoint(iter.next());
+            endpoints.put(address, metadata.getStorageType(address));
         }
 
         return endpoints;

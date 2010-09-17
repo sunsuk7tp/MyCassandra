@@ -102,36 +102,64 @@ public abstract class AbstractEndpointSnitch implements IEndPointSnitch
         sortByStorageType(queryType, preferred);
         return preferred;
     }
-    
-    public List<InetAddress> sortByStorageType(int queryType, List<InetAddress> addresses)
+
+    public List<InetAddress> sortByStorageType(int queryType, Map<InetAddress, Integer> map)
     {
-        Collections.sort(addresses, new Comparator<InetAddress>()
+        switch (queryType) {
+            case 1: // write
+            return sortByStorageTypeWrite(map);
+            case 2: // read
+            return sortByStorageTypeRead(map);
+            default:
+            return (List<InetAddress>)map.keySet();
+        }
+    }
+    
+    public List<InetAddress> sortByStorageTypeWrite(Map<InetAddress, Integer> map) {
+        ArrayList entries = new ArrayList(map.entrySet());
+        Collections.sort(entries, new Comparator<Object>()
         {
-            public int compare(InetAddress a1, InetAddress a2)
-            {/*
-                try
-                {
-                    if (address.equals(a1) && !address.equals(a2))
-                        return -1;
-                    if (address.equals(a2) && !address.equals(a1))
-                        return 1;
-                    if (isOnSameRack(address, a1) && !isOnSameRack(address, a2))
-                        return -1;
-                    if (isOnSameRack(address, a2) && !isOnSameRack(address, a1))
-                        return 1;
-                    if (isInSameDataCenter(address, a1) && !isInSameDataCenter(address, a2))
-                        return -1;
-                    if (isInSameDataCenter(address, a2) && !isInSameDataCenter(address, a1))
-                        return 1;
-                    return 0;
-                }
-                catch (UnknownHostException e)
-                {
-                    throw new RuntimeException(e);
-                }*/
+            public int compare(Object o1, Object o2)
+            {
+                Map.Entry e1 =(Map.Entry)o1;
+                Map.Entry e2 =(Map.Entry)o2;
+                int s1 = (Integer)e1.getValue();
+                int s2 = (Integer)e2.getValue();
+                if (s1 < s2) return -1;
+                else if (s1 > s2) return 1;
                 return 0;
             }
         });
+        List<InetAddress> addresses = new ArrayList<InetAddress>(entries.size());
+        for(int i = 0; i < entries.size(); i++)
+        {
+            Map.Entry me = (Map.Entry) entries.get(i);
+            addresses.add((InetAddress)me.getKey());
+        }
+        return addresses;
+    }
+
+    public List<InetAddress> sortByStorageTypeRead(Map<InetAddress, Integer> map) {
+        ArrayList entries = new ArrayList(map.entrySet());
+        Collections.sort(entries, new Comparator<Object>()
+        {
+            public int compare(Object o1, Object o2)
+            {
+                Map.Entry e1 =(Map.Entry)o1;
+                Map.Entry e2 =(Map.Entry)o2;
+                int s1 = (Integer)e1.getValue();
+                int s2 = (Integer)e2.getValue();
+                if (s1 > s2) return -1;
+                else if (s1 < s2) return 1;
+                return 0;
+            }
+        });
+        List<InetAddress> addresses = new ArrayList<InetAddress>(entries.size());
+        for(int i = 0; i < entries.size(); i++)
+        {
+            Map.Entry me = (Map.Entry) entries.get(i);
+            addresses.add((InetAddress)me.getKey());
+        }
         return addresses;
     }
 }
