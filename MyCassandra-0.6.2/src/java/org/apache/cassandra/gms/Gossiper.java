@@ -699,7 +699,6 @@ public class Gossiper implements IFailureDetectionEventListener, IEndPointStateC
             if ( remoteGeneration > localGeneration )
             {
                 localStatePtr.addApplicationState(remoteKey, remoteAppState);
-                System.out.println(addr+":"+remoteAppState.getStorageType());
                 doNotifications(addr, remoteKey, remoteAppState);
                 continue;
             }

@@ -13,7 +13,7 @@ public class MySQLConfigure {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			return DriverManager.getConnection(
-				"jdbc:mysql://"+dbHost+":"+dbPort+"/"+dbInstance+"?rewriteBatchedStatements=true", dbUser, dbPass);
+				"jdbc:mysql://"+dbHost+":"+dbPort+"/"+dbInstance, dbUser, dbPass);
 		} catch (ClassNotFoundException e) {
 			System.err.println("Cannot read JDBC Driver. "+ e);
 		} catch (SQLException e) {

@@ -111,7 +111,7 @@ public class StorageProxy implements StorageProxyMBean
                     String table = rm.getTable();
                     AbstractReplicationStrategy rs = ss.getReplicationStrategy(table);
 
-                    List<InetAddress> naturalEndpoints = ss.getNaturalEndpoints(table, rm.key());
+                    Set<InetAddress> naturalEndpoints = ss.getNaturalEndpoints(table, rm.key());
                     Multimap<InetAddress,InetAddress> hintedEndpoints = rs.getHintedEndpoints(table, naturalEndpoints);
                     Message unhintedMessage = null; // lazy initialize for non-local, unhinted writes
 
@@ -199,7 +199,7 @@ public class StorageProxy implements StorageProxyMBean
                 String table = rm.getTable();
                 AbstractReplicationStrategy rs = ss.getReplicationStrategy(table);
 
-                List<InetAddress> naturalEndpoints = ss.getNaturalEndpoints(table, rm.key());
+                Set<InetAddress> naturalEndpoints = ss.getNaturalEndpoints(table, rm.key());
                 Collection<InetAddress> writeEndpoints = rs.getWriteEndpoints(StorageService.getPartitioner().getToken(rm.key()), table, naturalEndpoints);
                 Multimap<InetAddress, InetAddress> hintedEndpoints = rs.getHintedEndpoints(table, writeEndpoints);
                 int blockFor = determineBlockFor(writeEndpoints.size(), consistency_level);
@@ -390,7 +390,7 @@ public class StorageProxy implements StorageProxyMBean
 
             for (ReadCommand command: commands)
             {
-                List<InetAddress> endpoints = StorageService.instance.getNaturalEndpoints(command.table, command.key);
+                Set<InetAddress> endpoints = StorageService.instance.getNaturalEndpoints(command.table, command.key);
                 boolean foundLocal = endpoints.contains(FBUtilities.getLocalAddress());
                 //TODO: Throw InvalidRequest if we're in bootstrap mode?
                 if (foundLocal && !StorageService.instance.isBootstrapMode())

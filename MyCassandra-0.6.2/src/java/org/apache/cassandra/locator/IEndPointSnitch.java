@@ -49,12 +49,12 @@ public interface IEndPointSnitch
     /**
      * returns a new List<InetAddress> sorted by storageType to the given queryType ( and proximity to the given address)
      */
-    public List<InetAddress> getSortedListByStorageType(int queryType, Collection<InetAddress> unsortedAddress);
+    //public List<InetAddress> getSortedListByStorageType(int queryType, Collection<InetAddress> unsortedAddress);
 
     /**
      * This method will sort the List<InetAddress> according to the storageType of the given queryType.
      */
     public List<InetAddress> sortByStorageType(int queryType, Map<InetAddress, Integer> map);
-    public List<InetAddress> sortByStorageType(int queryType, List<InetAddress> addresses);
+    //public List<InetAddress> sortByStorageType(int queryType, List<InetAddress> addresses);
 }
 

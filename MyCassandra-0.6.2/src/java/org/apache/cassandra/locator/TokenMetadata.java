@@ -71,6 +71,7 @@ public class TokenMetadata
             tokenToEndPointMap = HashBiMap.create();
         this.tokenToEndPointMap = tokenToEndPointMap;
         bootstrapTokens = HashBiMap.create();
+        endPointToStypeMap = new HashMap<InetAddress, Integer>();
         leavingEndPoints = new HashSet<InetAddress>();
         pendingRanges = new ConcurrentHashMap<String, Multimap<Range, InetAddress>>();
         sortedTokens = sortTokens();
@@ -96,9 +97,26 @@ public class TokenMetadata
 
     public void updateNormalToken(Token token, InetAddress endpoint, int apStorageType)
     {
-        endPointToStypeMap.remove(endpoint);
-        endPointToStypeMap.put(endpoint, apStorageType);
-        updateNormalToken(token, endpoint);
+        assert token != null;
+        assert endpoint != null;
+        
+        lock.writeLock().lock();
+        try
+        {
+            endPointToStypeMap.remove(endpoint);
+            endPointToStypeMap.put(endpoint, apStorageType);
+            bootstrapTokens.inverse().remove(endpoint);
+            tokenToEndPointMap.inverse().remove(endpoint);
+            if (!endpoint.equals(tokenToEndPointMap.put(token, endpoint)))
+            {
+                sortedTokens = sortTokens();
+            }
+            leavingEndPoints.remove(endpoint);
+        }
+        finally
+        {
+            lock.writeLock().unlock();
+        }
     }
 
     public void updateNormalToken(Token token, InetAddress endpoint)
@@ -335,7 +353,10 @@ public class TokenMetadata
         lock.readLock().lock();
         try
         {
-            return endPointToStypeMap.get(address);
+            if(endPointToStypeMap.containsKey(address))
+                return endPointToStypeMap.get(address);
+            else
+                return 0;
         }
         finally
         {

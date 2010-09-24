@@ -96,13 +96,14 @@ public abstract class AbstractEndpointSnitch implements IEndPointSnitch
     }
     
     // queryType: 1=>write, 2=>read
+/*
     public List<InetAddress> getSortedListByStorageType(int queryType, Collection<InetAddress> unsortedAddress)
     {
         List<InetAddress> preferred = new ArrayList<InetAddress>(unsortedAddress);
         sortByStorageType(queryType, preferred);
         return preferred;
     }
-
+*/
     public List<InetAddress> sortByStorageType(int queryType, Map<InetAddress, Integer> map)
     {
         switch (queryType) {

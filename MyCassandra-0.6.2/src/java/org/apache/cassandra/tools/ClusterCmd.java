@@ -146,7 +146,7 @@ public class ClusterCmd {
     
     public void printEndPoints(String key, String table)
     {
-        List<InetAddress> endpoints = probe.getEndPoints(key, table);
+        Set<InetAddress> endpoints = probe.getEndPoints(key, table);
         System.out.println(String.format("%-17s: %s", "Key", key));
         System.out.println(String.format("%-17s: %s", "Endpoints", endpoints));
     }

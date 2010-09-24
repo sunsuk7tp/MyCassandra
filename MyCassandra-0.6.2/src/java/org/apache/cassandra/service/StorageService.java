@@ -331,7 +331,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
                 && !SystemTable.isBootstrapped())
             logger_.info("This node will not auto bootstrap because it is configured to be a seed node.");
 
-        if (DatabaseDescriptor.isAutoBootstrap()
+        if (false && DatabaseDescriptor.isAutoBootstrap()
             && !(DatabaseDescriptor.getSeeds().contains(FBUtilities.getLocalAddress()) || SystemTable.isBootstrapped()))
         {
             setMode("Joining: getting load information", true);
@@ -833,7 +833,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
         // range.
         for (Range range : ranges)
         {
-            ArrayList<InetAddress> newReplicaEndpoints = (ArrayList<InetAddress>)getReplicationStrategy(table).getNaturalEndpoints(range.right, temp, table).keySet();
+            Set<InetAddress> newReplicaEndpoints = getReplicationStrategy(table).getNaturalEndpoints(range.right, temp, table).keySet();
             newReplicaEndpoints.removeAll(currentReplicaEndpoints.get(range));
             if (logger_.isDebugEnabled())
                 if (newReplicaEndpoints.isEmpty())
@@ -1065,7 +1065,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
     {
         // request that all relevant endpoints generate trees
         final MessagingService ms = MessagingService.instance;
-        final List<InetAddress> endpoints = getNaturalEndpoints(tableName, getLocalToken());
+        final Set<InetAddress> endpoints = getNaturalEndpoints(tableName, getLocalToken());
         for (ColumnFamilyStore cfStore : getValidColumnFamilies(tableName, columnFamilies))
         {
             Message request = TreeRequestVerbHandler.makeVerb(tableName, cfStore.getColumnFamilyName());
@@ -1147,7 +1147,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
      * @param key - key for which we need to find the endpoint return value -
      * the endpoint responsible for this key
      */
-    public List<InetAddress> getNaturalEndpoints(String table, String key)
+    public Set<InetAddress> getNaturalEndpoints(String table, String key)
     {
         return getNaturalEndpoints(table, partitioner_.getToken(key));
     }
@@ -1163,9 +1163,9 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
      * @param token - token for which we need to find the endpoint return value -
      * the endpoint responsible for this token
      */
-    public List<InetAddress> getNaturalEndpoints(String table, Token token)
+    public Set<InetAddress> getNaturalEndpoints(String table, Token token)
     {
-        return (List<InetAddress>)getReplicationStrategy(table).getNaturalEndpoints(token, table).keySet();
+        return getReplicationStrategy(table).getNaturalEndpoints(token, table).keySet();
     }
     
     public Map<InetAddress, Integer> getNaturalMap(String table, Token token)
