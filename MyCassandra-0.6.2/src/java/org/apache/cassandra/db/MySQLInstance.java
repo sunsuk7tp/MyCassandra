@@ -33,12 +33,13 @@ public class MySQLInstance implements DBInstance {
 		table = cfName;
 		
 		try {
-			pstInsert = conn.prepareStatement("INSERT INTO "+table+" (Row_Key, ColumnFamily) VALUES (?,?)");
+			pstInsert = conn.prepareStatement("INSERT INTO "+table+" (Row_Key, ColumnFamily) VALUES (?,?) "
+						+"ON DUPLICATE KEY UPDATE ColumnFamily = ?");
 			pstSelect = conn.prepareStatement("SELECT ColumnFamily FROM "+table+" WHERE Row_Key = ?");
 			pstSearch = conn.prepareStatement("SELECT COUNT(Row_Key) FROM "+table+" WHERE Row_Key = ?");
 			pstUpdate = conn.prepareStatement("UPDATE "+table+" SET ColumnFamily = ? WHERE Row_Key = ?");
 			pstDelete = conn.prepareStatement("DELETE FROM "+table+" WHERE Row_Key = ?");
-			pstBatchInsert = conn.prepareStatement("INSERT INTO "+table+" (Row_Key, ColumnFamily) VALUES (?,?)");			
+			pstBatchInsert = conn.prepareStatement("INSERT INTO "+table+" (Row_Key, ColumnFamily) VALUES (?,?)");
 			bsql = "INSERT INTO "+table + " (Row_Key, ColumnFamily) VALUES (?,?)";
 			/*for(int i=0; i< multiMax; i++) {
 				bsql += " (?, ?)";
@@ -54,11 +55,11 @@ public class MySQLInstance implements DBInstance {
 	}
 	
 	public int insertOrUpdate(String rowKey, ColumnFamily cf) throws SQLException, IOException {
-		if(rowSearch(rowKey) > 0) {
+		/*if(rowSearch(rowKey) > 0) {
 			return update(rowKey, cf);
-		} else {
+		} else {*/
 			return insert(rowKey, cf);
-		}
+		//}
 	}
 	
 	int insert(String rowKey, ColumnFamily cf) throws SQLException {
@@ -158,7 +159,7 @@ public class MySQLInstance implements DBInstance {
 		}		
 	}
 	
-	synchronized int rowSearch(String rowKey) throws SQLException {
+	int rowSearch(String rowKey) throws SQLException {
 		int count = -1;
 		
 		try {		
@@ -256,6 +257,7 @@ public class MySQLInstance implements DBInstance {
 	synchronized int doInsert(String rowKey, byte[] cfValue) throws SQLException {
 		pstInsert.setString(1, rowKey);
 		pstInsert.setBytes(2, cfValue);
+		pstInsert.setBytes(3, cfValue);
 		
 		return pstInsert.executeUpdate();
 	}
