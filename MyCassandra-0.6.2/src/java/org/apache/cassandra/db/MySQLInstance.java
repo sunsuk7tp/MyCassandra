@@ -11,7 +11,7 @@ public class MySQLInstance implements DBInstance {
 	
 	Connection conn;
 	String instanceName, table;
-	PreparedStatement pstInsert, pstSelect, pstSearch, pstUpdate, pstDelete;
+	PreparedStatement pstInsert, pstSearch, pstUpdate;
 	PreparedStatement pstBatchInsert, pstMultiInsert;
 	
 	int debug = 0;
@@ -34,10 +34,7 @@ public class MySQLInstance implements DBInstance {
 		
 		try {
 			pstInsert = conn.prepareStatement("INSERT INTO "+table+" (Row_Key, ColumnFamily) VALUES (?,?) ");
-			pstSelect = conn.prepareStatement("SELECT ColumnFamily FROM "+table+" WHERE Row_Key = ?");
-			pstSearch = conn.prepareStatement("SELECT COUNT(Row_Key) FROM "+table+" WHERE Row_Key = ?");
 			pstUpdate = conn.prepareStatement("UPDATE "+table+" SET ColumnFamily = ? WHERE Row_Key = ?");
-			pstDelete = conn.prepareStatement("DELETE FROM "+table+" WHERE Row_Key = ?");
 			pstBatchInsert = conn.prepareStatement("INSERT INTO "+table+" (Row_Key, ColumnFamily) VALUES (?,?)");
 			bsql = "INSERT INTO "+table + " (Row_Key, ColumnFamily) VALUES (?,?)";
 			/*for(int i=0; i< multiMax; i++) {
@@ -122,6 +119,7 @@ public class MySQLInstance implements DBInstance {
 	}
 	
 	public int delete(String table, String columnName, String columnValue) throws SQLException {
+		PreparedStatement pstDelete = conn.prepareStatement("DELETE FROM "+table+" WHERE Row_Key = ?");
 		try {
 			pstDelete.setString(1, columnValue);
 			return pstDelete.executeUpdate();
@@ -137,8 +135,10 @@ public class MySQLInstance implements DBInstance {
 			ResultSet rs = doSelect(rowKey);
 			
 			byte[] b = null;
-			while(rs.next()) {
-				b = rs.getBytes(1);
+			if(rs != null) {
+				while(rs.next()) {
+					b = rs.getBytes(1);
+				}
 			}
 			
 			if(b != null) {
@@ -261,12 +261,14 @@ public class MySQLInstance implements DBInstance {
 	}
 	
 	ResultSet doSelect(String rowKey) throws SQLException {
+		PreparedStatement pstSelect = conn.prepareStatement("SELECT ColumnFamily FROM "+table+" WHERE Row_Key = ?");
 		pstSelect.setString(1, rowKey);
 
 		return pstSelect.executeQuery();
 	}
 
 	ResultSet doSearch(String rowKey) throws SQLException {
+		PreparedStatement pstSearch = conn.prepareStatement("SELECT COUNT(Row_Key) FROM "+table+" WHERE Row_Key = ?");
 		pstSearch.setString(1, rowKey);
 
 		return pstSearch.executeQuery();

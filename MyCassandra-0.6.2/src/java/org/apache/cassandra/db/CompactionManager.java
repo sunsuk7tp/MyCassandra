@@ -319,7 +319,7 @@ public class CompactionManager implements CompactionManagerMBean
 
         SSTableReader ssTable = writer.closeAndOpenReader();
         cfs.replaceCompactedSSTables(sstables, Arrays.asList(ssTable));
-        submitMinorIfNeeded(cfs);
+        //submitMinorIfNeeded(cfs);
 
         String format = "Compacted to %s.  %d/%d bytes for %d keys.  Time: %dms.";
         long dTime = System.currentTimeMillis() - startTime;
@@ -560,10 +560,10 @@ public class CompactionManager implements CompactionManagerMBean
 
         // actually schedule compactions.  done in a second pass so all the estimates occur before we
         // bog down the executor in actual compactions.
-        for (ColumnFamilyStore cfs : ColumnFamilyStore.all())
+        /*for (ColumnFamilyStore cfs : ColumnFamilyStore.all())
         {
             submitMinorIfNeeded(cfs);
-        }
+        }*/
     }
 
     private class CompactionExecutor extends DebuggableThreadPoolExecutor
