@@ -51,8 +51,9 @@ public class MySQLInstance implements DBInstance {
 	}
 	
 	public int insertOrUpdate(String rowKey, ColumnFamily cf) throws SQLException, IOException {
-		if(rowSearch(rowKey) > 0) {
-			return update(rowKey, cf);
+		ColumnFamily oldcf = select(rowKey, null);
+		if(oldcf != null) {
+			return update(rowKey, cf, oldcf);
 		} else {
 			return insert(rowKey, cf);
 		}
@@ -90,10 +91,9 @@ public class MySQLInstance implements DBInstance {
 		}
 	}
 	
-	int update(String rowKey, ColumnFamily newcf) throws SQLException, IOException {
+	int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException {
 		if(debug > 0) System.out.print("SQLUpdate: ");
 		try {
-			ColumnFamily cf = select(rowKey, null);
 			cf.addAll(newcf);
 			
 			DataOutputBuffer outputBuffer = new DataOutputBuffer();
@@ -158,21 +158,6 @@ public class MySQLInstance implements DBInstance {
 		}		
 	}
 	
-	int rowSearch(String rowKey) throws SQLException {
-		int count = -1;
-		
-		try {		
-			ResultSet rs = doSearch(rowKey);
-			while(rs.next()) {
-				count = rs.getInt(1);
-			}
-		} catch (SQLException e) {
-			System.out.println("db connection error "+ e);
-		}
-		
-		return count;
-	}
-	
 	// Init MySQL Table for Keyspaces
 	public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType) throws SQLException {
 		
@@ -234,7 +219,7 @@ public class MySQLInstance implements DBInstance {
 			return pstMultiInsert.executeUpdate();
 		}
 		return 1;
-	}*/
+	}
 	
 	int doMultipleBatchInsert(String rowKey, byte[] cfValue) throws SQLException {
 		pstMultiInsert.setString(1, rowKey);
@@ -251,9 +236,9 @@ public class MySQLInstance implements DBInstance {
 		}
 		//System.out.println(bcount);
 		return 1;
-	}
+	}*/
 	
-	synchronized int doInsert(String rowKey, byte[] cfValue) throws SQLException {
+	int doInsert(String rowKey, byte[] cfValue) throws SQLException {
 		pstInsert.setString(1, rowKey);
 		pstInsert.setBytes(2, cfValue);
 		
