@@ -176,7 +176,6 @@ public class MySQLInstance implements DBInstance {
 			}
 			
 			String sPrepareSQL = "CREATE Table "+table + "(" +
-				//"`ID` INT NOT NULL AUTO_INCREMENT," + 
 				"`Row_Key` VARCHAR(?) NOT NULL," +
 				"`ColumnFamily` VARBINARY(?)," +
 				"PRIMARY KEY (`Row_Key`)" +
@@ -251,15 +250,8 @@ public class MySQLInstance implements DBInstance {
 
 		return pstSelect.executeQuery();
 	}
-
-	ResultSet doSearch(String rowKey) throws SQLException {
-		PreparedStatement pstSearch = conn.prepareStatement("SELECT COUNT(Row_Key) FROM "+table+" WHERE Row_Key = ?");
-		pstSearch.setString(1, rowKey);
-
-		return pstSearch.executeQuery();
-	}
 	
-	synchronized int doUpdate(String rowKey, byte[] cfValue) throws SQLException {
+	int doUpdate(String rowKey, byte[] cfValue) throws SQLException {
 		pstUpdate.setBytes(1, cfValue);
 		pstUpdate.setString(2, rowKey);
 
