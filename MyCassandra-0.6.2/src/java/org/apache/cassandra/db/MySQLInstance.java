@@ -237,7 +237,7 @@ public class MySQLInstance implements DBInstance {
 		return 1;
 	}*/
 	
-	int doInsert(String rowKey, byte[] cfValue) throws SQLException {
+	synchronized int doInsert(String rowKey, byte[] cfValue) throws SQLException {
 		pstInsert.setString(1, rowKey);
 		pstInsert.setBytes(2, cfValue);
 		
@@ -251,7 +251,7 @@ public class MySQLInstance implements DBInstance {
 		return pstSelect.executeQuery();
 	}
 	
-	int doUpdate(String rowKey, byte[] cfValue) throws SQLException {
+	synchronized int doUpdate(String rowKey, byte[] cfValue) throws SQLException {
 		pstUpdate.setBytes(1, cfValue);
 		pstUpdate.setString(2, rowKey);
 
