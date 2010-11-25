@@ -78,6 +78,7 @@ public class DatabaseDescriptor
     private static String clusterName = "Test";
     private static long rpcTimeoutInMillis = 2000;
     private static Set<InetAddress> seeds = new HashSet<InetAddress>();
+    private static Set<InetAddress> hosts = new HashSet<InetAddress>();
     /* Keeps the list of data file directories */
     private static String[] dataFileDirectories;
     /* Current index into the above list of directories */
@@ -548,6 +549,11 @@ public class DatabaseDescriptor
             for( int i = 0; i < seedsxml.length; ++i )
             {
                 seeds.add(InetAddress.getByName(seedsxml[i]));
+            }
+            String[] hostsxml = xmlUtils.getNodeValues("/Storage/Hosts/Host");
+            for( int i = 0; i < hostsxml.length; ++i )
+            {
+                hosts.add(InetAddress.getByName(hostsxml[i]));
             }
         }
         catch (ConfigurationException e)
@@ -1138,6 +1144,11 @@ public class DatabaseDescriptor
     public static Set<InetAddress> getSeeds()
     {
         return seeds;
+    }
+    
+    public static Set<InetAddress> getHosts()
+    {
+        return hosts;
     }
 
     public static String getColumnFamilyType(String tableName, String cfName)

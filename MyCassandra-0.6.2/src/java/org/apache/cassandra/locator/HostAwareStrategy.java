@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.cassandra.dht.Token;
@@ -56,7 +57,9 @@ public class HostAwareStrategy extends AbstractReplicationStrategy
         while (endpoints.size() < replicas && iter.hasNext())
         {
             Token t = iter.next();
-            if (!endpoints.containsKey(metadata.getEndPoint(t))) {
+            Set<InetAddress> hosts = DatabaseDescriptor.getHosts();
+            if (!hosts.contains(metadata.getEndPoint(t))) // same host 
+            {
                 InetAddress address = metadata.getEndPoint(t);
                 endpoints.put(address, metadata.getStorageType(address));
             }
