@@ -1,0 +1,61 @@
+# MyCassandra is the project branched from Cassandra by Shunsuke Nakamura.
+# MyCassandra can exchange the Storage Engine from SSTable(Cassandra original) to MySQL, Redis and others.
+# This means that you can select the Storage Engine by the applied applications.
+
+# In default, you can select that.
+# - SSTable
+# - MySQL
+# - Redis
+
+# If you want to use MySQL, 
+
+# 1) Edit storage-conf.xml
+
+<DataBase>MySQL</DataBase>
+<SQL>
+		<SQLHost>localhost</SQLHost> # mysql host
+    <SQLPort>3306</SQLPort> # mysql port
+		<SQLUser>cassandra_user</SQLUser> # mysql connection user
+    <SQLPass>cA33anDra</SQLPass> # user password
+</SQL>
+
+# 2) You define the database schema at storage-conf.xml.
+
+# Example, if you want to make "usertable" keyspace and "data1","data2" column families in that.
+<Keyspaces>
+  <Keyspace Name="usertable">
+  	<ColumnFamily Name="data1" RowKeySize="16" ColumnFamilySize="2048" CompareWith="BytesType"/>
+		<ColumnFamily Name="data2" RowKeySize="16" ColumnFamilySize="2048" CompareWith="BytesType"/>
+		<ReplicaPlacementStrategy>org.apache.cassandra.locator.RackAwareStrategy</ReplicaPlacementS    trategy>
+		<ReplicationFactor>1</ReplicationFactor>
+		<EndPointSnitch>org.apache.cassandra.locator.EndPointSnitch</EndPointSnitch>
+	</Keyspace>
+</Keyspaces>
+
+# * MySQL automally make table according to 'RowKeySize', 'ColumnFamilySize' and 'storageEngineType'.
+
+# 3) mysql setup.
+
+# - You make mysql user.
+
+ GRANT cassandra_user
+
+# * cassandra_user needs to have all privileges.
+
+# - You make database by the keyspaces.
+
+ mysql> CREATE DATABASE system; # 'system' is the Cassandra's internal keyspace.
+ mysql> CREATE DATABASE <keyspace_name>; # <keyspace_name> is the keyspace name defined by storage-conf.xml
+
+# In the above example, you must make database as this,
+ mysql> CREATE DATABASE table;
+
+# 4) run.
+# You can run MyCassandra as Cassandra.
+
+$ cd <MyCassandra_Home>
+$ ./bin/cassandra
+
+# If you have something, please contact me!!
+# E-mail: sunsuk7tp at gmail.com
+# Twitter: @sunsuk7tp

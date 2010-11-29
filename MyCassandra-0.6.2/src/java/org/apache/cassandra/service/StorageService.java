@@ -454,7 +454,7 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
         Map<Range, List<InetAddress>> rangeToEndPointMap = new HashMap<Range, List<InetAddress>>();
         for (Range range : ranges)
         {
-            rangeToEndPointMap.put(range, (List<InetAddress>)getReplicationStrategy(keyspace).getNaturalEndpoints(range.right, keyspace).keySet());
+            rangeToEndPointMap.put(range, new ArrayList(getReplicationStrategy(keyspace).getNaturalEndpoints(range.right, keyspace).keySet()));
         }
         return rangeToEndPointMap;
     }
