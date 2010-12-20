@@ -152,7 +152,7 @@ public abstract class AbstractEndpointSnitch implements IEndPointSnitch
         return ArrayToAddressList(entries);
     }
     
-    public List<InetAddress> ArrayToAddressList(entries) {
+    public List<InetAddress> ArrayToAddressList(ArrayList entries) {
         List<InetAddress> addresses = new ArrayList<InetAddress>(entries.size());
         for(int i = 0; i < entries.size(); i++)
         {
