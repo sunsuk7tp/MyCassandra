@@ -131,13 +131,7 @@ public abstract class AbstractEndpointSnitch implements IEndPointSnitch
                 return 0;
             }
         });
-        List<InetAddress> addresses = new ArrayList<InetAddress>(entries.size());
-        for(int i = 0; i < entries.size(); i++)
-        {
-            Map.Entry me = (Map.Entry) entries.get(i);
-            addresses.add((InetAddress)me.getKey());
-        }
-        return addresses;
+        return ArrayToAddressList(entries);
     }
 
     public List<InetAddress> sortByStorageTypeRead(Map<InetAddress, Integer> map) {
@@ -155,6 +149,10 @@ public abstract class AbstractEndpointSnitch implements IEndPointSnitch
                 return 0;
             }
         });
+        return ArrayToAddressList(entries);
+    }
+    
+    public List<InetAddress> ArrayToAddressList(entries) {
         List<InetAddress> addresses = new ArrayList<InetAddress>(entries.size());
         for(int i = 0; i < entries.size(); i++)
         {
