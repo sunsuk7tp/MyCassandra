@@ -512,13 +512,21 @@ public class    DatabaseDescriptor
             
         }
         CFMetaData.fixMaxId();
+        
+        try
+        {
+            readTablesFromYaml();
+        }
+        catch (ConfigurationException e)
+        {
+            System.err.println("invalid in cassandra.yaml.especially ks or cf. "+ e);
+        }
     }
 
     /** reads xml. doesn't populate any internal structures. */
     public static Collection<KSMetaData> readTablesFromYaml() throws ConfigurationException
     {
         List<KSMetaData> defs = new ArrayList<KSMetaData>();
-        
         
         /* Read the table related stuff from config */
         for (RawKeyspace keyspace : conf.keyspaces)
@@ -549,6 +557,7 @@ public class    DatabaseDescriptor
             }
             
             int size2 = keyspace.column_families.length;
+            System.out.println(size2);
             CFMetaData[] cfDefs = new CFMetaData[size2];
             int j = 0;
             for (RawColumnFamily cf : keyspace.column_families)
@@ -566,6 +575,20 @@ public class    DatabaseDescriptor
                 AbstractType comparator = getComparator(cf.compare_with);
                 AbstractType subcolumnComparator = null;
                 AbstractType default_validator = getComparator(cf.default_validation_class);
+                
+                int rowKeySize = (cf.rowkeysize > 0 ? cf.rowkeysize : defaultRowKeySize);
+                int columnFamilySize = (cf.columnfamilysize > 0 ? cf.columnfamilysize : defaultColumnFamilySize);
+                String columnFamilyType =(cf.columnfamilytype != null ? cf.columnfamilytype : defaultColumnFamilyType);
+                String storageEngineType = (cf.storageenginetype != null ? cf.storageenginetype : defaultStorageEngineType);
+                if(dataBase == MYSQL) {
+                	try
+                	{
+                		new MySQLInstance(keyspace.name, cf.name).create(rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
+                	} catch (SQLException e)
+                	{
+                		System.out.println("db connection error "+ e);
+                	}
+                }
 
                 ColumnFamilyType cfType = cf.column_type == null ? ColumnFamilyType.Standard : cf.column_type;
                 if (cfType == ColumnFamilyType.Super)
