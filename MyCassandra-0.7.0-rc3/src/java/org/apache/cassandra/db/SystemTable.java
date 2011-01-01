@@ -243,7 +243,6 @@ public class SystemTable
             cf.addColumn(new Column(CLUSTERNAME, ByteBuffer.wrap(DatabaseDescriptor.getClusterName().getBytes()), FBUtilities.timestampMicros()));
             rm.add(cf);
             rm.apply();
-
             return;
         }
         
@@ -283,8 +282,8 @@ public class SystemTable
         }
         else
         {
-            generation = Math.max(FBUtilities.byteBufferToInt(cf.getColumn(GENERATION).value()) + 1,
-                                  (int) (System.currentTimeMillis() / 1000));
+            generation = //Math.max(FBUtilities.byteBufferToInt(cf.getColumn(GENERATION).value()) + 1,
+                                  (int) (System.currentTimeMillis() / 1000);//);
         }
 
         RowMutation rm = new RowMutation(Table.SYSTEM_TABLE, LOCATION_KEY);

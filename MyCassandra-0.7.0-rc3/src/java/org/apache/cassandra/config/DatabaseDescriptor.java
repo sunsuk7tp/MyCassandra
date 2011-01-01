@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.sql.SQLException;
 import java.util.*;
 
 import com.google.common.base.Charsets;
@@ -41,6 +42,7 @@ import org.apache.cassandra.db.Table;
 import org.apache.cassandra.db.commitlog.CommitLog;
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.migration.Migration;
+import org.apache.cassandra.db.MySQLInstance;
 import org.apache.cassandra.dht.IPartitioner;
 import org.apache.cassandra.io.sstable.Descriptor;
 import org.apache.cassandra.io.util.FileUtils;
@@ -88,7 +90,19 @@ public class    DatabaseDescriptor
 
     public static final UUID INITIAL_VERSION = new UUID(4096, 0); // has type nibble set to 1, everything else to zero.
     private static UUID defsVersion = INITIAL_VERSION;
-
+    
+    public static final int MSTABLE = 0;
+    public static final int MYSQL = 1;
+    public static final int JREDIS = 2;
+    public static final int defaultDataBase = MSTABLE;
+    
+    public static int dataBase;
+    
+    public static final String defaultStorageEngineType = "InnoDB";
+    public static final int defaultRowKeySize = 64;
+    public static final String defaultColumnFamilyType = "VARBINARY";
+    public static final int defaultColumnFamilySize = 6 * 1024; // 6KB
+    
     /**
      * Inspect the classpath to find storage configuration file
      */
@@ -318,33 +332,50 @@ public class    DatabaseDescriptor
             }
             
             /* data file and commit log directories. they get created later, when they're needed. */
-            if (conf.commitlog_directory != null && conf.data_file_directories != null && conf.saved_caches_directory != null)
+            if (conf.database.equals("MSTable"))
             {
-                for (String datadir : conf.data_file_directories)
-                {
-                    if (datadir.equals(conf.commitlog_directory))
-                        throw new ConfigurationException("commitlog_directory must not be the same as any data_file_directories");
-                    if (datadir.equals(conf.saved_caches_directory))
-                        throw new ConfigurationException("saved_caches_directory must not be the same as any data_file_directories");
+            	dataBase = MSTABLE;
+            	if (conf.commitlog_directory != null && conf.data_file_directories != null && conf.saved_caches_directory != null)
+            	{
+            		for (String datadir : conf.data_file_directories)
+            		{
+            			if (datadir.equals(conf.commitlog_directory))
+            				throw new ConfigurationException("commitlog_directory must not be the same as any data_file_directories");
+            			if (datadir.equals(conf.saved_caches_directory))
+            				throw new ConfigurationException("saved_caches_directory must not be the same as any data_file_directories");
+            		}
+
+            		if (conf.commitlog_directory.equals(conf.saved_caches_directory))
+            			throw new ConfigurationException("saved_caches_directory must not be the same as the commitlog_directory");
+            	}
+            	else
+            	{
+            		if (conf.commitlog_directory == null)
+            			throw new ConfigurationException("commitlog_directory missing");
+            		if (conf.data_file_directories == null)
+            			throw new ConfigurationException("data_file_directories missing; at least one data directory must be specified");
+            		if (conf.saved_caches_directory == null)
+            			throw new ConfigurationException("saved_caches_directory missing");
+            	}
+
+                /* threshold after which commit log should be rotated. */
+                if (conf.commitlog_rotation_threshold_in_mb != null)
+                    CommitLog.setSegmentSize(conf.commitlog_rotation_threshold_in_mb * 1024 * 1024);
+            } else if (conf.database.equals("MySQL"))
+            {
+            	dataBase = MYSQL;
+                try {
+                    new MySQLInstance("system", "Schema").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
+                    new MySQLInstance("system", "Migrations").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
+                    new MySQLInstance("system", "LocationInfo").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
+                    new MySQLInstance("system", "HintsColumnFamily").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
+                    new MySQLInstance("system", "IndexInfo").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
+                } catch (SQLException e) {
+                    System.out.println("db connection error "+ e);
                 }
-
-                if (conf.commitlog_directory.equals(conf.saved_caches_directory))
-                    throw new ConfigurationException("saved_caches_directory must not be the same as the commitlog_directory");
+            } else if (conf.database.equals("JRedis")){
+            	dataBase = JREDIS;
             }
-            else
-            {
-                if (conf.commitlog_directory == null)
-                    throw new ConfigurationException("commitlog_directory missing");
-                if (conf.data_file_directories == null)
-                    throw new ConfigurationException("data_file_directories missing; at least one data directory must be specified");
-                if (conf.saved_caches_directory == null)
-                    throw new ConfigurationException("saved_caches_directory missing");
-            }
-
-            /* threshold after which commit log should be rotated. */
-            if (conf.commitlog_rotation_threshold_in_mb != null)
-                CommitLog.setSegmentSize(conf.commitlog_rotation_threshold_in_mb * 1024 * 1024);
-
             // Hardcoded system tables
             KSMetaData systemMeta = new KSMetaData(Table.SYSTEM_TABLE,
                                                    LocalStrategy.class,
@@ -672,29 +703,32 @@ public class    DatabaseDescriptor
      */
     public static void createAllDirectories() throws IOException
     {
-        try {
-            if (conf.data_file_directories.length == 0)
-            {
-                throw new ConfigurationException("At least one DataFileDirectory must be specified");
-            }
-            for ( String dataFileDirectory : conf.data_file_directories )
-                FileUtils.createDirectory(dataFileDirectory);
-            if (conf.commitlog_directory == null)
-            {
-                throw new ConfigurationException("commitlog_directory must be specified");
-            }
-            FileUtils.createDirectory(conf.commitlog_directory);
-            if (conf.saved_caches_directory == null)
-            {
-                throw new ConfigurationException("saved_caches_directory must be specified");
-            }
-            FileUtils.createDirectory(conf.saved_caches_directory);
-        }
-        catch (ConfigurationException ex) {
-            logger.error("Fatal error: " + ex.getMessage());
-            System.err.println("Bad configuration; unable to start server");
-            System.exit(1);
-        }
+    	if (dataBase == MSTABLE)
+    	{
+    		try {
+            	if (conf.data_file_directories.length == 0)
+            	{
+                	throw new ConfigurationException("At least one DataFileDirectory must be specified");
+            	}
+            	for ( String dataFileDirectory : conf.data_file_directories )
+                	FileUtils.createDirectory(dataFileDirectory);
+            	if (conf.commitlog_directory == null)
+            	{
+                	throw new ConfigurationException("commitlog_directory must be specified");
+            	}
+            	FileUtils.createDirectory(conf.commitlog_directory);
+            	if (conf.saved_caches_directory == null)
+            	{
+                	throw new ConfigurationException("saved_caches_directory must be specified");
+            	}
+            	FileUtils.createDirectory(conf.saved_caches_directory);
+        	}
+        	catch (ConfigurationException ex) {
+            	logger.error("Fatal error: " + ex.getMessage());
+            	System.err.println("Bad configuration; unable to start server");
+            	System.exit(1);
+        	}
+    	}
     }
 
     public static IPartitioner getPartitioner()
@@ -1069,6 +1103,31 @@ public class    DatabaseDescriptor
     public static boolean isAutoBootstrap()
     {
         return conf.auto_bootstrap;
+    }
+    
+    public static int getStorageType()
+    {
+        return dataBase;
+    }
+
+    public static String getSQLHost()
+    {
+        return conf.sqlhost;
+    }
+    
+    public static String getSQLPort()
+    {
+        return conf.sqlport;
+    }
+    
+    public static String getSQLUser()
+    {
+        return conf.sqluser;
+    }
+ 
+    public static String getSQLPass()
+    {
+        return conf.sqlpass;
     }
 
     public static boolean hintedHandoffEnabled()

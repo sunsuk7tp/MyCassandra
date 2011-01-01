@@ -57,7 +57,7 @@ public class DecoratedKey<T extends Token> implements Comparable<DecoratedKey>
         this.token = token;
         this.key = key;
     }
-
+    
     @Override
     public int hashCode()
     {
@@ -86,6 +86,15 @@ public class DecoratedKey<T extends Token> implements Comparable<DecoratedKey>
     public boolean isEmpty()
     {
         return token.equals(partitioner.getMinimumToken());
+    }
+    
+    public String getTxtKey()
+    {
+        byte[] b = new byte[key.limit()];
+        for(int i = 0; i < key.limit(); i++) {
+            b[i] = key.get(i);
+        }
+        return new String(b);
     }
 
     @Override

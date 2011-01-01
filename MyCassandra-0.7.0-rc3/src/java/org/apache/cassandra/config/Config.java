@@ -35,6 +35,12 @@ public class Config
     public Boolean auto_bootstrap = false;
     public Boolean hinted_handoff_enabled = true;
     
+    public String database;
+    public String sqlhost;
+    public String sqlport;
+    public String sqluser;
+    public String sqlpass;
+    
     public String[] seeds;
     public DiskAccessMode disk_access_mode = DiskAccessMode.auto;
     

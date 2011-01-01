@@ -21,6 +21,7 @@ package org.apache.cassandra.db;
 import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.nio.ByteBuffer;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -136,6 +137,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     private volatile DefaultInteger memtime;
     private volatile DefaultInteger memsize;
     private volatile DefaultDouble memops;
+    
+    private DBInstance dbi;
 
     private final Runnable rowCacheSaverTask = new WrappedRunnable()
     {
@@ -258,6 +261,19 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         catch (Exception e)
         {
             throw new RuntimeException(e);
+        }
+        
+        switch(DatabaseDescriptor.dataBase) {
+        case DatabaseDescriptor.MSTABLE:
+            //dbi = new MSTableInstance(new String(table.name), columnFamily_);
+            break;
+        case DatabaseDescriptor.JREDIS:
+            dbi = new JRedisInstance(new String(table.name), columnFamilyName);
+            break;
+        case DatabaseDescriptor.MYSQL:
+        default:
+            dbi = new MySQLInstance(new String(table.name), columnFamilyName);
+            break;
         }
     }
 
@@ -729,10 +745,24 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         long start = System.nanoTime();
 
         boolean flushRequested = memtable.isThresholdViolated();
-        memtable.put(key, columnFamily);
-        ColumnFamily cachedRow = getRawCachedRow(key);
-        if (cachedRow != null)
-            cachedRow.addAll(columnFamily);
+        if (DatabaseDescriptor.dataBase == DatabaseDescriptor.MSTABLE)
+        {
+        	memtable.put(key, columnFamily);
+        	ColumnFamily cachedRow = getRawCachedRow(key);
+        	if (cachedRow != null)
+        		cachedRow.addAll(columnFamily);
+        } else {
+            try {
+                if(dbi.put(key.getTxtKey(), columnFamily) < 0) {
+                    System.err.println("can't insert or update to mysql.");
+                }
+            } catch (SQLException e) {
+                System.err.println(e);
+            } catch (IOException e)
+            {
+            	System.err.println(e);
+            }
+        }
         writeStats.addNano(System.nanoTime() - start);
         
         return flushRequested ? memtable : null;
@@ -1094,20 +1124,31 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         long start = System.nanoTime();
         try
         {
-            if (ssTables.getRowCache().getCapacity() == 0)
-            {
-                ColumnFamily cf = getTopLevelColumns(filter, gcBefore);
-                         
+        	if (ssTables.getRowCache().getCapacity() == 0)
+        	{
+        		ColumnFamily cf;
+        		try {
+        			cf = (DatabaseDescriptor.dataBase == DatabaseDescriptor.MSTABLE ? 
+        				getTopLevelColumns(filter, gcBefore) : 
+        				dbi.get(filter.key.getTxtKey(), filter));
+        			if (DatabaseDescriptor.dataBase == DatabaseDescriptor.MYSQL) return cf;
+        		} catch (SQLException e) {
+        			System.err.println(e);
+        			return null;
+        		} catch (IOException e) {
+        			System.err.println(e);
+        			return null;
+        		}
                 // TODO this is necessary because when we collate supercolumns together, we don't check
                 // their subcolumns for relevance, so we need to do a second prune post facto here.
-                return cf.isSuper() ? removeDeleted(cf, gcBefore) : removeDeletedCF(cf, gcBefore);
-            }
+        		return cf.isSuper() ? removeDeleted(cf, gcBefore) : removeDeletedCF(cf, gcBefore);
+        	}
 
-            ColumnFamily cached = cacheRow(filter.key);
-            if (cached == null)
-                return null;
+        	ColumnFamily cached = cacheRow(filter.key);
+        	if (cached == null)
+        		return null;
  
-            return filterColumnFamily(cached, filter, gcBefore);
+        	return filterColumnFamily(cached, filter, gcBefore);
         }
         finally
         {

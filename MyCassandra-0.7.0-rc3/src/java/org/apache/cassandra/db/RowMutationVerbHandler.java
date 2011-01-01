@@ -35,6 +35,8 @@ import org.apache.cassandra.net.*;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.cassandra.utils.FBUtilities;
 
+import org.apache.cassandra.config.DatabaseDescriptor;
+
 import static com.google.common.base.Charsets.UTF_8;
 
 
@@ -70,7 +72,11 @@ public class RowMutationVerbHandler implements IVerbHandler
                 }
             }
 
-            Table.open(rm.getTable()).apply(rm, bytes, true);
+            if(DatabaseDescriptor.dataBase == DatabaseDescriptor.MSTABLE) {
+                Table.open(rm.getTable()).apply(rm, bytes, true);
+            } else {
+                Table.open(rm.getTable()).apply(rm, bytes, false);
+            }
 
             WriteResponse response = new WriteResponse(rm.getTable(), rm.key(), true);
             Message responseMessage = WriteResponse.makeWriteResponseMessage(message, response);
