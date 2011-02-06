@@ -20,6 +20,7 @@ package org.apache.cassandra.db;
 
 import java.nio.ByteBuffer;
 import java.util.Comparator;
+import java.util.regex.Matcher;
 
 import org.apache.cassandra.dht.IPartitioner;
 import org.apache.cassandra.dht.Token;
@@ -94,7 +95,8 @@ public class DecoratedKey<T extends Token> implements Comparable<DecoratedKey>
         for(int i = 0; i < key.limit(); i++) {
             b[i] = key.get(i);
         }
-        return new String(b);
+        // temporary code. The 'key' includes the command name and remove it.
+        return (new String(b)).replaceAll("\\s|\\W|get_slice|get", "");
     }
 
     @Override

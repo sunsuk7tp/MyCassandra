@@ -263,7 +263,7 @@ public class SystemTable
         Table table = Table.open(Table.SYSTEM_TABLE);
         QueryFilter filter = QueryFilter.getNamesFilter(decorate(LOCATION_KEY), new QueryPath(STATUS_CF), TOKEN);
         ColumnFamily cf = table.getColumnFamilyStore(STATUS_CF).getColumnFamily(filter);
-        return cf == null ? null : StorageService.getPartitioner().getTokenFactory().fromByteArray(cf.getColumn(TOKEN).value());
+        return cf.getColumn(TOKEN) == null ? null : StorageService.getPartitioner().getTokenFactory().fromByteArray(cf.getColumn(TOKEN).value());
     }
 
     public static int incrementAndGetGeneration() throws IOException

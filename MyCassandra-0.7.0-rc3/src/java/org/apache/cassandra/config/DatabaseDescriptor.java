@@ -101,7 +101,7 @@ public class    DatabaseDescriptor
     public static final String defaultStorageEngineType = "InnoDB";
     public static final int defaultRowKeySize = 64;
     public static final String defaultColumnFamilyType = "VARBINARY";
-    public static final int defaultColumnFamilySize = 6 * 1024; // 6KB
+    public static final int defaultColumnFamilySize = 30 * 1024; // 30KB
     
     /**
      * Inspect the classpath to find storage configuration file
