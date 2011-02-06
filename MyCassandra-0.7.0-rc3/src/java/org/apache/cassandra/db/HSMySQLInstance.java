@@ -38,9 +38,8 @@ public class HSMySQLInstance extends DBInstance {
 			return insert(rowKey, cf);
 		//}
 	}
-
 	
-	int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException {
+	public int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException {
 		try {	
 			return doInsert(rowKey, cf.toBytes());
 		} catch (IOException e) {
@@ -49,7 +48,7 @@ public class HSMySQLInstance extends DBInstance {
 		}
 	}
 	
-	int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException {
+	public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException {
 		try {
 			return doUpdate(rowKey, mergeColumnFamily(cf, newcf));
 		} catch (SQLException e) {
@@ -61,20 +60,18 @@ public class HSMySQLInstance extends DBInstance {
 		}
 	}
 	
-	public int delete(String table, String columnName, String columnValue) throws SQLException {
-		return 0;
+	public byte[] select(String rowKey) throws SQLException, IOException {
+		hs.command().find(ID, rowKey);
+		List<HandlerSocketResult> res = hs.execute();
+		return null;
+		/*if(res.size() == 0) return null;
+		else {
+			return res.get(0).getMessages();
+		}*/
 	}
 	
-	public ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException {
-		try {
-			return bytes2ColumnFamily(doSelect(rowKey));
-		} catch (SQLException e) {
-			System.out.println("db get error "+ e);
-			return null;
-		} catch (IOException e) {
-			System.out.println("db get error "+ e);
-			return null;
-		}
+	public int delete(String table, String columnName, String columnValue) throws SQLException {
+		return 0;
 	}
 	
 	// Init MySQL Table for Keyspaces
@@ -118,16 +115,6 @@ public class HSMySQLInstance extends DBInstance {
 		return res.get(0).getStatus();
 	}
 	
-	byte[] doSelect(String rowKey) throws SQLException, IOException {
-		hs.command().find(ID, rowKey);
-		List<HandlerSocketResult> res = hs.execute();
-		return null;
-		/*if(res.size() == 0) return null;
-		else {
-			return res.get(0).getMessages();
-		}*/
-	}
-
 	synchronized int doUpdate(String rowKey, byte[] cfValue) throws SQLException, IOException {
 		hs.command().findModifyUpdate(ID, rowKey, "=", "1", "0", cfValue);
 		List<HandlerSocketResult> res = hs.execute();

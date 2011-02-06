@@ -31,29 +31,16 @@ public class MongoInstance extends DBInstance {
 		coll = conn.getCollection(this.cfName);
 		coll.ensureIndex(new BasicDBObject(KEY, 1).append("unique", true));
 	}
-
-	public int put(String rowKey, ColumnFamily cf) throws SQLException, IOException {
-		ColumnFamily oldcf = get(rowKey, null);
-		if (oldcf != null) {
-			return update(rowKey, cf, oldcf);
-		} else {
-			return insert(rowKey, cf);
-		}
-	}
-
-	int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) {
+	
+	public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)  throws SQLException, IOException {
 		return doInsert(rowKey, mergeColumnFamily(cf, newcf));
 	}
 
-	int insert(String rowKey, ColumnFamily cf) {
+	public int insert(String rowKey, ColumnFamily cf)  throws SQLException, IOException{
 		return doInsert(rowKey, cf.toBytes());
 	}
-
-	public ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException {
-        return bytes2ColumnFamily(doSelect(rowKey));
-	}
-
-	byte[] doSelect(String rowKey) {
+	
+	public byte[] select(String rowKey) throws SQLException, IOException {
 		BasicDBObject query = new BasicDBObject();
 		query.put(KEY, rowKey);
 		
@@ -64,7 +51,7 @@ public class MongoInstance extends DBInstance {
 			return null;
 		}
 	}
-
+	
 	synchronized int doInsert(String rowKey, byte[] cfValue) {
 		DBObject doc = new BasicDBObject();
 		doc.put(KEY, rowKey);

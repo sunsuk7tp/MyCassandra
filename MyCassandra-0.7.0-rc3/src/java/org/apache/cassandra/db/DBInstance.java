@@ -13,9 +13,21 @@ public abstract class DBInstance implements StorageEngineInterface {
 	
 	public abstract int delete(String table, String columnName, String columnValue) throws SQLException;
 	
-	public abstract ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException;
-
-	public abstract int put(String rowKey, ColumnFamily cf) throws SQLException, IOException;
+	public ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException
+	{
+		try {
+			return bytes2ColumnFamily(select(rowKey));
+		} catch (SQLException e) {
+			System.err.println("db get error "+ e);
+			return null;
+		}
+	}
+	
+	public int put(String rowKey, ColumnFamily cf) throws SQLException, IOException
+	{
+		ColumnFamily oldcf = get(rowKey, null);
+		return oldcf != null ? update(rowKey, cf, oldcf) : insert(rowKey, cf);
+	}
 	
 	public byte[] mergeColumnFamily(ColumnFamily cf, ColumnFamily newcf)
 	{
@@ -27,4 +39,10 @@ public abstract class DBInstance implements StorageEngineInterface {
 	{
 		return b != null ? new ColumnFamilySerializer().deserialize(new DataInputBuffer(b, 0, b.length)) : null;
 	}
+	
+	public abstract int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException;
+	
+	public abstract int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException;
+	
+	public abstract byte[] select(String rowKey) throws SQLException, IOException;
 }

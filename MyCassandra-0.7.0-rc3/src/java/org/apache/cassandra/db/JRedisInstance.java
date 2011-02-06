@@ -19,16 +19,7 @@ public class JRedisInstance extends DBInstance {
 		this.cfName = cfName;
 		conn = new JRedisConfigure().connect();
 	}
-
-	public int put(String rowKey, ColumnFamily cf) throws SQLException, IOException {
-		ColumnFamily oldcf = get(rowKey, null);
-		if(oldcf != null) {
-			return update(rowKey, cf, oldcf);
-		} else {
-			return insert(rowKey, cf);
-		}
-	}
-
+	
 	synchronized public int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException {
 		try {
 			conn.set(makeRowKey(rowKey), cf.toBytes());
@@ -39,14 +30,14 @@ public class JRedisInstance extends DBInstance {
 		}
 	}
 
-	synchronized public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException {
+	public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException {
 		cf.addAll(newcf);
 		return insert(rowKey, cf);
 	}
-
-	public ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException {
+	
+	public byte[] select(String rowKey) throws SQLException, IOException {
 		try {
-			return bytes2ColumnFamily(conn.get(makeRowKey(rowKey)));
+			return conn.get(makeRowKey(rowKey));
 		} catch (RedisException e) {
 			System.err.println("db get error: "+ e);
 			return null;

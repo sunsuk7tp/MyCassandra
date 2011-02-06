@@ -28,13 +28,13 @@ public class MySQLInstance extends DBInstance {
     	}*/
         
         try {
-            pstInsert = conn.prepareStatement("INSERT INTO "+cfName+" (Row_Key, ColumnFamily) VALUES (?,?) ON DUPLICATE KEY UPDATE ColumnFamily = ?");
+            pstInsert = conn.prepareStatement("INSERT INTO "+this.cfName+" (Row_Key, ColumnFamily) VALUES (?,?) ON DUPLICATE KEY UPDATE ColumnFamily = ?");
             if(ksName.equals("system")) {
-                pstUpdate = conn.prepareStatement("UPDATE "+cfName+" SET ColumnFamily = ? WHERE Row_Key = ?");
+                pstUpdate = conn.prepareStatement("UPDATE "+this.cfName+" SET ColumnFamily = ? WHERE Row_Key = ?");
             } else {
                 pstUpdate = conn.prepareStatement("CALL set_row(?,?)");
             }
-            bsql = "INSERT INTO "+ cfName + " (Row_Key, ColumnFamily) VALUES";
+            bsql = "INSERT INTO "+ this.cfName + " (Row_Key, ColumnFamily) VALUES";
             for(int i=0; i< multiMax; i++) {
                 bsql += " (?, ?)";
                 if(i < multiMax - 1) {
@@ -48,17 +48,7 @@ public class MySQLInstance extends DBInstance {
         }
     }
     
-    public int put(String rowKey, ColumnFamily cf) throws SQLException, IOException {
-        ColumnFamily oldcf = get(rowKey, null);
-        if(oldcf != null) {
-            return update(rowKey, cf, oldcf);
-        } else {
-            return insert(rowKey, cf);
-        }
-    }
-
-    
-    int insert(String rowKey, ColumnFamily cf) throws SQLException {
+    public int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException {
         try {
             return doInsert(rowKey, cf.toBytes());
             // return doMultipleInsert(rowKey, cfValue);
@@ -68,13 +58,35 @@ public class MySQLInstance extends DBInstance {
         }
     }
     
-    int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException {
+    public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException {
         try {
             return doUpdate(rowKey, mergeColumnFamily(cf, newcf));
         } catch (SQLException e) {
             System.out.println("db update error: "+ e);
             return -1;
         }
+    }
+    
+    public byte[] select(String rowKey) throws SQLException, IOException {
+        //Connection conn1 = new MySQLConfigure().connect(ksName);
+        PreparedStatement pstSelect;
+        if(ksName.equals("system")) {
+            pstSelect = conn.prepareStatement("SELECT ColumnFamily FROM " + cfName + " WHERE Row_Key = ?");
+        } else {
+            pstSelect = conn.prepareStatement("CALL get_row(?)");
+        }
+        pstSelect.setString(1, rowKey);
+        ResultSet rs = pstSelect.executeQuery();
+        byte[] b = null;
+        if(rs != null) {
+        	while(rs.next()) {
+        		b = rs.getBytes(1);
+        	}
+        }
+        rs.close();
+        pstSelect.close();
+        //conn1.close();
+        return b;
     }
     
     public int delete(String table, String columnName, String columnValue) throws SQLException {
@@ -84,15 +96,6 @@ public class MySQLInstance extends DBInstance {
             return pstDelete.executeUpdate();
         } finally {
             pstDelete.close();
-        }
-    }
-    
-    public ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException {
-        try {
-            return bytes2ColumnFamily(doSelect(rowKey));
-        } catch (SQLException e) {
-            System.err.println("db get error "+ e);
-            return null;
         }
     }
     
@@ -144,6 +147,7 @@ public class MySQLInstance extends DBInstance {
         return 1;
     }
     */
+    
     synchronized int doInsert(String rowKey, byte[] cfValue) throws SQLException {
         pstInsert.setString(1, rowKey);
         pstInsert.setBytes(2, cfValue);
@@ -151,28 +155,6 @@ public class MySQLInstance extends DBInstance {
         return pstInsert.executeUpdate();
     }
     
-    byte[] doSelect(String rowKey) throws SQLException {
-        //Connection conn1 = new MySQLConfigure().connect(ksName);
-        PreparedStatement pstSelect;
-        if(ksName.equals("system")) {
-            pstSelect = conn.prepareStatement("SELECT ColumnFamily FROM " + cfName + " WHERE Row_Key = ?");
-        } else {
-            pstSelect = conn.prepareStatement("CALL get_row(?)");
-        }
-        pstSelect.setString(1, rowKey);
-        ResultSet rs = pstSelect.executeQuery();
-        byte[] b = null;
-        if(rs != null) {
-        	while(rs.next()) {
-        		b = rs.getBytes(1);
-        	}
-        }
-        rs.close();
-        pstSelect.close();
-        //conn1.close();
-        return b;
-    }
-
     synchronized int doUpdate(String rowKey, byte[] cfValue) throws SQLException {
         pstUpdate.setBytes(1, cfValue);
         pstUpdate.setString(2, rowKey);
