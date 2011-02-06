@@ -154,7 +154,7 @@ public class MySQLInstance implements DBInstance {
                 "`Row_Key` VARCHAR(?) NOT NULL," +
                 "`ColumnFamily` VARBINARY(?)," +
                 "PRIMARY KEY (`Row_Key`)" +
-            ")";// PARTITION BY KEY(`Row_Key`) PARTITIONS 2;";
+            ") ENGINE = " + storageEngineType;
             
             PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
             pst.setInt(1,rowKeySize);
