@@ -9,6 +9,8 @@ import org.apache.cassandra.db.filter.*;
 
 public abstract class DBInstance implements StorageEngineInterface {
 
+	String ksName, cfName;
+	
 	public abstract int delete(String table, String columnName, String columnValue) throws SQLException;
 	
 	public abstract ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException;

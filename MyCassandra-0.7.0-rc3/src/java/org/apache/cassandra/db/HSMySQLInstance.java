@@ -11,7 +11,6 @@ import org.apache.cassandra.db.filter.*;
 public class HSMySQLInstance extends DBInstance {
 	
 	HandlerSocket hs;
-	String db, table;
 	private final String PREFIX = "";
 	private final String ID = "1";
 	private final String KEY = "Row_Key"; 	
@@ -19,12 +18,12 @@ public class HSMySQLInstance extends DBInstance {
 
 	int debug = 0;
 	
-	public HSMySQLInstance(String dbInstance, String cfName) {
-		db = PREFIX + dbInstance;
-		table = PREFIX + cfName;
+	public HSMySQLInstance(String ksName, String cfName) {
+		this.ksName = ksName;
+		this.cfName = PREFIX + cfName;
 		try {
 			hs = new HSMySQLConfigure().connect();
-			hs.command().openIndex(ID, db, table, "PRIMARY", KEY+","+VALUE);
+			hs.command().openIndex(ID, this.ksName, this.cfName, "PRIMARY", KEY+","+VALUE);
 			hs.execute();
 		} catch (IOException e) {
 			System.err.println("can't open hs.");
@@ -42,17 +41,8 @@ public class HSMySQLInstance extends DBInstance {
 
 	
 	int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException {
-		if(debug > 0) System.out.print("SQLInsert: ");
 		try {	
-			int result = doInsert(rowKey, cf.toBytes());
-			if(debug > 0) { 
-				if(result > 0) {
-					System.out.println(cf.toString());
-				} else {
-					System.out.println("can't insert");
-				}
-			}
-			return result;
+			return doInsert(rowKey, cf.toBytes());
 		} catch (IOException e) {
 			System.err.println("can't insert: " + e);
 			return -1;
@@ -76,7 +66,6 @@ public class HSMySQLInstance extends DBInstance {
 	}
 	
 	public ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException {
-		//if(debug > 0) System.out.print("SQLSelect: ");
 		try {
 			return bytes2ColumnFamily(doSelect(rowKey));
 		} catch (SQLException e) {
@@ -85,7 +74,7 @@ public class HSMySQLInstance extends DBInstance {
 		} catch (IOException e) {
 			System.out.println("db get error "+ e);
 			return null;
-		}	
+		}
 	}
 	
 	// Init MySQL Table for Keyspaces

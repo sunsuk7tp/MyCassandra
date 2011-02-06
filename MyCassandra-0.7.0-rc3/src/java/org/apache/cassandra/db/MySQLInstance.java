@@ -8,7 +8,6 @@ import org.apache.cassandra.db.filter.*;
 public class MySQLInstance extends DBInstance {
     
     Connection conn;
-    String instanceName, table;
     PreparedStatement pstInsert, pstUpdate, pstMultiInsert;
     
     int debug = 0;
@@ -18,10 +17,10 @@ public class MySQLInstance extends DBInstance {
     String bsql;
     final String PREFIX = "_";
     
-    public MySQLInstance(String dbInstance, String cfName) {
-        instanceName = dbInstance;
-        conn = new MySQLConfigure().connect(dbInstance);
-        table = PREFIX + cfName;
+    public MySQLInstance(String ksName, String cfName) {
+        this.ksName = ksName;
+        this.cfName = PREFIX + cfName;
+        conn = new MySQLConfigure().connect(ksName);
         /*try {
              conn.setAutoCommit(false);
         } catch(SQLException e) {
@@ -29,13 +28,13 @@ public class MySQLInstance extends DBInstance {
     	}*/
         
         try {
-            pstInsert = conn.prepareStatement("INSERT INTO "+table+" (Row_Key, ColumnFamily) VALUES (?,?) ON DUPLICATE KEY UPDATE ColumnFamily = ?");
-            if(instanceName.equals("system")) {
-                pstUpdate = conn.prepareStatement("UPDATE "+table+" SET ColumnFamily = ? WHERE Row_Key = ?");
+            pstInsert = conn.prepareStatement("INSERT INTO "+cfName+" (Row_Key, ColumnFamily) VALUES (?,?) ON DUPLICATE KEY UPDATE ColumnFamily = ?");
+            if(ksName.equals("system")) {
+                pstUpdate = conn.prepareStatement("UPDATE "+cfName+" SET ColumnFamily = ? WHERE Row_Key = ?");
             } else {
                 pstUpdate = conn.prepareStatement("CALL set_row(?,?)");
             }
-            bsql = "INSERT INTO "+table + " (Row_Key, ColumnFamily) VALUES";
+            bsql = "INSERT INTO "+ cfName + " (Row_Key, ColumnFamily) VALUES";
             for(int i=0; i< multiMax; i++) {
                 bsql += " (?, ?)";
                 if(i < multiMax - 1) {
@@ -60,18 +59,9 @@ public class MySQLInstance extends DBInstance {
 
     
     int insert(String rowKey, ColumnFamily cf) throws SQLException {
-        if(debug > 0) System.out.print("SQLInsert: ");
         try {
-            int result = doInsert(rowKey, cf.toBytes());
-            //result = doMultipleInsert(rowKey, cfValue);
-            if(debug > 0) { 
-                if(result > 0) {
-                    System.out.println(cf.toString());
-                } else {
-                    System.out.println("can't insert");
-                }
-            }
-            return result;
+            return doInsert(rowKey, cf.toBytes());
+            // return doMultipleInsert(rowKey, cfValue);
         } catch (SQLException e) {
             System.out.println("db connection error "+ e);
             return -1;
@@ -98,7 +88,6 @@ public class MySQLInstance extends DBInstance {
     }
     
     public ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException {
-        //if(debug > 0) System.out.print("SQLSelect: ");
         try {
             return bytes2ColumnFamily(doSelect(rowKey));
         } catch (SQLException e) {
@@ -109,23 +98,21 @@ public class MySQLInstance extends DBInstance {
     
     // Init MySQL Table for Keyspaces
     public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType) throws SQLException {
-        
         try {
             Statement stmt = conn.createStatement();
             
             if(debug > 0) {
-                stmt.executeUpdate("TRUNCATE TABLE "+table);
+                stmt.executeUpdate("TRUNCATE TABLE " + cfName);
             }
             
             ResultSet rs = stmt.executeQuery("SHOW TABLES");
             while(rs.next()) {
-                if(rs.getString(1).equals(table)) {
+                if(rs.getString(1).equals(cfName)) {
                     return 0;
                 }
             }
             
-            String sPrepareSQL = "CREATE Table "+table + "(" +
-                //"`ID` INT NOT NULL AUTO_INCREMENT," + 
+            String sPrepareSQL = "CREATE Table "+ cfName + "(" +
                 "`Row_Key` VARCHAR(?) NOT NULL," +
                 "`ColumnFamily` VARBINARY(?)," +
                 "PRIMARY KEY (`Row_Key`)" +
@@ -165,10 +152,10 @@ public class MySQLInstance extends DBInstance {
     }
     
     byte[] doSelect(String rowKey) throws SQLException {
-        //Connection conn1 = new MySQLConfigure().connect(instanceName);
+        //Connection conn1 = new MySQLConfigure().connect(ksName);
         PreparedStatement pstSelect;
-        if(instanceName.equals("system")) {
-            pstSelect = conn.prepareStatement("SELECT ColumnFamily FROM "+table+" WHERE Row_Key = ?");
+        if(ksName.equals("system")) {
+            pstSelect = conn.prepareStatement("SELECT ColumnFamily FROM " + cfName + " WHERE Row_Key = ?");
         } else {
             pstSelect = conn.prepareStatement("CALL get_row(?)");
         }

@@ -18,17 +18,17 @@ import com.mongodb.MongoURI;
 public class MongoInstance extends DBInstance {
 
 	DBCollection coll;
-	String instanceName, table;
 	public static final String PREFIX = "_";
 	
 	public static final String KEY = "k";
 	public static final String VALUE = "v";
 
-	public MongoInstance(String dbInstance, String cfName) {
-		instanceName = PREFIX+dbInstance;
-		DB conn = new MongoConfigure().connect(instanceName);
-		table = PREFIX+cfName;
-		coll = conn.getCollection(table);
+	public MongoInstance(String ksName, String cfName) {
+		this.ksName = PREFIX + ksName;
+		this.cfName = PREFIX + cfName;
+		
+		DB conn = new MongoConfigure().connect(ksName);
+		coll = conn.getCollection(this.cfName);
 		coll.ensureIndex(new BasicDBObject(KEY, 1).append("unique", true));
 	}
 
