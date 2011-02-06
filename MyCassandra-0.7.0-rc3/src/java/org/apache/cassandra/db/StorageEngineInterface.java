@@ -5,7 +5,7 @@ import java.sql.*;
 
 import org.apache.cassandra.db.filter.QueryFilter;
 
-public interface DBInstance {
+public interface StorageEngineInterface {
 	
 	int put(String rowKey, ColumnFamily cf) throws SQLException, IOException;
 	

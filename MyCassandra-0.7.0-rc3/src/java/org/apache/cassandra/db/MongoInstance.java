@@ -18,7 +18,7 @@ import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoURI;
 
-public class MongoInstance implements DBInstance {
+public class MongoInstance implements StorageEngineInterface {
 
 	DBCollection coll;
 	String instanceName, table;

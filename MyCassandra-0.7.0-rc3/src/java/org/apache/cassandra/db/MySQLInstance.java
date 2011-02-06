@@ -7,7 +7,7 @@ import org.apache.cassandra.io.util.DataInputBuffer;
 import org.apache.cassandra.io.util.DataOutputBuffer;
 import org.apache.cassandra.db.filter.*;
 
-public class MySQLInstance implements DBInstance {
+public class MySQLInstance implements StorageEngineInterface {
     
     Connection conn;
     String instanceName, table;

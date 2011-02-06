@@ -9,7 +9,7 @@ import org.apache.cassandra.io.util.DataInputBuffer;
 import org.apache.cassandra.io.util.DataOutputBuffer;
 import org.apache.cassandra.db.filter.*;
 
-public class HSMySQLInstance implements DBInstance {
+public class HSMySQLInstance implements StorageEngineInterface {
 	
 	HandlerSocket hs;
 	String db, table;

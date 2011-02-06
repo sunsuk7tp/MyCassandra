@@ -389,7 +389,7 @@ public class    DatabaseDescriptor
             }
             else if (conf.database.equals("HSMySQL"))
             {
-            	dataBase = HSMySQL;
+            	dataBase = HSMYSQL;
             }
             // Hardcoded system tables
             KSMetaData systemMeta = new KSMetaData(Table.SYSTEM_TABLE,

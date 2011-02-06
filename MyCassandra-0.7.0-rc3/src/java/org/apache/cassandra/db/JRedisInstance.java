@@ -9,7 +9,7 @@ import org.apache.cassandra.io.util.DataOutputBuffer;
 import org.jredis.JRedis;
 import org.jredis.RedisException;
 
-public class JRedisInstance implements DBInstance {
+public class JRedisInstance implements StorageEngineInterface {
 
 	JRedis conn;
 	String instanceName, table;

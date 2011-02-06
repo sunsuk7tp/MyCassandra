@@ -138,7 +138,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     private volatile DefaultInteger memsize;
     private volatile DefaultDouble memops;
     
-    private DBInstance dbi;
+    private StorageEngineInterface dbi;
 
     private final Runnable rowCacheSaverTask = new WrappedRunnable()
     {
