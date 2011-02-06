@@ -4,12 +4,11 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import org.apache.cassandra.db.filter.QueryFilter;
-import org.apache.cassandra.io.util.DataInputBuffer;
-import org.apache.cassandra.io.util.DataOutputBuffer;
+
 import org.jredis.JRedis;
 import org.jredis.RedisException;
 
-public class JRedisInstance implements StorageEngineInterface {
+public class JRedisInstance extends DBInstance {
 
 	JRedis conn;
 	String instanceName, table;
@@ -25,23 +24,18 @@ public class JRedisInstance implements StorageEngineInterface {
 	}
 
 	public int put(String rowKey, ColumnFamily cf) throws SQLException, IOException {
-		if(rowSearch(rowKey) > 0) {
-			return update(rowKey, cf);
+		ColumnFamily oldcf = get(rowKey, null);
+		if(oldcf != null) {
+			return update(rowKey, cf, oldcf);
 		} else {
 			return insert(rowKey, cf);
 		}
 	}
 
 	synchronized public int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException {
-		DataOutputBuffer buffer = new DataOutputBuffer();
-		ColumnFamily.serializer().serialize(cf, buffer);
-		int cfLength = buffer.getLength();
-		assert cfLength > 0;
-		byte[] cfValue = buffer.getData();
-			
 		try {
 			String key = instanceName+KEYSEPARATOR+table+KEYSEPARATOR+rowKey;
-			conn.set(key, cfValue);
+			conn.set(key, cf.toBytes());
 			return 1;
 		} catch (RedisException e) {
 			System.err.println("db connection error: "+ e);
@@ -49,11 +43,10 @@ public class JRedisInstance implements StorageEngineInterface {
 		}
 	}
 
-	synchronized public int update(String rowKey, ColumnFamily newcf) throws SQLException, IOException {
+	synchronized public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException {
 		if(debug > 0) System.out.print("SQLUpdate: ");
-		ColumnFamily cf = get(rowKey, null);
 		cf.addAll(newcf);
-		return insert(rowKey,cf);
+		return insert(rowKey, cf);
 	}
 
 	public ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException {
@@ -62,17 +55,13 @@ public class JRedisInstance implements StorageEngineInterface {
 			byte[] b = conn.get(key);
 			
 			if(b != null) {
-				DataInputBuffer inputBuffer = new DataInputBuffer(b, 0, b.length);
-				
-				ColumnFamily cf = new ColumnFamilySerializer().deserialize(inputBuffer);
-				if(debug > 0) System.out.println(cf.toString());
-				return cf;
+		        return bytes2ColumnFamily(b);
 			} else {
-				if(debug > 0) System.out.println("cant't select");
+				if(debug > 0) System.out.println("cant't get");
 				return null;
 			}
 		} catch (RedisException e) {
-			System.err.println("db select error: "+ e);
+			System.err.println("db get error: "+ e);
 			return null;
 		}
 	}
@@ -81,19 +70,4 @@ public class JRedisInstance implements StorageEngineInterface {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	
-	synchronized int rowSearch(String rowKey) {
-		
-		try {
-			if(conn.exists(rowKey)) {
-				return 1;
-			} else {
-				return -1;
-			}
-		} catch (RedisException e) {
-			System.err.println("db can't lookup key "+e);
-			return -1;
-		}
-	}
-
 }

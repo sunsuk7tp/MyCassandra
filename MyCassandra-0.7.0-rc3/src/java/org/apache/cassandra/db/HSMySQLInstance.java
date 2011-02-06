@@ -1,15 +1,14 @@
 package org.apache.cassandra.db;
 
 import java.sql.*;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.cassandra.io.util.DataInputBuffer;
-import org.apache.cassandra.io.util.DataOutputBuffer;
 import org.apache.cassandra.db.filter.*;
 
-public class HSMySQLInstance implements StorageEngineInterface {
+public class HSMySQLInstance extends DBInstance {
 	
 	HandlerSocket hs;
 	String db, table;
@@ -44,13 +43,8 @@ public class HSMySQLInstance implements StorageEngineInterface {
 	
 	int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException {
 		if(debug > 0) System.out.print("SQLInsert: ");
-		DataOutputBuffer buffer = new DataOutputBuffer();
-		ColumnFamily.serializer().serialize(cf, buffer);
-		int cfLength = buffer.getLength();
-		assert cfLength > 0;
-		byte[] cfValue = buffer.getData();
 		try {	
-			int result = doInsert(rowKey, cfValue);
+			int result = doInsert(rowKey, cf.toBytes());
 			if(debug > 0) { 
 				if(result > 0) {
 					System.out.println(cf.toString());
@@ -67,15 +61,7 @@ public class HSMySQLInstance implements StorageEngineInterface {
 	
 	int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException {
 		try {
-			cf.addAll(newcf);
-			
-			DataOutputBuffer outputBuffer = new DataOutputBuffer();
-			ColumnFamily.serializer().serialize(cf, outputBuffer);
-			//int cfLength = outputBuffer.getLength();
-			//assert cfLength > 0;
-			//byte[] cfValue = outputBuffer.getData();
-			
-			return doUpdate(rowKey, outputBuffer.getData());
+			return doUpdate(rowKey, mergeColumnFamily(cf, newcf));
 		} catch (SQLException e) {
 			System.out.println("db update error: "+ e);
 			return -1;
@@ -92,20 +78,12 @@ public class HSMySQLInstance implements StorageEngineInterface {
 	public ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException {
 		//if(debug > 0) System.out.print("SQLSelect: ");
 		try {
-			//long start = System.currentTimeMillis();
-			byte[] b = doSelect(rowKey);
-			//System.out.println(System.currentTimeMillis() - start);
-			
-			if(b != null) {
-				return new ColumnFamilySerializer().deserialize(new DataInputBuffer(b, 0, b.length));
-			} else {
-				return null;
-			}
+			return bytes2ColumnFamily(doSelect(rowKey));
 		} catch (SQLException e) {
-			System.out.println("db select error "+ e);
+			System.out.println("db get error "+ e);
 			return null;
 		} catch (IOException e) {
-			System.out.println("db select error "+ e);
+			System.out.println("db get error "+ e);
 			return null;
 		}	
 	}

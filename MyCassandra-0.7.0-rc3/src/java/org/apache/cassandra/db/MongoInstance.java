@@ -2,12 +2,9 @@ package org.apache.cassandra.db;
 
 import java.sql.*;
 import java.io.IOException;
-
-import org.apache.cassandra.io.util.DataInputBuffer;
-import org.apache.cassandra.io.util.DataOutputBuffer;
-import org.apache.cassandra.db.filter.*;
-
 import java.util.List;
+
+import org.apache.cassandra.db.filter.*;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -18,7 +15,7 @@ import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoURI;
 
-public class MongoInstance implements StorageEngineInterface {
+public class MongoInstance extends DBInstance {
 
 	DBCollection coll;
 	String instanceName, table;
@@ -45,27 +42,15 @@ public class MongoInstance implements StorageEngineInterface {
 	}
 
 	int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) {
-		cf.addAll(newcf);
-		DataOutputBuffer outputBuffer = new DataOutputBuffer();
-		ColumnFamily.serializer().serialize(cf, outputBuffer);
-		return doInsert(rowKey, outputBuffer.getData());
+		return doInsert(rowKey, mergeColumnFamily(cf, newcf));
 	}
 
 	int insert(String rowKey, ColumnFamily cf) {
-		DataOutputBuffer buf = new DataOutputBuffer();
-		ColumnFamily.serializer().serialize(cf, buf);
-		byte[] cfValue = buf.getData();
-
-		return doInsert(rowKey, cfValue);
+		return doInsert(rowKey, cf.toBytes());
 	}
 
 	public ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException {
-		byte[] b = doSelect(rowKey);
-		if (b != null) {
-			return new ColumnFamilySerializer().deserialize(new DataInputBuffer(b,0,b.length));
-		} else {
-			return null;
-		}
+        return bytes2ColumnFamily(doSelect(rowKey));
 	}
 
 	byte[] doSelect(String rowKey) {

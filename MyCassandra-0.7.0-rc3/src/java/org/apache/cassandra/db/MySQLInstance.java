@@ -3,11 +3,9 @@ package org.apache.cassandra.db;
 import java.sql.*;
 import java.io.IOException;
 
-import org.apache.cassandra.io.util.DataInputBuffer;
-import org.apache.cassandra.io.util.DataOutputBuffer;
 import org.apache.cassandra.db.filter.*;
 
-public class MySQLInstance implements StorageEngineInterface {
+public class MySQLInstance extends DBInstance {
     
     Connection conn;
     String instanceName, table;
@@ -24,11 +22,11 @@ public class MySQLInstance implements StorageEngineInterface {
         instanceName = dbInstance;
         conn = new MySQLConfigure().connect(dbInstance);
         table = PREFIX + cfName;
-    /*try {
+        /*try {
              conn.setAutoCommit(false);
         } catch(SQLException e) {
              System.out.println(e);
-    }*/
+    	}*/
         
         try {
             pstInsert = conn.prepareStatement("INSERT INTO "+table+" (Row_Key, ColumnFamily) VALUES (?,?) ON DUPLICATE KEY UPDATE ColumnFamily = ?");
@@ -64,14 +62,8 @@ public class MySQLInstance implements StorageEngineInterface {
     int insert(String rowKey, ColumnFamily cf) throws SQLException {
         if(debug > 0) System.out.print("SQLInsert: ");
         try {
-            DataOutputBuffer buffer = new DataOutputBuffer();
-            ColumnFamily.serializer().serialize(cf, buffer);
-            int cfLength = buffer.getLength();
-            assert cfLength > 0;
-            byte[] cfValue = buffer.getData();
-            
-          int result = doInsert(rowKey, cfValue);
-          //result = doMultipleInsert(rowKey, cfValue);
+            int result = doInsert(rowKey, cf.toBytes());
+            //result = doMultipleInsert(rowKey, cfValue);
             if(debug > 0) { 
                 if(result > 0) {
                     System.out.println(cf.toString());
@@ -88,15 +80,7 @@ public class MySQLInstance implements StorageEngineInterface {
     
     int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException {
         try {
-            cf.addAll(newcf);
-            
-            DataOutputBuffer outputBuffer = new DataOutputBuffer();
-            ColumnFamily.serializer().serialize(cf, outputBuffer);
-            //int cfLength = outputBuffer.getLength();
-            //assert cfLength > 0;
-            //byte[] cfValue = outputBuffer.getData();
-            
-            return doUpdate(rowKey, outputBuffer.getData());
+            return doUpdate(rowKey, mergeColumnFamily(cf, newcf));
         } catch (SQLException e) {
             System.out.println("db update error: "+ e);
             return -1;
@@ -116,20 +100,11 @@ public class MySQLInstance implements StorageEngineInterface {
     public ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException {
         //if(debug > 0) System.out.print("SQLSelect: ");
         try {
-            //long start = System.currentTimeMillis();
-            byte[] b = doSelect(rowKey);
-            //System.out.println(System.currentTimeMillis() - start);
-            
-            if(b != null) {
-                return new ColumnFamilySerializer().deserialize(new DataInputBuffer(b, 0, b.length));
-            } else {
-                //if(debug > 0) System.out.println("can't select");
-                return null;
-            }
+            return bytes2ColumnFamily(doSelect(rowKey));
         } catch (SQLException e) {
-            System.out.println("db select error "+ e);
+            System.err.println("db get error "+ e);
             return null;
-        }        
+        }
     }
     
     // Init MySQL Table for Keyspaces
@@ -190,7 +165,7 @@ public class MySQLInstance implements StorageEngineInterface {
     }
     
     byte[] doSelect(String rowKey) throws SQLException {
-                //Connection conn1 = new MySQLConfigure().connect(instanceName);
+        //Connection conn1 = new MySQLConfigure().connect(instanceName);
         PreparedStatement pstSelect;
         if(instanceName.equals("system")) {
             pstSelect = conn.prepareStatement("SELECT ColumnFamily FROM "+table+" WHERE Row_Key = ?");
@@ -200,13 +175,13 @@ public class MySQLInstance implements StorageEngineInterface {
         pstSelect.setString(1, rowKey);
         ResultSet rs = pstSelect.executeQuery();
         byte[] b = null;
-    if(rs != null) {
-        while(rs.next()) {
-          b = rs.getBytes(1);
-      }
-    }
-    rs.close();
-    pstSelect.close();
+        if(rs != null) {
+        	while(rs.next()) {
+        		b = rs.getBytes(1);
+        	}
+        }
+        rs.close();
+        pstSelect.close();
         //conn1.close();
         return b;
     }
