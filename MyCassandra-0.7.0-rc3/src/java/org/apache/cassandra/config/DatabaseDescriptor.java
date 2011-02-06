@@ -94,14 +94,17 @@ public class    DatabaseDescriptor
     public static final int MSTABLE = 0;
     public static final int MYSQL = 1;
     public static final int JREDIS = 2;
+    public static final int MONGODB = 3;
+    public static final int HSMYSQL = 4;
     public static final int defaultDataBase = MSTABLE;
     
     public static int dataBase;
     
+    // mysql default setting
     public static final String defaultStorageEngineType = "InnoDB";
     public static final int defaultRowKeySize = 64;
     public static final String defaultColumnFamilyType = "VARBINARY";
-    public static final int defaultColumnFamilySize = 30 * 1024; // 30KB
+    public static final int defaultColumnFamilySize = 30 * 1024;
     
     /**
      * Inspect the classpath to find storage configuration file
@@ -361,9 +364,11 @@ public class    DatabaseDescriptor
                 /* threshold after which commit log should be rotated. */
                 if (conf.commitlog_rotation_threshold_in_mb != null)
                     CommitLog.setSegmentSize(conf.commitlog_rotation_threshold_in_mb * 1024 * 1024);
-            } else if (conf.database.equals("MySQL"))
+                }
+            
+            else if (conf.database.equals("MySQL"))
             {
-            	dataBase = MYSQL;
+                dataBase = MYSQL;
                 try {
                     new MySQLInstance("system", "Schema").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
                     new MySQLInstance("system", "Migrations").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
@@ -371,10 +376,20 @@ public class    DatabaseDescriptor
                     new MySQLInstance("system", "HintsColumnFamily").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
                     new MySQLInstance("system", "IndexInfo").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
                 } catch (SQLException e) {
-                    System.out.println("db connection error "+ e);
+                	System.out.println("db connection error "+ e);
                 }
-            } else if (conf.database.equals("JRedis")){
+            }
+            else if (conf.database.equals("JRedis"))
+            {
             	dataBase = JREDIS;
+            }
+            else if (conf.database.equals("MongoDB"))
+            {
+            	dataBase = MONGODB;
+            }
+            else if (conf.database.equals("HSMySQL"))
+            {
+            	dataBase = HSMySQL;
             }
             // Hardcoded system tables
             KSMetaData systemMeta = new KSMetaData(Table.SYSTEM_TABLE,
