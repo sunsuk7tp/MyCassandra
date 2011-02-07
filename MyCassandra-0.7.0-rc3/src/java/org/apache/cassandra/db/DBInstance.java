@@ -15,9 +15,12 @@ public abstract class DBInstance implements StorageEngineInterface {
 	
 	public ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException
 	{
-		try {
+		try
+		{
 			return bytes2ColumnFamily(select(rowKey));
-		} catch (SQLException e) {
+		}
+		catch (SQLException e)
+		{
 			System.err.println("db get error "+ e);
 			return null;
 		}

@@ -15,7 +15,8 @@ import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoURI;
 
-public class MongoInstance extends DBInstance {
+public class MongoInstance extends DBInstance
+{
 
 	DBCollection coll;
 	public static final String PREFIX = "_";
@@ -23,7 +24,8 @@ public class MongoInstance extends DBInstance {
 	public static final String KEY = "k";
 	public static final String VALUE = "v";
 
-	public MongoInstance(String ksName, String cfName) {
+	public MongoInstance(String ksName, String cfName)
+	{
 		this.ksName = PREFIX + ksName;
 		this.cfName = PREFIX + cfName;
 		
@@ -32,27 +34,34 @@ public class MongoInstance extends DBInstance {
 		coll.ensureIndex(new BasicDBObject(KEY, 1).append("unique", true));
 	}
 	
-	public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)  throws SQLException, IOException {
+	public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)  throws SQLException, IOException
+	{
 		return doInsert(rowKey, mergeColumnFamily(cf, newcf));
 	}
 
-	public int insert(String rowKey, ColumnFamily cf)  throws SQLException, IOException{
+	public int insert(String rowKey, ColumnFamily cf)  throws SQLException, IOException
+	{
 		return doInsert(rowKey, cf.toBytes());
 	}
 	
-	public byte[] select(String rowKey) throws SQLException, IOException {
+	public byte[] select(String rowKey) throws SQLException, IOException
+	{
 		BasicDBObject query = new BasicDBObject();
 		query.put(KEY, rowKey);
 		
 		DBCursor cur = coll.find(query);
-		if (cur.hasNext()){
+		if (cur.hasNext())
+		{
 			return (byte[])cur.next().get(VALUE);
-		} else {
+		}
+		else
+		{
 			return null;
 		}
 	}
 	
-	synchronized int doInsert(String rowKey, byte[] cfValue) {
+	synchronized int doInsert(String rowKey, byte[] cfValue)
+	{
 		DBObject doc = new BasicDBObject();
 		doc.put(KEY, rowKey);
 		doc.put(VALUE, cfValue);
@@ -60,8 +69,8 @@ public class MongoInstance extends DBInstance {
 		return 1;
 	}
 
-	public int delete(String table, String columnName, String columnValue) throws SQLException {
+	public int delete(String table, String columnName, String columnValue) throws SQLException
+	{
 		return 0;
  	}
 }
-
