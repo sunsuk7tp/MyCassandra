@@ -335,7 +335,7 @@ public class    DatabaseDescriptor
             }
             
             /* data file and commit log directories. they get created later, when they're needed. */
-            if (conf.database.equals("MSTable"))
+            if (conf.database.equals("Bigtable"))
             {
             	dataBase = MSTABLE;
             	if (conf.commitlog_directory != null && conf.data_file_directories != null && conf.saved_caches_directory != null)
