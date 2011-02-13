@@ -213,6 +213,12 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             default:
                 dbi = new MySQLInstance(table_, columnFamily_);
                 break;
+            case DatabaseDescriptor.MONGO:
+                dbi = new MongoInstance(table_, columnFamily_);
+                break;
+            case DatabaseDescriptor.HSMYSQL:
+                dbi = new HSMySQLInstance(table_, columnFamily_);
+                break;
         }
     }
 

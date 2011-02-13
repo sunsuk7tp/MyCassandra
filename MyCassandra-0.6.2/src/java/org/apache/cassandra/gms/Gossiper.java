@@ -471,7 +471,6 @@ public class Gossiper implements IFailureDetectionEventListener, IEndPointStateC
                     if (logger_.isTraceEnabled())
                         logger_.trace("Adding state " + key + ": " + appState.getValue());
                     reqdEndPointState.addApplicationState(key, appState);
-                    System.out.println(forEndpoint+":"+appState.getStorageType());
                 }
             }
         }
@@ -623,6 +622,7 @@ public class Gossiper implements IFailureDetectionEventListener, IEndPointStateC
             */
             if ( localEpStatePtr != null )
             {
+              if(remoteState.getStorageType() <= 0) remoteState.setStorageType(localEpStatePtr.getStorageType());
             	int localGeneration = localEpStatePtr.getHeartBeatState().getGeneration();
             	int remoteGeneration = remoteState.getHeartBeatState().getGeneration();
 
@@ -686,7 +686,6 @@ public class Gossiper implements IFailureDetectionEventListener, IEndPointStateC
             if ( localAppState == null )
             {
                 localStatePtr.addApplicationState(remoteKey, remoteAppState);
-                System.out.println(addr+":"+remoteAppState.getStorageType());
                 doNotifications(addr, remoteKey, remoteAppState);
                 continue;
             }
@@ -712,7 +711,6 @@ public class Gossiper implements IFailureDetectionEventListener, IEndPointStateC
                 if ( remoteVersion > localVersion )
                 {
                     localStatePtr.addApplicationState(remoteKey, remoteAppState);
-                    System.out.println(addr+":"+remoteAppState.getStorageType());
                     doNotifications(addr, remoteKey, remoteAppState);
                 }
             }

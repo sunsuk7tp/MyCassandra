@@ -128,7 +128,7 @@ public abstract class AbstractEndpointSnitch implements IEndPointSnitch
                 int s2 = (Integer)e2.getValue();
                 if (s1 < s2) return -1;
                 else if (s1 > s2) return 1;
-                return 0;
+                else return 0;
             }
         });
         return ArrayToAddressList(entries);
@@ -146,7 +146,7 @@ public abstract class AbstractEndpointSnitch implements IEndPointSnitch
                 int s2 = (Integer)e2.getValue();
                 if (s1 > s2) return -1;
                 else if (s1 < s2) return 1;
-                return 0;
+                else return 0;
             }
         });
         return ArrayToAddressList(entries);

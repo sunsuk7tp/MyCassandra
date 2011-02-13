@@ -95,16 +95,25 @@ public class TokenMetadata
         return n;
     }
 
+    public void updateStorageType(InetAddress endpoint, int apStorageType)
+    {
+        assert endpoint != null;
+        if(apStorageType > 0) {
+            endPointToStypeMap.put(endpoint, apStorageType);
+        }
+    }
+
     public void updateNormalToken(Token token, InetAddress endpoint, int apStorageType)
     {
         assert token != null;
         assert endpoint != null;
-        
         lock.writeLock().lock();
         try
         {
-            endPointToStypeMap.remove(endpoint);
-            endPointToStypeMap.put(endpoint, apStorageType);
+            if(apStorageType > 0) {
+                endPointToStypeMap.remove(endpoint);
+                endPointToStypeMap.put(endpoint, apStorageType);
+            }
             bootstrapTokens.inverse().remove(endpoint);
             tokenToEndPointMap.inverse().remove(endpoint);
             if (!endpoint.equals(tokenToEndPointMap.put(token, endpoint)))
@@ -143,8 +152,10 @@ public class TokenMetadata
 
     public void addBootstrapToken(Token token, InetAddress endpoint, int apStorageType)
     {
-        endPointToStypeMap.remove(endpoint);
-        endPointToStypeMap.put(endpoint, apStorageType);
+        if(apStorageType > 0) {
+            endPointToStypeMap.remove(endpoint);
+            endPointToStypeMap.put(endpoint, apStorageType);
+        }
         addBootstrapToken(token, endpoint);
     }
 

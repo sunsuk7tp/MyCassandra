@@ -390,7 +390,6 @@ public class Table
     public void apply(RowMutation mutation, Object serializedMutation, boolean writeCommitLog) throws IOException
     {
         HashMap<ColumnFamilyStore,Memtable> memtablesToFlush = new HashMap<ColumnFamilyStore, Memtable>(2);
-        
         // write the mutation to the commitlog and memtables
         flusherLock.readLock().lock();
         try
@@ -417,7 +416,7 @@ public class Table
                 ColumnFamilyStore cfs = columnFamilyStores.get(columnFamily.name());
                 if ((memtableToFlush=cfs.apply(mutation.key(), columnFamily)) != null)
                     memtablesToFlush.put(cfs, memtableToFlush);
-
+                if (!writeCommitLog) return;
                 ColumnFamily cachedRow = cfs.getRawCachedRow(mutation.key());
                 if (cachedRow != null)
                     cachedRow.addAll(columnFamily);

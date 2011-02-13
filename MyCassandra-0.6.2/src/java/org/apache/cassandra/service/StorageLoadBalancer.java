@@ -193,6 +193,7 @@ public class StorageLoadBalancer implements IEndPointStateChangeSubscriber
 
     public void onChange(InetAddress endpoint, String stateName, ApplicationState state)
     {
+        StorageService.instance.getTokenMetadata().updateStorageType(endpoint, state.getStorageType());
         if (!stateName.equals(LoadDisseminator.loadInfo_))
             return;
         loadInfo_.put(endpoint, Double.parseDouble(state.getValue()));

@@ -351,7 +351,7 @@ public class HandlerSocket {
 			writeToken(dos, OPERATOR_INSERT);
 			writeTokenSeparator(dos);
 			//key
-			writeToken(dos, "2");
+			writeToken(dos, "1");
 			writeTokenSeparator(dos);
 			writeToken(dos, key == null ? null : key.getBytes(encoding));
 		  writeTokenSeparator(dos);
