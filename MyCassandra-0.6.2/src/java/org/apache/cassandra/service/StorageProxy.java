@@ -681,7 +681,7 @@ public class StorageProxy implements StorageProxyMBean
             if (endpoints.size() < responseCount)
                 throw new UnavailableException();
 
-            DatabaseDescriptor.getEndPointSnitch(keyspace).sortByStorageType(2, map);
+            endpoints = DatabaseDescriptor.getEndPointSnitch(keyspace).sortByStorageType(2, map);
             //DatabaseDescriptor.getEndPointSnitch(keyspace).sortByProximity(FBUtilities.getLocalAddress(), endpoints);
             List<InetAddress> endpointsForCL = endpoints.subList(0, responseCount);
             Set<AbstractBounds> restrictedRanges = queryRange.restrictTo(nodeRange);
