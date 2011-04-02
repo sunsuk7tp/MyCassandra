@@ -172,16 +172,16 @@
    ~ of tokens around the hash space, especially for clusters with a small
    ~ number of nodes.
   -->
-  <InitialToken>124061279606592141841200015133305208832</InitialToken>
+  <InitialToken></InitialToken>
 
   <!--
    ~ Directories: Specify where Cassandra should store different data on
    ~ disk.  Keep the data disks and the CommitLog disks separate for best
    ~ performance
   -->
-  <CommitLogDirectory>/work1/nakamura/cassandra/commitlog</CommitLogDirectory>
+  <CommitLogDirectory>/var/lib/cassandra/commitlog</CommitLogDirectory>
   <DataFileDirectories>
-      <DataFileDirectory>/work1/nakamura/cassandra/data</DataFileDirectory>
+      <DataFileDirectory>/var/lib/cassandra/data</DataFileDirectory>
   </DataFileDirectories>
 
 
@@ -217,7 +217,7 @@
    ~ (hostname, name resolution, etc), and the Right Thing is to use the
    ~ address associated with the hostname (it might not be).
   -->
-  <ListenAddress>lime06</ListenAddress>
+  <ListenAddress>175.41.245.39</ListenAddress>
   <!-- internal communications port -->
   <StoragePort>7000</StoragePort>
 
@@ -229,7 +229,7 @@
    ~ Leaving this blank has the same effect it does for ListenAddress,
    ~ (i.e. it will be based on the configured hostname of the node).
   -->
-  <ThriftAddress>lime06</ThriftAddress>
+  <ThriftAddress>175.41.245.39</ThriftAddress>
   <!-- Thrift RPC port (the port clients connect to). -->
   <ThriftPort>9160</ThriftPort>
   <!-- 
