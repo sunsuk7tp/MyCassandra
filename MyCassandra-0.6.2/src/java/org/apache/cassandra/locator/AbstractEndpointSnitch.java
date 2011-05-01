@@ -25,6 +25,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 
+//import org.apache.cassandra.services.PerformanceStat;
+
 /**
  * An endpoint snitch tells Cassandra information about network topology that it can use to route
  * requests more efficiently (with "sortByProximity").  Of the abstract methods, isOnSameRack
@@ -104,6 +106,11 @@ public abstract class AbstractEndpointSnitch implements IEndPointSnitch
         return preferred;
     }
 */
+/*    public List<InetAddress> sortByResponse(int queryType, List<InetAddress> addresses, PerformanceStat ps)
+    {
+    	return ps.sortByResponse(queryType, addresses);
+    }
+*/    
     public List<InetAddress> sortByStorageType(int queryType, Map<InetAddress, Integer> map)
     {
         switch (queryType) {

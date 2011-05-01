@@ -1198,6 +1198,11 @@ public class StorageService implements IEndPointStateChangeSubscriber, StorageSe
 
         return liveEps;
     }
+
+    public Map<InetAddress, Integer> getLiveMap(String table, String key)
+    {
+        return getLiveMap(table, partitioner_.getToken(key));
+    }
     
     public Map<InetAddress, Integer> getLiveMap(String table, Token token)
     {

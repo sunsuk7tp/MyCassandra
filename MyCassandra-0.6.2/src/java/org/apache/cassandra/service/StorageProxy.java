@@ -64,6 +64,8 @@ public class StorageProxy implements StorageProxyMBean
     private static final LatencyTracker readStats = new LatencyTracker();
     private static final LatencyTracker rangeStats = new LatencyTracker();
     private static final LatencyTracker writeStats = new LatencyTracker();
+    
+    //private static PerformanceStat pStats = new PerformanceStats(0.5);
 
     private StorageProxy() {}
     static
@@ -447,21 +449,24 @@ public class StorageProxy implements StorageProxyMBean
             Message message = command.makeReadMessage();
             Message messageDigestOnly = readMessageDigestOnly.makeReadMessage();
 
-            InetAddress dataPoint = StorageService.instance.findSuitableEndPoint(command.table, command.key);
-            List<InetAddress> endpointList = StorageService.instance.getLiveNaturalEndpoints(command.table, command.key);
+            //InetAddress dataPoint = StorageService.instance.findSuitableEndPoint(command.table, command.key);
+            //List<InetAddress> endpointList = StorageService.instance.getLiveNaturalEndpoints(command.table, command.key);
             final String table = command.table;
+            Map<InetAddress, Integer> endpointMap = StorageService.instance.getLiveMap(command.table, command.key);
+            List<InetAddress> endpointList = DatabaseDescriptor.getEndPointSnitch(table).sortByStorageType(2, endpointMap);
             int responseCount = determineBlockFor(DatabaseDescriptor.getReplicationFactor(table), consistency_level);
             if (endpointList.size() < responseCount)
                 throw new UnavailableException();
 
-            InetAddress[] endPoints = new InetAddress[endpointList.size()];
-            Message messages[] = new Message[endpointList.size()];
+            InetAddress[] endPoints = new InetAddress[endpointMap.size()];
+            Message messages[] = new Message[endpointMap.size()];
             // data-request message is sent to dataPoint, the node that will actually get
             // the data for us. The other replicas are only sent a digest query.
             int n = 0;
             for (InetAddress endpoint : endpointList)
             {
-                Message m = endpoint.equals(dataPoint) ? message : messageDigestOnly;
+                //Message m = endpoint.equals(dataPoint) ? message : messageDigestOnly;
+                Message m = (n == 0 ? message : messageDigestOnly);
                 endPoints[n] = endpoint;
                 messages[n++] = m;
                 if (logger.isDebugEnabled())
