@@ -141,9 +141,9 @@ public class DatabaseDescriptor
     private final static String STORAGE_CONF_FILE = "storage-conf.xml";
     
     public static final int MSTABLE = 1;
-    public static final int MYSQL = 2;
+    public static final int MYSQL = 4;
     public static final int REDIS = 3;
-    public static final int JREDIS = 4;
+    public static final int JREDIS = 2;
     public static final int MONGO = 5;
     public static final int HSMYSQL = 6;
     public static final int defaultDataBase = MSTABLE;

@@ -151,9 +151,17 @@ public abstract class AbstractEndpointSnitch implements IEndPointSnitch
                 Map.Entry e2 =(Map.Entry)o2;
                 int s1 = (Integer)e1.getValue();
                 int s2 = (Integer)e2.getValue();
-                if (s1 > s2) return -1;
+                /*
+								if (s1 > s2) return -1;
                 else if (s1 < s2) return 1;
                 else return 0;
+								*/
+                if (s1 % 2 != 0 && s2 % 2 == 0)
+                    return -1;
+                if (s1 % 2 == 0 && s2 % 2 != 0)
+                    return 1;
+                else
+                    return 0;
             }
         });
         return ArrayToAddressList(entries);

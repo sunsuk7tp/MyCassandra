@@ -54,17 +54,19 @@ public class HostAwareStrategy extends AbstractReplicationStrategy
 
         // Add the token at the index by default
         Iterator<Token> iter = TokenMetadata.ringIterator(tokens, token);
+        List<Integer> replicaStorageTypes = new ArrayList(replicas);
         while (endpoints.size() < replicas && iter.hasNext())
         {
             Token t = iter.next();
-            Set<InetAddress> hosts = DatabaseDescriptor.getHosts();
-            if (!hosts.contains(metadata.getEndPoint(t))) // same host 
+            //Set<InetAddress> hosts = DatabaseDescriptor.getHosts();
+            InetAddress address = metadata.getEndPoint(t);
+            int storageType = metadata.getStorageType(address);
+            if (!replicaStorageTypes.contains(storageType))
             {
-                InetAddress address = metadata.getEndPoint(t);
                 endpoints.put(address, metadata.getStorageType(address));
+                replicaStorageTypes.add(storageType);
             }
         }
-
         return endpoints;
     }
 }
