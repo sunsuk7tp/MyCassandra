@@ -89,12 +89,12 @@ public class    DatabaseDescriptor
     public static final UUID INITIAL_VERSION = new UUID(4096, 0); // has type nibble set to 1, everything else to zero.
     private static volatile UUID defsVersion = INITIAL_VERSION;
 
-    public static final int MSTABLE = 0;
+    public static final int BIGTABLE = 0;
     public static final int MYSQL = 1;
     public static final int JREDIS = 2;
     public static final int MONGODB = 3;
     public static final int HSMYSQL = 4;
-    public static final int defaultDataBase = MSTABLE;
+    public static final int defaultDataBase = BIGTABLE;
     
     public static int dataBase;
     
@@ -360,7 +360,7 @@ public class    DatabaseDescriptor
             
             if (conf.database.equals("Bigtable"))
             {
-               dataBase = MSTABLE;
+               dataBase = BIGTABLE;
                if (conf.commitlog_directory != null && conf.data_file_directories != null && conf.saved_caches_directory != null)
                {
                    for (String datadir : conf.data_file_directories)

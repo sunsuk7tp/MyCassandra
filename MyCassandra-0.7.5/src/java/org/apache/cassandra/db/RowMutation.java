@@ -187,7 +187,7 @@ public class RowMutation
     */
     public void apply() throws IOException
     {
-        if (DatabaseDescriptor.dataBase == DatabaseDescriptor.MSTABLE)
+        if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
             Table.open(table_).apply(this, getSerializedBuffer(), true);
         else
             applyUnsafe();

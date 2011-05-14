@@ -223,31 +223,33 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
         if (logger.isDebugEnabled())
             logger.debug("Starting CFS {}", columnFamily);
-
-        // scan for sstables corresponding to this cf and load them
-        ssTables = new SSTableTracker(table.name, columnFamilyName);
-        Set<DecoratedKey> savedKeys = readSavedCache(DatabaseDescriptor.getSerializedKeyCachePath(table.name, columnFamilyName));
-        List<SSTableReader> sstables = new ArrayList<SSTableReader>();
-        for (Map.Entry<Descriptor,Set<Component>> sstableFiles : files(table.name, columnFamilyName, false).entrySet())
+        if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
         {
-            SSTableReader sstable;
-            try
+            // scan for sstables corresponding to this cf and load them
+            ssTables = new SSTableTracker(table.name, columnFamilyName);
+            Set<DecoratedKey> savedKeys = readSavedCache(DatabaseDescriptor.getSerializedKeyCachePath(table.name, columnFamilyName));
+            List<SSTableReader> sstables = new ArrayList<SSTableReader>();
+            for (Map.Entry<Descriptor,Set<Component>> sstableFiles : files(table.name, columnFamilyName, false).entrySet())
             {
-                sstable = SSTableReader.open(sstableFiles.getKey(), sstableFiles.getValue(), savedKeys, ssTables, metadata, this.partitioner);
+                SSTableReader sstable;
+                try
+                {
+                    sstable = SSTableReader.open(sstableFiles.getKey(), sstableFiles.getValue(), savedKeys, ssTables, metadata, this.partitioner);
+                }
+                catch (FileNotFoundException ex)
+                {
+                    logger.error("Missing sstable component in " + sstableFiles + "; skipped because of " + ex.getMessage());
+                    continue;
+                }
+                catch (IOException ex)
+                {
+                    logger.error("Corrupt sstable " + sstableFiles + "; skipped", ex);
+                    continue;
+                }
+                sstables.add(sstable);
             }
-            catch (FileNotFoundException ex)
-            {
-                logger.error("Missing sstable component in " + sstableFiles + "; skipped because of " + ex.getMessage());
-                continue;
-            }
-            catch (IOException ex)
-            {
-                logger.error("Corrupt sstable " + sstableFiles + "; skipped", ex);
-                continue;
-            }
-            sstables.add(sstable);
+            ssTables.add(sstables);
         }
-        ssTables.add(sstables);
 
         // create the private ColumnFamilyStores for the secondary column indexes
         indexedColumns = new ConcurrentSkipListMap<ByteBuffer, ColumnFamilyStore>(getComparator());
@@ -273,10 +275,10 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
         switch(DatabaseDescriptor.dataBase)
         {
-            case DatabaseDescriptor.MSTABLE:
+            case DatabaseDescriptor.BIGTABLE:
                 break;
             case DatabaseDescriptor.JREDIS:
-                dbi = new JRedisInstance(new String(table.name), columnFamilyName);                                                                                                  
+                dbi = new JRedisInstance(new String(table.name), columnFamilyName);
                 break;
             case DatabaseDescriptor.MYSQL:
             default:
@@ -855,7 +857,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     {
         long start = System.nanoTime();
         try {
-            if (DatabaseDescriptor.dataBase == DatabaseDescriptor.MSTABLE)
+            if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
             {
                 boolean flushRequested = memtable.isThresholdViolated();
                 memtable.put(key, columnFamily);
@@ -1311,10 +1313,10 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                 ColumnFamily cf;
                 try
                 {
-                    cf = (DatabaseDescriptor.dataBase == DatabaseDescriptor.MSTABLE ? 
+                    cf = (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE ? 
                             getTopLevelColumns(filter, gcBefore) : 
                             dbi.get(filter.key.getTxtKey(), filter));
-                    if (DatabaseDescriptor.dataBase != DatabaseDescriptor.MSTABLE) return cf;
+                    if (DatabaseDescriptor.dataBase != DatabaseDescriptor.BIGTABLE) return cf;
                 }
                 catch (SQLException e)
                 {

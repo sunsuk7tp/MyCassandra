@@ -66,7 +66,7 @@ public class Table
     // proper directories here as well as in CassandraDaemon.
     static 
     {
-        if (!StorageService.instance.isClientMode() && DatabaseDescriptor.dataBase == DatabaseDescriptor.MSTABLE) 
+        if (!StorageService.instance.isClientMode() && DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE) 
         {
             try
             {

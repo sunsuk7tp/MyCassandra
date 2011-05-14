@@ -99,7 +99,7 @@ public class CommitLog
     {
         try
         {
-            if (DatabaseDescriptor.dataBase == DatabaseDescriptor.MSTABLE)
+            if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
                 DatabaseDescriptor.createAllDirectories();
             segmentSize = DatabaseDescriptor.getCommitLogSegmentSize();
         }
