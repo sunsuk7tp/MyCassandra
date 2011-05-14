@@ -223,10 +223,10 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
         if (logger.isDebugEnabled())
             logger.debug("Starting CFS {}", columnFamily);
+        // scan for sstables corresponding to this cf and load them
+        ssTables = new SSTableTracker(table.name, columnFamilyName);
         if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
         {
-            // scan for sstables corresponding to this cf and load them
-            ssTables = new SSTableTracker(table.name, columnFamilyName);
             Set<DecoratedKey> savedKeys = readSavedCache(DatabaseDescriptor.getSerializedKeyCachePath(table.name, columnFamilyName));
             List<SSTableReader> sstables = new ArrayList<SSTableReader>();
             for (Map.Entry<Descriptor,Set<Component>> sstableFiles : files(table.name, columnFamilyName, false).entrySet())
