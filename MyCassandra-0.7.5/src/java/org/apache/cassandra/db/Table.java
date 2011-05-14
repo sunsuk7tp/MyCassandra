@@ -107,8 +107,9 @@ public class Table
                     instances.put(table, tableInstance);
 
                     //table has to be constructed and in the cache before cacheRow can be called
-                    for (ColumnFamilyStore cfs : tableInstance.getColumnFamilyStores())
-                        cfs.initRowCache();
+                    if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
+                        for (ColumnFamilyStore cfs : tableInstance.getColumnFamilyStores())
+                            cfs.initRowCache();
                 }
             }
         }
