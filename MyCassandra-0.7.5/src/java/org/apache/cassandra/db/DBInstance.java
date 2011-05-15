@@ -10,7 +10,7 @@ import org.apache.cassandra.db.filter.*;
 public abstract class DBInstance implements StorageEngineInterface
 {
     String ksName, cfName;
-        
+
     public ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException
     {
         try
@@ -23,29 +23,31 @@ public abstract class DBInstance implements StorageEngineInterface
             return null;
         }
     }
-    
+
     public int put(String rowKey, ColumnFamily cf) throws SQLException, IOException
     {
         ColumnFamily oldcf = get(rowKey, null);
         return oldcf != null ? update(rowKey, cf, oldcf) : insert(rowKey, cf);
     }
-    
+
     public abstract int delete(String rowKey) throws SQLException;
-    
+
+    public abstract int create (int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType);
+
     public byte[] mergeColumnFamily(ColumnFamily cf, ColumnFamily newcf)
     {
         cf.addAll(newcf);
         return cf.toBytes();
     }
-    
+
     public ColumnFamily bytes2ColumnFamily(byte[] b) throws IOException
     {
         return b != null ? new ColumnFamilySerializer().deserialize(new DataInputBuffer(b, 0, b.length)) : null;
     }
-    
+
     public abstract int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException;
-    
+
     public abstract int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException;
-    
+
     public abstract byte[] select(String rowKey) throws SQLException, IOException;
 }

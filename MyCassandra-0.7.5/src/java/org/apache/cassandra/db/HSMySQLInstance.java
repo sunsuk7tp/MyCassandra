@@ -97,7 +97,12 @@ public class HSMySQLInstance extends DBInstance
         }
         return -1;
     }
-    
+
+    public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
+    {
+        return 0;
+    }
+
     // Init MySQL Table for Keyspaces
     /*public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType) throws SQLException
     {

@@ -618,14 +618,14 @@ public class    DatabaseDescriptor
                 String storageEngineType = (cf.storageenginetype != null ? cf.storageenginetype : defaultStorageEngineType);
                 if(dataBase == MYSQL)
                 {
-                	try
-                	{
-                		new MySQLInstance(keyspace.name, cf.name).create(rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
-                	}
-                	catch (SQLException e)
-                	{
-                		System.out.println("db connection error "+ e);
-                	}
+                    try
+                    {
+                        new MySQLInstance(keyspace.name, cf.name).create(rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
+                    }
+                    catch (SQLException e)
+                    {
+                        System.out.println("db connection error "+ e);
+                    }
                 }
                 
                 ColumnFamilyType cfType = cf.column_type == null ? ColumnFamilyType.Standard : cf.column_type;

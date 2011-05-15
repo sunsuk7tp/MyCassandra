@@ -75,5 +75,10 @@ public class MongoInstance extends DBInstance
         doc.put(KEY, rowKey);
         coll.remove(doc);
         return 1;
-     }
+    }
+    
+    public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
+    {
+        return 0;
+    }
 }

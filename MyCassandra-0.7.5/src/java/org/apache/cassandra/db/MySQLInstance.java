@@ -127,7 +127,7 @@ public class MySQLInstance extends DBInstance
     }
     
     // Init MySQL Table for Keyspaces
-    public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType) throws SQLException
+    public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
     {
         try {
             Statement stmt = conn.createStatement();

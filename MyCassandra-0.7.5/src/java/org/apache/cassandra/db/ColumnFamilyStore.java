@@ -137,7 +137,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     private volatile DefaultInteger memsize;
     private volatile DefaultDouble memops;
     
-    private DBInstance dbi;
+    private static DBInstance dbi;
     
     private volatile DefaultInteger rowCacheSaveInSeconds;
     private volatile DefaultInteger keyCacheSaveInSeconds;
@@ -225,8 +225,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             logger.debug("Starting CFS {}", columnFamily);
         // scan for sstables corresponding to this cf and load them
         ssTables = new SSTableTracker(table.name, columnFamilyName);
-        if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
-        {
+        //if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
+        //{
             Set<DecoratedKey> savedKeys = readSavedCache(DatabaseDescriptor.getSerializedKeyCachePath(table.name, columnFamilyName));
             List<SSTableReader> sstables = new ArrayList<SSTableReader>();
             for (Map.Entry<Descriptor,Set<Component>> sstableFiles : files(table.name, columnFamilyName, false).entrySet())
@@ -249,7 +249,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                 sstables.add(sstable);
             }
             ssTables.add(sstables);
-        }
+        //}
 
         // create the private ColumnFamilyStores for the secondary column indexes
         indexedColumns = new ConcurrentSkipListMap<ByteBuffer, ColumnFamilyStore>(getComparator());
@@ -501,6 +501,10 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         }
         Collections.sort(generations);
         int value = (generations.size() > 0) ? (generations.get(generations.size() - 1)) : 0;
+
+        if(DatabaseDescriptor.dataBase == DatabaseDescriptor.MYSQL) {
+            dbi.create(DatabaseDescriptor.defaultRowKeySize, DatabaseDescriptor.defaultColumnFamilySize, DatabaseDescriptor.defaultColumnFamilyType, DatabaseDescriptor.defaultStorageEngineType);
+        }
 
         return new ColumnFamilyStore(table, columnFamily, partitioner, value, metadata);
     }

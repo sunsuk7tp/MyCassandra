@@ -13,14 +13,14 @@ public class JRedisInstance extends DBInstance
     JRedis conn;
     
     final String KEYSEPARATOR = ":";
-    
+
     public JRedisInstance(String ksName, String cfName)
     {
         this.ksName = ksName;
         this.cfName = cfName;
         conn = new JRedisConfigure().connect();
     }
-    
+
     synchronized public int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException
     {
         try
@@ -40,7 +40,7 @@ public class JRedisInstance extends DBInstance
         cf.addAll(newcf);
         return insert(rowKey, cf);
     }
-    
+
     public byte[] select(String rowKey) throws SQLException, IOException
     {
         try
@@ -53,7 +53,7 @@ public class JRedisInstance extends DBInstance
             return null;
         }
     }
-    
+
     synchronized public int delete(String rowKey) throws SQLException
     {
         try
@@ -67,7 +67,12 @@ public class JRedisInstance extends DBInstance
         }
         return -1;
     }
-    
+
+    public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
+    {
+        return 0;
+    }
+
     public String makeRowKey(String rowKey)
     {
         return ksName+KEYSEPARATOR+cfName+KEYSEPARATOR+rowKey;
