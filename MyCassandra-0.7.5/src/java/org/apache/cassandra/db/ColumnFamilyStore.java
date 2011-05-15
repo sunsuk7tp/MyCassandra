@@ -282,6 +282,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                 break;
             case DatabaseDescriptor.MYSQL:
             default:
+                dbi.create(DatabaseDescriptor.defaultRowKeySize, DatabaseDescriptor.defaultColumnFamilySize, DatabaseDescriptor.defaultColumnFamilyType, DatabaseDescriptor.defaultStorageEngineType);
                 dbi = new MySQLInstance(new String(table.name), columnFamilyName);
                 break;
             case DatabaseDescriptor.MONGODB:
@@ -501,10 +502,6 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         }
         Collections.sort(generations);
         int value = (generations.size() > 0) ? (generations.get(generations.size() - 1)) : 0;
-
-        if(DatabaseDescriptor.dataBase == DatabaseDescriptor.MYSQL) {
-            dbi.create(DatabaseDescriptor.defaultRowKeySize, DatabaseDescriptor.defaultColumnFamilySize, DatabaseDescriptor.defaultColumnFamilyType, DatabaseDescriptor.defaultStorageEngineType);
-        }
 
         return new ColumnFamilyStore(table, columnFamily, partitioner, value, metadata);
     }
