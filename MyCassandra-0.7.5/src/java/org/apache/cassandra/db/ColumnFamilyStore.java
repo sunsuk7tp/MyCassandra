@@ -1305,47 +1305,55 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         return cached;
     }
 
-    private ColumnFamily getColumnFamily(QueryFilter filter, int gcBefore)
+    public ColumnFamily getColumnFamily(QueryFilter filter, int gcBefore)
     {
         assert columnFamily.equals(filter.getColumnFamilyName()) : filter.getColumnFamilyName();
 
         long start = System.nanoTime();
-        try
-        {
-            if (ssTables.getRowCache().getCapacity() == 0)
-            {
-                ColumnFamily cf;
-                try
-                {
-                    cf = (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE ? 
-                            getTopLevelColumns(filter, gcBefore) : 
-                            dbi.get(filter.key.getTxtKey(), filter));
-                    if (DatabaseDescriptor.dataBase != DatabaseDescriptor.BIGTABLE) return cf;
-                }
-                catch (SQLException e)
-                {
-                    System.err.println(e);
-                    return null;
-                }
-                catch (IOException e)
-                {
-                    throw new IOError(e);
-                }
-
-                // TODO this is necessary because when we collate supercolumns together, we don't check
-                // their subcolumns for relevance, so we need to do a second prune post facto here.
-                return cf.isSuper() ? removeDeleted(cf, gcBefore) : removeDeletedCF(cf, gcBefore);
+        try {
+            if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE) {
+                return doGetCFBigtable(filter, gcBefore);
+            } else {
+                return doGetCFDB(filter, gcBefore);
             }
-
-            ColumnFamily cached = cacheRow(filter.key);
-            if (cached == null)
-                return null;
- 
-            return filterColumnFamily(cached, filter, gcBefore);
         }
         finally
         {
             readStats.addNano(System.nanoTime() - start);
+        }
+    }
+
+    private ColumnFamily doGetCFBigtable(QueryFilter filter, int gcBefore)
+    {
+        if (ssTables.getRowCache().getCapacity() == 0)
+        {
+            ColumnFamily cf = getTopLevelColumns(filter, gcBefore);
+            // TODO this is necessary because when we collate supercolumns together, we don't check
+            // their subcolumns for relevance, so we need to do a second prune post facto here.
+            return cf.isSuper() ? removeDeleted(cf, gcBefore) : removeDeletedCF(cf, gcBefore);
+        }
+
+        ColumnFamily cached = cacheRow(filter.key);
+        if (cached == null)
+            return null;
+ 
+        return filterColumnFamily(cached, filter, gcBefore);
+    }
+
+    private ColumnFamily doGetCFDB(QueryFilter filter, int gcBefore)
+    {
+        try
+        {
+            return dbi.get(filter.key.getTxtKey(), filter);
+        }
+        catch (SQLException e)
+        {
+            System.err.println(e);
+            return null;
+        }
+        catch (IOException e)
+        {
+            throw new IOError(e);
         }
     }
 

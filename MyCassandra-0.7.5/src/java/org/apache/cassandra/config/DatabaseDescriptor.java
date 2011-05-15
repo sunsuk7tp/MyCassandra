@@ -387,19 +387,11 @@ public class    DatabaseDescriptor
             else if (conf.database.equals("MySQL"))
             {
                 dataBase = MYSQL;
-                try
-                {
-                    new MySQLInstance("system", "Schema").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
-                    new MySQLInstance("system", "Migrations").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
-                    new MySQLInstance("system", "LocationInfo").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
-                    new MySQLInstance("system", "HintsColumnFamily").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
-                    new MySQLInstance("system", "IndexInfo").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
-                }
-                catch (SQLException e)
-                {
-                    System.err.println("db connection error "+ e);
-                    System.exit(1);
-                }
+                new MySQLInstance("system", "Schema").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
+                new MySQLInstance("system", "Migrations").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
+                new MySQLInstance("system", "LocationInfo").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
+                new MySQLInstance("system", "HintsColumnFamily").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
+                new MySQLInstance("system", "IndexInfo").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
             }
             else if (conf.database.equals("JRedis"))
             {
@@ -617,16 +609,7 @@ public class    DatabaseDescriptor
                 String columnFamilyType =(cf.columnfamilytype != null ? cf.columnfamilytype : defaultColumnFamilyType);
                 String storageEngineType = (cf.storageenginetype != null ? cf.storageenginetype : defaultStorageEngineType);
                 if(dataBase == MYSQL)
-                {
-                    try
-                    {
-                        new MySQLInstance(keyspace.name, cf.name).create(rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
-                    }
-                    catch (SQLException e)
-                    {
-                        System.out.println("db connection error "+ e);
-                    }
-                }
+                    new MySQLInstance(keyspace.name, cf.name).create(rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
                 
                 ColumnFamilyType cfType = cf.column_type == null ? ColumnFamilyType.Standard : cf.column_type;
                 if (cfType == ColumnFamilyType.Super)
