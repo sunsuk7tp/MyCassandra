@@ -282,8 +282,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                 break;
             case DatabaseDescriptor.MYSQL:
             default:
-                dbi.create(DatabaseDescriptor.defaultRowKeySize, DatabaseDescriptor.defaultColumnFamilySize, DatabaseDescriptor.defaultColumnFamilyType, DatabaseDescriptor.defaultStorageEngineType);
                 dbi = new MySQLInstance(new String(table.name), columnFamilyName);
+                dbi.create(DatabaseDescriptor.defaultRowKeySize, DatabaseDescriptor.defaultColumnFamilySize, DatabaseDescriptor.defaultColumnFamilyType, DatabaseDescriptor.defaultStorageEngineType);
                 break;
             case DatabaseDescriptor.MONGODB:
                 dbi = new MongoInstance(new String(table.name), columnFamilyName);
