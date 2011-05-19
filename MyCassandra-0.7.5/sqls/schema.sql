@@ -31,9 +31,9 @@ DROP TABLE IF EXISTS `Standard1`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Standard1` (
-  `Row_Key` varchar(64) NOT NULL,
-  `ColumnFamily` varbinary(5120) NOT NULL,
-  PRIMARY KEY (`Row_Key`)
+  `rkey` varchar(64) NOT NULL,
+  `cf` varbinary(5120) NOT NULL,
+  PRIMARY KEY (`rkey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -54,9 +54,9 @@ DROP TABLE IF EXISTS `Standard2`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Standard2` (
-  `Row_Key` varchar(64) NOT NULL,
-  `ColumnFamily` varbinary(256) NOT NULL,
-  PRIMARY KEY (`Row_Key`)
+  `rkey` varchar(64) NOT NULL,
+  `cf` varbinary(256) NOT NULL,
+  PRIMARY KEY (`rkey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -77,9 +77,9 @@ DROP TABLE IF EXISTS `StandardByUUID1`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `StandardByUUID1` (
-  `Row_Key` varchar(64) NOT NULL,
-  `ColumnFamily` varbinary(6144) DEFAULT NULL,
-  PRIMARY KEY (`Row_Key`)
+  `rkey` varchar(64) NOT NULL,
+  `cf` varbinary(6144) DEFAULT NULL,
+  PRIMARY KEY (`rkey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -100,9 +100,9 @@ DROP TABLE IF EXISTS `Super1`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Super1` (
-  `Row_Key` varchar(64) NOT NULL,
-  `ColumnFamily` varbinary(65276) NOT NULL,
-  PRIMARY KEY (`Row_Key`)
+  `rkey` varchar(64) NOT NULL,
+  `cf` varbinary(65276) NOT NULL,
+  PRIMARY KEY (`rkey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -123,9 +123,9 @@ DROP TABLE IF EXISTS `Super2`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Super2` (
-  `Row_Key` varchar(64) NOT NULL,
-  `ColumnFamily` varbinary(65276) NOT NULL,
-  PRIMARY KEY (`Row_Key`)
+  `rkey` varchar(64) NOT NULL,
+  `cf` varbinary(65276) NOT NULL,
+  PRIMARY KEY (`rkey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -802,9 +802,9 @@ DROP TABLE IF EXISTS `HintsColumnFamily`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `HintsColumnFamily` (
-  `Row_Key` varchar(64) NOT NULL,
-  `ColumnFamily` varbinary(6144) DEFAULT NULL,
-  PRIMARY KEY (`Row_Key`)
+  `rkey` varchar(64) NOT NULL,
+  `cf` varbinary(6144) DEFAULT NULL,
+  PRIMARY KEY (`rkey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -825,9 +825,9 @@ DROP TABLE IF EXISTS `LocationInfo`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `LocationInfo` (
-  `Row_Key` varchar(64) NOT NULL,
-  `ColumnFamily` varbinary(65276) NOT NULL,
-  PRIMARY KEY (`Row_Key`)
+  `rkey` varchar(64) NOT NULL,
+  `cf` varbinary(65276) NOT NULL,
+  PRIMARY KEY (`rkey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -865,9 +865,9 @@ DROP TABLE IF EXISTS `data`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `data` (
-  `Row_Key` varchar(16) NOT NULL,
-  `ColumnFamily` varbinary(2048) DEFAULT NULL,
-  PRIMARY KEY (`Row_Key`)
+  `rkey` varchar(16) NOT NULL,
+  `cf` varbinary(2048) DEFAULT NULL,
+  PRIMARY KEY (`rkey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
