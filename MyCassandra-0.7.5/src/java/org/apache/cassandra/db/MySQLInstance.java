@@ -16,31 +16,41 @@ public class MySQLInstance extends DBInstance
     int multiMax = 100;
     int multiCount = 0;
     String bsql;
-    final String PREFIX = "_";
-    
+    private final String PREFIX = "_";
+    private final String KEY = "rkey";
+    private final String VALUE = "cf";
+    private String insertSt, updateSt, selectSt, deleteSt, setSt, getSt;
+
     public MySQLInstance(String ksName, String cfName)
     {
         this.ksName = ksName;
         this.cfName = PREFIX + cfName;
+        insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + KEY + " = ?'"; 
+        updateSt = "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?)";
+        selectSt = "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
+        deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?)";
+        setSt = "CALL set_row(?,?)";
+        getSt = "CALL get_row(?)";
+
         conn = new MySQLConfigure().connect(ksName);
         /*try {
              conn.setAutoCommit(false);
         } catch(SQLException e) {
              System.out.println(e);
-    	}*/
+    	  }*/
         
         try
         {
-            pstInsert = conn.prepareStatement("INSERT INTO "+this.cfName+" (Row_Key, ColumnFamily) VALUES (?,?) ON DUPLICATE KEY UPDATE ColumnFamily = ?");
+            pstInsert = conn.prepareStatement(insertSt);
             if(ksName.equals("system"))
             {
-                pstUpdate = conn.prepareStatement("UPDATE "+this.cfName+" SET ColumnFamily = ? WHERE Row_Key = ?");
+                pstUpdate = conn.prepareStatement(updateSt);
             }
             else
             {
-                pstUpdate = conn.prepareStatement("CALL set_row(?,?)");
+                pstUpdate = conn.prepareStatement(setSt);
             }
-            bsql = "INSERT INTO "+ this.cfName + " (Row_Key, ColumnFamily) VALUES";
+            /*bsql = "INSERT INTO "+ this.cfName + " (" + KEY + ", " + VALUE +") VALUES";
             for(int i=0; i< multiMax; i++)
             {
                 bsql += " (?, ?)";
@@ -50,7 +60,7 @@ public class MySQLInstance extends DBInstance
                 }
             }
                 
-            pstMultiInsert = conn.prepareStatement(bsql);
+            pstMultiInsert = conn.prepareStatement(bsql);*/
         }
         catch (SQLException e)
         {
@@ -91,11 +101,11 @@ public class MySQLInstance extends DBInstance
         PreparedStatement pstSelect;
         if(ksName.equals("system"))
         {
-            pstSelect = conn.prepareStatement("SELECT ColumnFamily FROM " + cfName + " WHERE Row_Key = ?");
+            pstSelect = conn.prepareStatement(selectSt);
         }
         else
         {
-            pstSelect = conn.prepareStatement("CALL get_row(?)");
+            pstSelect = conn.prepareStatement(getSt);
         }
         pstSelect.setString(1, rowKey);
         ResultSet rs = pstSelect.executeQuery();
@@ -115,7 +125,7 @@ public class MySQLInstance extends DBInstance
     
     public synchronized int delete(String rowKey) throws SQLException
     {
-        PreparedStatement pstDelete = conn.prepareStatement("DELETE FROM "+cfName+" WHERE Row_Key = ?");
+        PreparedStatement pstDelete = conn.prepareStatement(deleteSt);
         try {
             pstDelete.setString(1, rowKey);
             return pstDelete.executeUpdate();
@@ -146,14 +156,14 @@ public class MySQLInstance extends DBInstance
             }
             
             String sPrepareSQL = "CREATE Table "+ cfName + "(" +
-                "`Row_Key` VARCHAR(?) NOT NULL," +
-                "`ColumnFamily` VARBINARY(?)," +
-                "PRIMARY KEY (`Row_Key`)" +
+                "`" + KEY + "` VARCHAR(?) NOT NULL," +
+                "`" + VALUE + "` VARBINARY(?)," +
+                "PRIMARY KEY (`" + KEY + "`)" +
             ") ENGINE = " + storageEngineType;
             
             PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
-            pst.setInt(1,rowKeySize);
-            pst.setInt(2,columnFamilySize);
+            pst.setInt(1, rowKeySize);
+            pst.setInt(2, columnFamilySize);
             
             return pst.executeUpdate();
         }

@@ -13,8 +13,8 @@ public class HSMySQLInstance extends DBInstance
     HandlerSocket hs;
     private final String PREFIX = "";
     private final String ID = "1";
-    private final String KEY = "Row_Key";     
-    private final String VALUE = "ColumnFamily";
+    private final String KEY = "rkey";     
+    private final String VALUE = "cf";
 
     int debug = 0;
     
@@ -126,10 +126,10 @@ public class HSMySQLInstance extends DBInstance
             
             String sPrepareSQL = "CREATE Table "+table + "(" +
                 //"`ID` INT NOT NULL AUTO_INCREMENT," + 
-                "`Row_Key` VARCHAR(?) NOT NULL," +
-                "`ColumnFamily` VARBINARY(?)," +
-                "PRIMARY KEY (`Row_Key`)" +
-            ")";// PARTITION BY KEY(`Row_Key`) PARTITIONS 2;";
+                "`` VARCHAR(?) NOT NULL," +
+                "`cf` VARBINARY(?)," +
+                "PRIMARY KEY (`" + KEY + "`)" +
+            ")";// PARTITION BY KEY(`" + KEY + "`);";
             
             PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
             pst.setInt(1,rowKeySize);
