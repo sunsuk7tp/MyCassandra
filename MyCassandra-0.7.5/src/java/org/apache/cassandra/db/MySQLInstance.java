@@ -25,10 +25,10 @@ public class MySQLInstance extends DBInstance
     {
         this.ksName = ksName;
         this.cfName = PREFIX + cfName;
-        insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + KEY + " = ?'"; 
-        updateSt = "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?)";
+        insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + KEY + " = ?"; 
+        updateSt = "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
         selectSt = "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
-        deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?)";
+        deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
         setSt = "CALL set_row(?,?)";
         getSt = "CALL get_row(?)";
 

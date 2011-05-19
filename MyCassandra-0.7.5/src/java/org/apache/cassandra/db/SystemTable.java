@@ -272,7 +272,7 @@ public class SystemTable
         ColumnFamily cf = table.getColumnFamilyStore(STATUS_CF).getColumnFamily(filter);
 
         int generation;
-				if (cf == null)
+				if (cf == null || !cf.findColumn(GENERATION))
         {
             // seconds-since-epoch isn't a foolproof new generation
             // (where foolproof is "guaranteed to be larger than the last one seen at this ip address"),

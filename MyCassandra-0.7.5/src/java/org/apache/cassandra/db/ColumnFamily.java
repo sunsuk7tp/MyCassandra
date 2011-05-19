@@ -240,6 +240,11 @@ public class ColumnFamily implements IColumnContainer, IIterableColumns
         return columns.get(name);
     }
 
+		public boolean findColumn(ByteBuffer name)
+		{
+				return columns.containsKey(name);
+		}
+
     public SortedSet<ByteBuffer> getColumnNames()
     {
         return columns.keySet();
