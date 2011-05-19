@@ -77,7 +77,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-            System.err.println("db connection error "+ e);
+            System.err.println("db insert error "+ e);
             return -1;
         }
     }
