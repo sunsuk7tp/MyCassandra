@@ -55,7 +55,7 @@ import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
-public class    DatabaseDescriptor
+public class DatabaseDescriptor
 {
     private static Logger logger = LoggerFactory.getLogger(DatabaseDescriptor.class);
 
@@ -95,9 +95,9 @@ public class    DatabaseDescriptor
     public static final int MONGODB = 3;
     public static final int HSMYSQL = 4;
     public static final int defaultDataBase = BIGTABLE;
-    
+
     public static int dataBase;
-    
+
     // mysql default setting
     public static final String defaultStorageEngineType = "InnoDB";
     public static final int defaultRowKeySize = 64;
@@ -609,7 +609,11 @@ public class    DatabaseDescriptor
                 String columnFamilyType =(cf.columnfamilytype != null ? cf.columnfamilytype : defaultColumnFamilyType);
                 String storageEngineType = (cf.storageenginetype != null ? cf.storageenginetype : defaultStorageEngineType);
                 if(dataBase == MYSQL)
-                    new MySQLInstance(keyspace.name, cf.name).create(rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
+                {
+                    MySQLInstance mdbi = new MySQLInstance(keyspace.name, cf.name);
+                    mdbi.create(rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
+                    mdbi.createProcedure(rowKeySize, columnFamilySize);
+                }
                 
                 ColumnFamilyType cfType = cf.column_type == null ? ColumnFamilyType.Standard : cf.column_type;
                 if (cfType == ColumnFamilyType.Super)

@@ -20,8 +20,10 @@ public class MySQLInstance extends DBInstance
     private final String KEY = "rkey";
     private final String VALUE = "cf";
     private final String SYSTEM = "system";
+    private final String SETPR = "set_row";
+    private final String GETPR = "get_row";
     
-    private String insertSt, updateSt, selectSt, deleteSt, createSt, setSt, getSt;
+    private String insertSt, updateSt, selectSt, deleteSt, createSt, setSt, getSt, getPr, setPr;
 
     public MySQLInstance (String ksName, String cfName)
     {
@@ -36,6 +38,8 @@ public class MySQLInstance extends DBInstance
         createSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` VARBINARY(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         setSt = "CALL set_row(?,?)";
         getSt = "CALL get_row(?)";
+        setPr = "CREATE PROCEDURE set_row(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
+        getPr = "CREATE PROCEDURE get_row(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + "WHERE " + KEY + " = id END";
 
         createDB();
         conn = new MySQLConfigure().connect(this.ksName);
@@ -43,7 +47,7 @@ public class MySQLInstance extends DBInstance
              conn.setAutoCommit(false);
         } catch(SQLException e) {
              System.out.println(e);
-    	  }*/
+          }*/
         
         try
         {
@@ -52,7 +56,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-        	System.err.println("db prepare state error "+ e);
+            System.err.println("db prepare state error "+ e);
         }
     }
     
@@ -77,7 +81,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-        	System.err.println("db update error: "+ e);
+            System.err.println("db update error: "+ e);
             return -1;
         }
     }
@@ -89,8 +93,8 @@ public class MySQLInstance extends DBInstance
         ResultSet rs = pstSelect.executeQuery();
         byte[] b = null;
         if (rs != null)
-        	while (rs.next())
-        		b = rs.getBytes(1);
+            while (rs.next())
+                b = rs.getBytes(1);
         rs.close();
         pstSelect.close();
         return b;
@@ -111,17 +115,17 @@ public class MySQLInstance extends DBInstance
 
     public int createDB()
     {
-    	try {
+        try {
           Statement stmt = new MySQLConfigure().connect("").createStatement();
           ResultSet rs = stmt.executeQuery("SHOW DATABASES");
           while (rs.next())
               if (rs.getString(1).equals(ksName))
                   return 0;
           return stmt.executeUpdate("CREATE DATABASE " + ksName);
-     	}
+         }
         catch (SQLException e) 
         {
-        	System.err.println("db database creation error "+ e);
+            System.err.println("db database creation error "+ e);
             return -1;
         }
     }
@@ -149,7 +153,32 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e) 
         {
-        	System.err.println("db table creation error "+ e);
+            System.err.println("db table creation error "+ e);
+            return -1;
+        }
+    }
+    
+    public int createProcedure(int rowKeySize, int columnFamilySize)
+    {
+        try {
+            Statement stmt = conn.createStatement();
+            
+            ResultSet rs = stmt.executeQuery("SHOW PROCEDURES");
+    	    while (rs.next())
+                if (rs.getString(2).equals(cfName) && ( rs.getString(3).equals(GETPR) || rs.getString(3).equals(SETPR)))
+                    return 0;
+            PreparedStatement gst = conn.prepareStatement(getPr);
+            PreparedStatement sst = conn.prepareStatement(setPr);
+            
+            gst.setInt(1, rowKeySize);
+            sst.setInt(1, columnFamilySize);
+            sst.setInt(2, rowKeySize);
+            
+            return gst.executeUpdate() * sst.executeUpdate();
+        }
+        catch (SQLException e)
+        {
+            System.err.println("db procedure creation error " + e);
             return -1;
         }
     }

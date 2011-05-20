@@ -103,6 +103,11 @@ public class HSMySQLInstance extends DBInstance
         return 0;
     }
 
+    public int createProcedure(int rowKeySize, int columnFanukySize)
+    {
+        return 0;
+    }
+
     // Init MySQL Table for Keyspaces
     /*public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType) throws SQLException
     {

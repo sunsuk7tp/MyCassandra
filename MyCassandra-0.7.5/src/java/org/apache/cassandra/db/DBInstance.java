@@ -32,7 +32,9 @@ public abstract class DBInstance implements StorageEngineInterface
 
     public abstract int delete(String rowKey) throws SQLException;
 
-    public abstract int create (int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType);
+    public abstract int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType);
+
+    public abstract int createProcedure(int rowKeySize, int columnFanukySize);
 
     public byte[] mergeColumnFamily(ColumnFamily cf, ColumnFamily newcf)
     {

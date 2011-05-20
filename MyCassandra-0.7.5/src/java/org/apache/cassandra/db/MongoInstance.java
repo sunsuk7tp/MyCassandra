@@ -81,4 +81,9 @@ public class MongoInstance extends DBInstance
     {
         return 0;
     }
+
+    public int createProcedure(int rowKeySize, int columnFanukySize)
+    {
+        return 0;
+    }
 }

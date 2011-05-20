@@ -73,6 +73,11 @@ public class JRedisInstance extends DBInstance
         return 0;
     }
 
+    public int createProcedure(int rowKeySize, int columnFanukySize)
+    {
+        return 0;
+    }
+
     public String makeRowKey(String rowKey)
     {
         return ksName+KEYSEPARATOR+cfName+KEYSEPARATOR+rowKey;
