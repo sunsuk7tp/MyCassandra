@@ -229,9 +229,11 @@ public class SystemTable
                     {
                         return name.endsWith(".db");
                     }
-                }); 
-                if (dbContents.length > 0)
-                    throw new ConfigurationException("Found system table files, but they couldn't be loaded. Did you change the partitioner?");
+                });
+
+                if (dbContents != null)
+                    if (dbContents.length > 0)
+                        throw new ConfigurationException("Found system table files, but they couldn't be loaded. Did you change the partitioner?");
             }
 
             // no system files.  this is a new node.

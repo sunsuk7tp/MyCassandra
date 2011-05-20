@@ -226,7 +226,7 @@ public class Table
             try
             {
                 String keyspaceDir = dataDir + File.separator + table;
-                if (!StorageService.instance.isClientMode())
+                if (!StorageService.instance.isClientMode() && DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
                     FileUtils.createDirectory(keyspaceDir);
     
                 // remove the deprecated streaming directory.
