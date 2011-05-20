@@ -19,19 +19,25 @@ public class MySQLInstance extends DBInstance
     private final String PREFIX = "_";
     private final String KEY = "rkey";
     private final String VALUE = "cf";
-    private String insertSt, updateSt, selectSt, deleteSt, setSt, getSt;
+    private final String SYSTEM = "system";
+    
+    private String insertSt, updateSt, selectSt, deleteSt, createSt, setSt, getSt;
 
-    public MySQLInstance(String ksName, String cfName)
+    public MySQLInstance (String ksName, String cfName)
     {
         this.ksName = ksName;
         this.cfName = PREFIX + cfName;
-        insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + KEY + " = ?"; 
-        updateSt = "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
-        selectSt = "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
-        deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
+        
+        /* define crud sql statements */
+        insertSt = "INSERT INTO " + cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + KEY + " = ?"; 
+        updateSt = "UPDATE " + cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
+        selectSt = "SELECT " + VALUE + " FROM " + cfName + " WHERE " + KEY + " = ?";
+        deleteSt = "DELETE FROM " + cfName + " WHERE " + KEY + " = ?";
+        createSt = "CREATE Table "+ cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` VARBINARY(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         setSt = "CALL set_row(?,?)";
         getSt = "CALL get_row(?)";
 
+        createDB();
         conn = new MySQLConfigure().connect(ksName);
         /*try {
              conn.setAutoCommit(false);
@@ -42,25 +48,7 @@ public class MySQLInstance extends DBInstance
         try
         {
             pstInsert = conn.prepareStatement(insertSt);
-            if(ksName.equals("system"))
-            {
-                pstUpdate = conn.prepareStatement(updateSt);
-            }
-            else
-            {
-                pstUpdate = conn.prepareStatement(setSt);
-            }
-            /*bsql = "INSERT INTO "+ this.cfName + " (" + KEY + ", " + VALUE +") VALUES";
-            for(int i=0; i< multiMax; i++)
-            {
-                bsql += " (?, ?)";
-                if(i < multiMax - 1)
-                {
-                    bsql += ",";
-                }
-            }
-                
-            pstMultiInsert = conn.prepareStatement(bsql);*/
+            pstUpdate = ksName.equals(SYSTEM) ? conn.prepareStatement(updateSt) : conn.prepareStatement(setSt);
         }
         catch (SQLException e)
         {
@@ -73,7 +61,6 @@ public class MySQLInstance extends DBInstance
         try
         {
             return doInsert(rowKey, cf.toBytes());
-            // return doMultipleInsert(rowKey, cfValue);
         }
         catch (SQLException e)
         {
@@ -97,29 +84,15 @@ public class MySQLInstance extends DBInstance
     
     public byte[] select(String rowKey) throws SQLException, IOException
     {
-        //Connection conn1 = new MySQLConfigure().connect(ksName);
-        PreparedStatement pstSelect;
-        if(ksName.equals("system"))
-        {
-            pstSelect = conn.prepareStatement(selectSt);
-        }
-        else
-        {
-            pstSelect = conn.prepareStatement(getSt);
-        }
+        PreparedStatement pstSelect = ksName.equals(SYSTEM) ? conn.prepareStatement(selectSt) : conn.prepareStatement(getSt);
         pstSelect.setString(1, rowKey);
         ResultSet rs = pstSelect.executeQuery();
         byte[] b = null;
-        if(rs != null)
-        {
-        	while(rs.next())
-        	{
+        if (rs != null)
+        	while (rs.next())
         		b = rs.getBytes(1);
-        	}
-        }
         rs.close();
         pstSelect.close();
-        //conn1.close();
         return b;
     }
     
@@ -135,52 +108,59 @@ public class MySQLInstance extends DBInstance
             pstDelete.close();
         }
     }
-    
+
+    public int createDB()
+    {
+    	try {
+    		Statement stmt = conn.createStatement();
+    		ResultSet rs = stmt.executeQuery("SHOW DATABASES");
+    		while (rs.next())
+    			if (rs.getString(1).equals(ksName))
+    				return 0;
+    		return stmt.executeUpdate("CREATE DATABASE" + ksName);
+     	}
+        catch (SQLException e) 
+        {
+        	System.err.println("db database creation error "+ e);
+            return -1;
+        }
+    }
+
     // Init MySQL Table for Keyspaces
     public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
     {
         try {
             Statement stmt = conn.createStatement();
             
-            if(debug > 0)
-            {
+            if (debug > 0)
                 stmt.executeUpdate("TRUNCATE TABLE " + cfName);
-            }
             
             ResultSet rs = stmt.executeQuery("SHOW TABLES");
-            while(rs.next()) 
-            {
-                if(rs.getString(1).equals(cfName)) {
+            while (rs.next()) 
+                if (rs.getString(1).equals(cfName))
                     return 0;
-                }
-            }
-            
-            String sPrepareSQL = "CREATE Table "+ cfName + "(" +
-                "`" + KEY + "` VARCHAR(?) NOT NULL," +
-                "`" + VALUE + "` VARBINARY(?)," +
-                "PRIMARY KEY (`" + KEY + "`)" +
-            ") ENGINE = " + storageEngineType;
-            
-            PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
+
+            PreparedStatement pst = conn.prepareStatement(createSt);
             pst.setInt(1, rowKeySize);
             pst.setInt(2, columnFamilySize);
+            pst.setString(3, storageEngineType);
             
             return pst.executeUpdate();
         }
         catch (SQLException e) 
         {
-        	System.err.println("db connection error "+ e);
+        	System.err.println("db table creation error "+ e);
             return -1;
         }
     }
     /*
     int doMultipleInsert(String rowKey, byte[] cfValue) throws SQLException {
-        if(multiCount < multiMax) {
+        if (multiCount < multiMax) {
             pstMultiInsert.setString(2*multiCount+1, rowKey);
             pstMultiInsert.setBytes(2*multiCount+2, cfValue);
             multiCount++;
         }
-        if(multiCount == multiMax) {
+        if (multiCount == multiMax) {
             multiCount = 0;
             pstMultiInsert.addBatch();
             //pstMultiInsert = conn.prepareStatement(bsql);
