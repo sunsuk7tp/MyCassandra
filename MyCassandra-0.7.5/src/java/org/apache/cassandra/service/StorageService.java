@@ -392,7 +392,8 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
                 {
                     mutationStage.shutdown();
                     mutationStage.awaitTermination(1, TimeUnit.SECONDS);
-                    CommitLog.instance.shutdownBlocking();
+                    if(DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
+                        CommitLog.instance.shutdownBlocking();
                 }
             }
         });
