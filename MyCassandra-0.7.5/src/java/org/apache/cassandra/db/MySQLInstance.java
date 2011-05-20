@@ -29,16 +29,16 @@ public class MySQLInstance extends DBInstance
         this.cfName = PREFIX + cfName;
         
         /* define crud sql statements */
-        insertSt = "INSERT INTO " + cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + KEY + " = ?"; 
-        updateSt = "UPDATE " + cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
-        selectSt = "SELECT " + VALUE + " FROM " + cfName + " WHERE " + KEY + " = ?";
-        deleteSt = "DELETE FROM " + cfName + " WHERE " + KEY + " = ?";
-        createSt = "CREATE Table "+ cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` VARBINARY(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
+        insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + KEY + " = ?"; 
+        updateSt = "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
+        selectSt = "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
+        deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
+        createSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` VARBINARY(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         setSt = "CALL set_row(?,?)";
         getSt = "CALL get_row(?)";
 
         createDB();
-        conn = new MySQLConfigure().connect(ksName);
+        conn = new MySQLConfigure().connect(this.ksName);
         /*try {
              conn.setAutoCommit(false);
         } catch(SQLException e) {
@@ -48,7 +48,7 @@ public class MySQLInstance extends DBInstance
         try
         {
             pstInsert = conn.prepareStatement(insertSt);
-            pstUpdate = ksName.equals(SYSTEM) ? conn.prepareStatement(updateSt) : conn.prepareStatement(setSt);
+            pstUpdate = this.ksName.equals(SYSTEM) ? conn.prepareStatement(updateSt) : conn.prepareStatement(setSt);
         }
         catch (SQLException e)
         {
@@ -112,12 +112,12 @@ public class MySQLInstance extends DBInstance
     public int createDB()
     {
     	try {
-    		Statement stmt = conn.createStatement();
-    		ResultSet rs = stmt.executeQuery("SHOW DATABASES");
-    		while (rs.next())
-    			if (rs.getString(1).equals(ksName))
-    				return 0;
-    		return stmt.executeUpdate("CREATE DATABASE" + ksName);
+          Statement stmt = new MySQLConfigure().connect("").createStatement();
+          ResultSet rs = stmt.executeQuery("SHOW DATABASES");
+          while (rs.next())
+              if (rs.getString(1).equals(ksName))
+                  return 0;
+          return stmt.executeUpdate("CREATE DATABASE " + ksName);
      	}
         catch (SQLException e) 
         {
