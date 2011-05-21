@@ -385,26 +385,13 @@ public class DatabaseDescriptor
                }
             }
             else if (conf.database.equals("MySQL"))
-            {
                 dataBase = MYSQL;
-                new MySQLInstance("system", "Schema").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
-                new MySQLInstance("system", "Migrations").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
-                new MySQLInstance("system", "LocationInfo").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
-                new MySQLInstance("system", "HintsColumnFamily").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
-                new MySQLInstance("system", "IndexInfo").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
-            }
             else if (conf.database.equals("JRedis"))
-            {
                 dataBase = JREDIS;
-            }
             else if (conf.database.equals("MongoDB"))
-            {
                 dataBase = MONGODB;
-            }
             else if (conf.database.equals("HSMySQL"))
-            {
                 dataBase = HSMYSQL;
-            }
             
             // Hardcoded system tables
             KSMetaData systemMeta = new KSMetaData(Table.SYSTEM_TABLE,

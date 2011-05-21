@@ -9,7 +9,7 @@ public class MySQLInstance extends DBInstance
 {
 
     Connection conn;
-    PreparedStatement pstInsert, pstUpdate;
+    PreparedStatement pstInsert, pstUpdate, pstDelete;
 
     int debug = 0;
 
@@ -23,7 +23,7 @@ public class MySQLInstance extends DBInstance
     private final String SETPR = "set_row";
     private final String GETPR = "get_row";
 
-    private String insertSt, updateSt, selectSt, deleteSt, createSt, setSt, getSt, getPr, setPr;
+    private String insertSt, setSt, getSt, deleteSt, createSt, getPr, setPr;
 
     public MySQLInstance (String ksName, String cfName)
     {
@@ -32,19 +32,17 @@ public class MySQLInstance extends DBInstance
 
         /* define crud sql statements */
         insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + KEY + " = ?"; 
-        updateSt = "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
-        selectSt = "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
+        setSt = !this.ksName.equals(SYSTEM) ? "CALL set_row(?,?)" : "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
+        getSt = !this.ksName.equals(SYSTEM) ? "CALL get_row(?)" : "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
         deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
         createSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` VARBINARY(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
-        setSt = "CALL set_row(?,?)";
-        getSt = "CALL get_row(?)";
         setPr = "CREATE PROCEDURE set_row(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
         getPr = "CREATE PROCEDURE get_row(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
 
         createDB();
         conn = new MySQLConfigure().connect(this.ksName);
         /*
-         *　try {
+         *try {
              conn.setAutoCommit(false);
         } catch(SQLException e) {
              System.out.println(e);
@@ -54,7 +52,7 @@ public class MySQLInstance extends DBInstance
         try
         {
             pstInsert = conn.prepareStatement(insertSt);
-            pstUpdate = this.ksName.equals(SYSTEM) ? conn.prepareStatement(updateSt) : conn.prepareStatement(setSt);
+            pstUpdate = conn.prepareStatement(setSt);
         }
         catch (SQLException e)
         {
@@ -90,7 +88,7 @@ public class MySQLInstance extends DBInstance
 
     public byte[] select(String rowKey) throws SQLException, IOException
     {
-        PreparedStatement pstSelect = ksName.equals(SYSTEM) ? conn.prepareStatement(selectSt) : conn.prepareStatement(getSt);
+        PreparedStatement pstSelect = conn.prepareStatement(getSt);
         pstSelect.setString(1, rowKey);
         ResultSet rs = pstSelect.executeQuery();
         byte[] b = null;
@@ -201,7 +199,7 @@ public class MySQLInstance extends DBInstance
     }
     */
 
-    synchronized int doInsert(String rowKey, byte[] cfValue) throws SQLException
+    private synchronized int doInsert(String rowKey, byte[] cfValue) throws SQLException
     {
         pstInsert.setString(1, rowKey);
         pstInsert.setBytes(2, cfValue);
@@ -209,7 +207,7 @@ public class MySQLInstance extends DBInstance
         return pstInsert.executeUpdate();
     }
 
-    synchronized int doUpdate(String rowKey, byte[] cfValue) throws SQLException
+    private synchronized int doUpdate(String rowKey, byte[] cfValue) throws SQLException
     {
         pstUpdate.setBytes(1, cfValue);
         pstUpdate.setString(2, rowKey);
