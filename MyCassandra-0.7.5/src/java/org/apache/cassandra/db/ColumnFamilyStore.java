@@ -225,8 +225,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             logger.debug("Starting CFS {}", columnFamily);
         // scan for sstables corresponding to this cf and load them
         ssTables = new SSTableTracker(table.name, columnFamilyName);
-        //if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
-        //{
+        if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
+        {
             Set<DecoratedKey> savedKeys = readSavedCache(DatabaseDescriptor.getSerializedKeyCachePath(table.name, columnFamilyName));
             List<SSTableReader> sstables = new ArrayList<SSTableReader>();
             for (Map.Entry<Descriptor,Set<Component>> sstableFiles : files(table.name, columnFamilyName, false).entrySet())
@@ -249,7 +249,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                 sstables.add(sstable);
             }
             ssTables.add(sstables);
-        //}
+        }
 
         // create the private ColumnFamilyStores for the secondary column indexes
         indexedColumns = new ConcurrentSkipListMap<ByteBuffer, ColumnFamilyStore>(getComparator());
