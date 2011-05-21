@@ -38,8 +38,8 @@ public class MySQLInstance extends DBInstance
         createSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` VARBINARY(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         setSt = "CALL set_row(?,?)";
         getSt = "CALL get_row(?)";
-        setPr = "DELIMITER // CREATE PROCEDURE set_row(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
-        getPr = "DELIMITER // CREATE PROCEDURE get_row(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + "WHERE " + KEY + " = id; END";
+        setPr = "CREATE PROCEDURE set_row(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
+        getPr = "CREATE PROCEDURE get_row(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
 
         createDB();
         conn = new MySQLConfigure().connect(this.ksName);
@@ -113,7 +113,7 @@ public class MySQLInstance extends DBInstance
         }
     }
 
-    public int createDB()
+    synchronized public int createDB()
     {
         try {
           Statement stmt = new MySQLConfigure().connect("").createStatement();
@@ -131,7 +131,7 @@ public class MySQLInstance extends DBInstance
     }
 
     // Init MySQL Table for Keyspaces
-    public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
+    synchronized public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
     {
         try {
             Statement stmt = conn.createStatement();
@@ -158,14 +158,14 @@ public class MySQLInstance extends DBInstance
         }
     }
     
-    public int createProcedure(int rowKeySize, int columnFamilySize)
+    synchronized public int createProcedure(int rowKeySize, int columnFamilySize)
     {
         try {
             Statement stmt = conn.createStatement();
             
-            ResultSet rs = stmt.executeQuery("SHOW PROCEDURES");
-    	    while (rs.next())
-                if (rs.getString(2).equals(cfName) && ( rs.getString(3).equals(GETPR) || rs.getString(3).equals(SETPR)))
+            ResultSet rs = stmt.executeQuery("SHOW PROCEDURE STATUS");
+    	      while (rs.next())
+                if (rs.getString(1).equals(ksName) && ( rs.getString(2).equals(GETPR) || rs.getString(2).equals(SETPR)))
                     return 0;
             PreparedStatement gst = conn.prepareStatement(getPr);
             PreparedStatement sst = conn.prepareStatement(setPr);
