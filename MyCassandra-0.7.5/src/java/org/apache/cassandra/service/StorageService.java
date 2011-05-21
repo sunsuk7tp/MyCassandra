@@ -2020,7 +2020,9 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
         }
         
         assert DatabaseDescriptor.getDefsVersion().timestamp() > 0;
-        DefsTable.dumpToStorage(DatabaseDescriptor.getDefsVersion());
+        //XXX with mysql, the length of schema data is too long and so temporally remove this method. 
+        // We will be to specially prepare the schema table and store schema data there. 
+        //DefsTable.dumpToStorage(DatabaseDescriptor.getDefsVersion());
         // flush system and definition tables.
         Collection<Future> flushers = new ArrayList<Future>();
         flushers.addAll(Table.open(Table.SYSTEM_TABLE).flush());
