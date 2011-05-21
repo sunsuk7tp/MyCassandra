@@ -7,12 +7,12 @@ import org.apache.cassandra.db.filter.*;
 
 public class MySQLInstance extends DBInstance
 {
-    
+
     Connection conn;
-    PreparedStatement pstInsert, pstUpdate, pstMultiInsert;
-    
+    PreparedStatement pstInsert, pstUpdate;
+
     int debug = 0;
-    
+
     int multiMax = 100;
     int multiCount = 0;
     String bsql;
@@ -22,14 +22,14 @@ public class MySQLInstance extends DBInstance
     private final String SYSTEM = "system";
     private final String SETPR = "set_row";
     private final String GETPR = "get_row";
-    
+
     private String insertSt, updateSt, selectSt, deleteSt, createSt, setSt, getSt, getPr, setPr;
 
     public MySQLInstance (String ksName, String cfName)
     {
         this.ksName = ksName;
         this.cfName = PREFIX + cfName;
-        
+
         /* define crud sql statements */
         insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + KEY + " = ?"; 
         updateSt = "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
@@ -43,12 +43,14 @@ public class MySQLInstance extends DBInstance
 
         createDB();
         conn = new MySQLConfigure().connect(this.ksName);
-        /*try {
+        /*
+         *　try {
              conn.setAutoCommit(false);
         } catch(SQLException e) {
              System.out.println(e);
-          }*/
-        
+        }
+        */
+
         try
         {
             pstInsert = conn.prepareStatement(insertSt);
@@ -59,7 +61,7 @@ public class MySQLInstance extends DBInstance
             System.err.println("db prepare state error "+ e);
         }
     }
-    
+
     public int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException
     {
         try
@@ -68,11 +70,11 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-            System.err.println("db insert error "+ e);
+            System.err.println("db insertion error "+ e);
             return -1;
         }
     }
-    
+
     public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException
     {
         try
@@ -85,7 +87,7 @@ public class MySQLInstance extends DBInstance
             return -1;
         }
     }
-    
+
     public byte[] select(String rowKey) throws SQLException, IOException
     {
         PreparedStatement pstSelect = ksName.equals(SYSTEM) ? conn.prepareStatement(selectSt) : conn.prepareStatement(getSt);
@@ -99,7 +101,7 @@ public class MySQLInstance extends DBInstance
         pstSelect.close();
         return b;
     }
-    
+
     public synchronized int delete(String rowKey) throws SQLException
     {
         PreparedStatement pstDelete = conn.prepareStatement(deleteSt);
@@ -113,7 +115,7 @@ public class MySQLInstance extends DBInstance
         }
     }
 
-    synchronized public int createDB()
+    public synchronized int createDB()
     {
         try {
           Statement stmt = new MySQLConfigure().connect("").createStatement();
@@ -131,7 +133,7 @@ public class MySQLInstance extends DBInstance
     }
 
     // Init MySQL Table for Keyspaces
-    synchronized public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
+    public synchronized int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
     {
         try {
             Statement stmt = conn.createStatement();
@@ -158,13 +160,13 @@ public class MySQLInstance extends DBInstance
         }
     }
     
-    synchronized public int createProcedure(int rowKeySize, int columnFamilySize)
+    public synchronized int createProcedure(int rowKeySize, int columnFamilySize)
     {
         try {
             Statement stmt = conn.createStatement();
             
             ResultSet rs = stmt.executeQuery("SHOW PROCEDURE STATUS");
-    	      while (rs.next())
+            while (rs.next())
                 if (rs.getString(1).equals(ksName) && ( rs.getString(2).equals(GETPR) || rs.getString(2).equals(SETPR)))
                     return 0;
             PreparedStatement gst = conn.prepareStatement(getPr);
@@ -198,7 +200,7 @@ public class MySQLInstance extends DBInstance
         return 1;
     }
     */
-    
+
     synchronized int doInsert(String rowKey, byte[] cfValue) throws SQLException
     {
         pstInsert.setString(1, rowKey);
@@ -206,7 +208,7 @@ public class MySQLInstance extends DBInstance
         pstInsert.setBytes(3, cfValue);
         return pstInsert.executeUpdate();
     }
-    
+
     synchronized int doUpdate(String rowKey, byte[] cfValue) throws SQLException
     {
         pstUpdate.setBytes(1, cfValue);
