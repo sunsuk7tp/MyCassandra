@@ -1342,7 +1342,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     {
         try
         {
-            return dbi.get(filter.key.getTxtKey(), filter);
+            return filterColumnFamily(dbi.get(filter.key.getTxtKey(), filter), filter, gcBefore);
         }
         catch (SQLException e)
         {
