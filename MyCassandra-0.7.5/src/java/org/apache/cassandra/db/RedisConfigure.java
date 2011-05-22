@@ -4,7 +4,7 @@ import org.apache.cassandra.config.DatabaseDescriptor;
 import org.jredis.JRedis;
 import org.jredis.ri.alphazero.JRedisClient;
 
-public class JRedisConfigure
+public class RedisConfigure
 {
     public JRedis connect()
     {

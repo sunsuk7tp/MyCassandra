@@ -277,8 +277,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         {
             case DatabaseDescriptor.BIGTABLE:
                 break;
-            case DatabaseDescriptor.JREDIS:
-                dbi = new JRedisInstance(new String(table.name), columnFamilyName);
+            case DatabaseDescriptor.REDIS:
+                dbi = new RedisInstance(new String(table.name), columnFamilyName);
                 break;
             case DatabaseDescriptor.MYSQL:
             default:

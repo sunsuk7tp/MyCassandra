@@ -91,10 +91,10 @@ public class DatabaseDescriptor
 
     public static final int BIGTABLE = 0;
     public static final int MYSQL = 1;
-    public static final int JREDIS = 2;
+    public static final int REDIS = 2;
     public static final int MONGODB = 3;
     public static final int HSMYSQL = 4;
-    public static final int defaultDataBase = BIGTABLE;
+    public static final int defaultDataBase = MYSQL;
 
     public static int dataBase;
 
@@ -386,8 +386,8 @@ public class DatabaseDescriptor
             }
             else if (conf.db.equals("MySQL"))
                 dataBase = MYSQL;
-            else if (conf.db.equals("JRedis"))
-                dataBase = JREDIS;
+            else if (conf.db.equals("Redis"))
+                dataBase = REDIS;
             else if (conf.db.equals("MongoDB"))
                 dataBase = MONGODB;
             else if (conf.db.equals("HSMySQL"))

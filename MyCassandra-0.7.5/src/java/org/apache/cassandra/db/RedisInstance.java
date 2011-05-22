@@ -8,17 +8,17 @@ import org.apache.cassandra.db.filter.QueryFilter;
 import org.jredis.JRedis;
 import org.jredis.RedisException;
 
-public class JRedisInstance extends DBInstance
+public class RedisInstance extends DBInstance
 {
     JRedis conn;
     
     final String KEYSEPARATOR = ":";
 
-    public JRedisInstance(String ksName, String cfName)
+    public RedisInstance(String ksName, String cfName)
     {
         this.ksName = ksName;
         this.cfName = cfName;
-        conn = new JRedisConfigure().connect();
+        conn = new RedisConfigure().connect();
     }
 
     synchronized public int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException
