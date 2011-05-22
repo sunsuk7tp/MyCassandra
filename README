@@ -12,16 +12,17 @@
 
 # 1) add several statements at conf/cassandra.yaml (0.7~) or conf/storage-conf.xml (0.6~)
 
-database: MySQL
-sqlhost: 3306
-sqluser: root
-sqlpass: rootpass 
+db: MySQL
+db_host: localhost
+db_port: 3306
+db_user: root
+db_pass: rootpass 
 
 <DataBase>MySQL</DataBase>
 <SQL>
-		<SQLHost>localhost</SQLHost> # mysql host
+    <SQLHost>localhost</SQLHost> # mysql host
     <SQLPort>3306</SQLPort> # mysql port
-		<SQLUser>cassandra_user</SQLUser> # mysql connection user ("root" is easier but it is not secure.)
+    <SQLUser>cassandra_user</SQLUser> # mysql connection user ("root" is easier but it is not secure.)
     <SQLPass>cA33anDra</SQLPass> # user password
 </SQL>
 
@@ -79,6 +80,10 @@ keyspaces:
 
 $ cd <MyCassandra_Home>
 $ ./bin/cassandra
+
+# 5) schema load. (0.7~)
+
+$ ./bin/schmatool localhost 8080 import
 
 # If you have something, please contact me!!
 # E-mail: sunsuk7tp at gmail.com
