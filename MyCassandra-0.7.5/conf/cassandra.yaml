@@ -343,7 +343,7 @@ keyspaces:
       column_families:
         - name: data
           rowkeysize: 16
-          columnfamilysize: 4096
+          columnfamilysize: 2048
           columnfamilytype: VARBINARY
           storageenginetype: InnoDB
           compare_with: BytesType
