@@ -29,11 +29,26 @@ initial_token:
 # this off for the initial start simplifies that.
 auto_bootstrap: false
 
+# Set storage engine type (Bigtable, MySQL, Redis, MongoDB, ...) and
+# db host, port, username and pass
+
 database: MySQL
 sqlhost: localhost
 sqlport: 3306
 sqluser: root
 sqlpass:  
+
+#database: Bigtable
+#sqlhost: 
+#sqlport: 
+#sqluser:
+#sqlpass:
+
+#database: Redis
+#sqlhost: localhost
+#sqlport: 6379
+#sqluser: 
+#sqlpass:
 
 # See http://wiki.apache.org/cassandra/HintedHandoff
 hinted_handoff_enabled: true
