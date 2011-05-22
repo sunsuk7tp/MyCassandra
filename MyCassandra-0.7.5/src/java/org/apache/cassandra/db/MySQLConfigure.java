@@ -7,10 +7,10 @@ public class MySQLConfigure
 {
     public Connection connect(String dbInstance)
     {
-        String dbHost = DatabaseDescriptor.getSQLHost();
-        String dbPort = DatabaseDescriptor.getSQLPort();
-        String dbUser = DatabaseDescriptor.getSQLUser();
-        String dbPass = DatabaseDescriptor.getSQLPass();
+        String dbHost = DatabaseDescriptor.getDBHost() != null ? DatabaseDescriptor.getDBHost() : "localhost";
+        String dbPort = DatabaseDescriptor.getDBPort() != null ? DatabaseDescriptor.getDBPort() : "3306";
+        String dbUser = DatabaseDescriptor.getDBUser() != null ? DatabaseDescriptor.getDBUser() : "root";
+        String dbPass = DatabaseDescriptor.getDBPass();
         
         try
         {

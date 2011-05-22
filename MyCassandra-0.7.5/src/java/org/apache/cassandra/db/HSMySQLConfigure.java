@@ -7,8 +7,8 @@ public class HSMySQLConfigure
 {
 	public HandlerSocket connect() throws IOException
 	{
-		String dbHost = DatabaseDescriptor.getSQLHost();
-		int dbPort = new Integer(DatabaseDescriptor.getSQLPort());
+		String dbHost = DatabaseDescriptor.getDBHost();
+		int dbPort = new Integer(DatabaseDescriptor.getDBPort());
 		//String dbUser = DatabaseDescriptor.getSQLUser();
 		//String dbPass = DatabaseDescriptor.getSQLPass();
 	

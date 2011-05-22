@@ -8,8 +8,8 @@ public class JRedisConfigure
 {
     public JRedis connect()
     {
-        String dbHost = DatabaseDescriptor.getSQLHost();
-        int dbPort = new Integer(DatabaseDescriptor.getSQLPort());
+        String dbHost = DatabaseDescriptor.getDBHost();
+        int dbPort = new Integer(DatabaseDescriptor.getDBPort());
         
         return new JRedisClient(dbHost, dbPort, "jredis", 0);
     }

@@ -14,8 +14,8 @@ public class MongoConfigure
 {
     public DB connect(String dbInstance)
     {
-        String dbHost = DatabaseDescriptor.getSQLHost();
-        int dbPort = new Integer(DatabaseDescriptor.getSQLPort());
+        String dbHost = DatabaseDescriptor.getDBHost();
+        int dbPort = new Integer(DatabaseDescriptor.getDBPort());
         try
         {
             Mongo mongo = new Mongo(dbHost, dbPort);

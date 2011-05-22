@@ -358,7 +358,7 @@ public class DatabaseDescriptor
             
             /* data file and commit log directories. they get created later, when they're needed. */
             
-            if (conf.database.equals("Bigtable"))
+            if (conf.db.equals("Bigtable"))
             {
                dataBase = BIGTABLE;
                if (conf.commitlog_directory != null && conf.data_file_directories != null && conf.saved_caches_directory != null)
@@ -384,15 +384,17 @@ public class DatabaseDescriptor
                        throw new ConfigurationException("saved_caches_directory missing");
                }
             }
-            else if (conf.database.equals("MySQL"))
+            else if (conf.db.equals("MySQL"))
                 dataBase = MYSQL;
-            else if (conf.database.equals("JRedis"))
+            else if (conf.db.equals("JRedis"))
                 dataBase = JREDIS;
-            else if (conf.database.equals("MongoDB"))
+            else if (conf.db.equals("MongoDB"))
                 dataBase = MONGODB;
-            else if (conf.database.equals("HSMySQL"))
+            else if (conf.db.equals("HSMySQL"))
                 dataBase = HSMYSQL;
-            
+            else // default storage engine
+                dataBase = MYSQL;
+
             // Hardcoded system tables
             KSMetaData systemMeta = new KSMetaData(Table.SYSTEM_TABLE,
                                                    LocalStrategy.class,
@@ -1164,24 +1166,24 @@ public class DatabaseDescriptor
         return dataBase;
     }
 
-    public static String getSQLHost()
+    public static String getDBHost()
     {
-        return conf.sqlhost;
+        return conf.db_host;
     }
 
-    public static String getSQLPort()
+    public static String getDBPort()
     {
-        return conf.sqlport;
+        return conf.db_port;
     }
 
-    public static String getSQLUser()
+    public static String getDBUser()
     {
-        return conf.sqluser;
+        return conf.db_user;
     }
 
-    public static String getSQLPass()
+    public static String getDBPass()
     {
-        return conf.sqlpass;
+        return conf.db_pass;
     }
 
     public static boolean hintedHandoffEnabled()
