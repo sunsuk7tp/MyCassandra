@@ -1,10 +1,11 @@
-package org.apache.cassandra.db;
+package org.apache.cassandra.db.engine;
 
 import java.sql.*;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.cassandra.db.filter.*;
+import org.apache.cassandra.db.ColumnFamily;
+import org.apache.cassandra.db.filter.QueryFilter;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;

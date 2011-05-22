@@ -1,4 +1,4 @@
-package org.apache.cassandra.db;
+package org.apache.cassandra.db.engine;
 
 import org.apache.cassandra.config.DatabaseDescriptor;
 import org.jredis.JRedis;

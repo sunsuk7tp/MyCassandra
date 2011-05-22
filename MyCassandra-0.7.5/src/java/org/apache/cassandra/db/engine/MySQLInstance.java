@@ -1,9 +1,10 @@
-package org.apache.cassandra.db;
+package org.apache.cassandra.db.engine;
 
 import java.sql.*;
 import java.io.IOException;
 
-import org.apache.cassandra.db.filter.*;
+import org.apache.cassandra.db.ColumnFamily;
+import org.apache.cassandra.db.filter.QueryFilter;
 
 public class MySQLInstance extends DBInstance
 {

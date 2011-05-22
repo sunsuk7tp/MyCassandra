@@ -1,4 +1,4 @@
-package org.apache.cassandra.db;
+package org.apache.cassandra.db.engine;
 import java.sql.*;
 
 import org.apache.cassandra.config.DatabaseDescriptor;

@@ -1,11 +1,13 @@
-package org.apache.cassandra.db;
+package org.apache.cassandra.db.engine;
 
 import java.io.IOException;
 import java.sql.SQLException;
 
 import org.apache.cassandra.io.util.DataInputBuffer;
 import org.apache.cassandra.io.util.DataOutputBuffer;
-import org.apache.cassandra.db.filter.*;
+import org.apache.cassandra.db.ColumnFamily;
+import org.apache.cassandra.db.ColumnFamilySerializer;
+import org.apache.cassandra.db.filter.QueryFilter;
 
 public abstract class DBInstance implements StorageEngineInterface
 {
