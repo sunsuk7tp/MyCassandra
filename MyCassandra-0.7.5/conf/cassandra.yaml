@@ -32,23 +32,23 @@ auto_bootstrap: false
 # Set storage engine type (Bigtable, MySQL, Redis, MongoDB, ...) and
 # db host, port, username and pass
 
-database: MySQL
-sqlhost: localhost
-sqlport: 3306
-sqluser: root
-sqlpass:  
+db: MySQL
+db_host: localhost
+db_port: 3306
+db_user: root
+db_pass:  
 
-#database: Bigtable
-#sqlhost: 
-#sqlport: 
-#sqluser:
-#sqlpass:
+#db: Bigtable
+#db_host: 
+#db_port: 
+#db_user:
+#db_pass:
 
-#database: Redis
-#sqlhost: localhost
-#sqlport: 6379
-#sqluser: 
-#sqlpass:
+#db: Redis
+#db_host: localhost
+#db_port: 6379
+#db_user: 
+#db_pass:
 
 # See http://wiki.apache.org/cassandra/HintedHandoff
 hinted_handoff_enabled: true
