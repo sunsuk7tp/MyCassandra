@@ -86,6 +86,6 @@ public class RedisInstance extends DBInstance
 
     public String makeRowKey(String rowKey)
     {
-        return ksName+KEYSEPARATOR+cfName+KEYSEPARATOR+rowKey;
+        return ksName + KEYSEPARATOR + cfName + KEYSEPARATOR + rowKey;
     }
 }

@@ -23,6 +23,8 @@ import java.security.MessageDigest;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.SortedSet;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -240,14 +242,26 @@ public class ColumnFamily implements IColumnContainer, IIterableColumns
         return columns.get(name);
     }
 
-		public boolean findColumn(ByteBuffer name)
-		{
-				return columns.containsKey(name);
-		}
+	public boolean findColumn(ByteBuffer name)
+	{
+			return columns.containsKey(name);
+	}
 
     public SortedSet<ByteBuffer> getColumnNames()
     {
         return columns.keySet();
+    }
+
+    public Set<ByteBuffer> getRemovedColumnNames()
+    {
+        Set<ByteBuffer> cNames = new HashSet<ByteBuffer>();
+        for (Map.Entry<ByteBuffer, IColumn> entry : getColumnsMap().entrySet())
+        {
+            ByteBuffer cName = entry.getKey();
+            IColumn column = entry.getValue();
+            if (column.isMarkedForDelete()) cNames.add(cName);
+        }
+        return cNames;
     }
 
     public Collection<IColumn> getSortedColumns()

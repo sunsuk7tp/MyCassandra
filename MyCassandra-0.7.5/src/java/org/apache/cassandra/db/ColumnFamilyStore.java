@@ -871,10 +871,18 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             }
             else
             {
-                if(dbi.put(key.getTxtKey(), columnFamily) < 0)
+                String keyName = key.getTxtKey();
+                Set<ByteBuffer> cNames = columnFamily.getRemovedColumnNames();
+                if (!cNames.isEmpty())
                 {
-                    throw new IOException("can't insert or update " + key.getTxtKey() + "in a storage");
+                    ColumnFamily cf = dbi.get(keyName, null);
+                    for (Object cName : cNames.toArray())
+                        cf.remove((ByteBuffer) cName);
+                    if (dbi.put(keyName, cf) < 0)
+                        throw new IOException("can't delete " + keyName + "in a storage.");
                 }
+                else if (dbi.put(keyName, columnFamily) < 0)
+                    throw new IOException("can't insert or update " + keyName + "in a storage.");
                 return null;
             }
         }
