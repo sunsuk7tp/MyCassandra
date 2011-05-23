@@ -49,9 +49,27 @@ public class MongoInstance extends DBInstance
     {
         BasicDBObject query = new BasicDBObject();
         query.put(KEY, rowKey);
-        
+
         DBCursor cur = coll.find(query);
         return cur.hasNext() ? (byte[])cur.next().get(VALUE) : null;
+    }
+
+    synchronized int delete(String rowKey)
+    {
+        DBObject doc = new BasicDBObject();
+        doc.put(KEY, rowKey);
+        coll.remove(doc);
+        return 1;
+    }
+
+    public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
+    {
+        return 0;
+    }
+
+    public int createProcedure(int rowKeySize, int columnFanukySize)
+    {
+        return 0;
     }
 
     private synchronized int doUpdate(String rowKey, byte[] cfValue)
@@ -71,23 +89,5 @@ public class MongoInstance extends DBInstance
         doc.put(VALUE, cfValue);
         coll.insert(doc);
         return 1;
-    }
-
-    synchronized int delete(String rowKey)
-    {
-        DBObject doc = new BasicDBObject();
-        doc.put(KEY, rowKey);
-        coll.remove(doc);
-        return 1;
-    }
-    
-    public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
-    {
-        return 0;
-    }
-
-    public int createProcedure(int rowKeySize, int columnFanukySize)
-    {
-        return 0;
     }
 }

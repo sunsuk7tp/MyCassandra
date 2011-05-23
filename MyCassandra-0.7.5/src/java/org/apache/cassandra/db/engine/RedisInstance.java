@@ -22,24 +22,15 @@ public class RedisInstance extends DBInstance
         conn = new RedisConfigure().connect();
     }
 
-    synchronized public int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException
+    public int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException
     {
-        try
-        {
-            conn.set(makeRowKey(rowKey), cf.toBytes());
-            return 1;
-        }
-        catch (RedisException e)
-        {
-            System.err.println("db connection error: "+ e);
-            return -1;
-        }
+        doInsert(makeRowKey(rowKey), cf.toBytes());
     }
 
     public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException
     {
         cf.addAll(newcf);
-        return insert(rowKey, cf);
+        return doInsert(makeRowKey(rowKey), cf);
     }
 
     public byte[] select(String rowKey) throws SQLException, IOException
@@ -77,6 +68,20 @@ public class RedisInstance extends DBInstance
     public int createProcedure(int rowKeySize, int columnFanukySize)
     {
         return 0;
+    }
+
+    private synchronized int doInsert(String rowKey, byte[] cfValue)
+    {
+        try
+        {
+            conn.set(rowKey, cfValue);
+            return 1;
+        }
+        catch (RedisException e)
+        {
+            System.err.println("db insertion/update error: "+ e);
+            return -1;
+        }
     }
 
     public String makeRowKey(String rowKey)

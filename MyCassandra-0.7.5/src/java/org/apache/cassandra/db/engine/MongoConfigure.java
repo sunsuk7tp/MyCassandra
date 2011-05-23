@@ -16,9 +16,15 @@ public class MongoConfigure
     {
         String dbHost = DatabaseDescriptor.getDBHost();
         int dbPort = new Integer(DatabaseDescriptor.getDBPort());
+        String dbUser = DatabaseDescriptor.getDBUser();
+        String dbPass = DatabaseDescriptor.getDBPass();
         try
         {
             Mongo mongo = new Mongo(dbHost, dbPort);
+            DB db = mongo.getDB(dbInstance);
+            if (dbUser != null && dbPass != null)
+                if (!db.authenticate(dbUser, dbPass.toCharArray()))
+                    throws new Exception("authentication error!!");
             return mongo.getDB(dbInstance);
         }
         catch (Exception e)
