@@ -28,16 +28,16 @@ public class MongoInstance extends DBInstance
     public MongoInstance(String ksName, String cfName)
     {
         this.ksName = PREFIX + ksName;
-        this.cfName = PREFIX + cfName;
+        this.cfName = cfName;
 
-        DB conn = new MongoConfigure().connect(ksName);
+        DB conn = new MongoConfigure().connect(this.ksName);
         coll = conn.getCollection(this.cfName);
-        coll.ensureIndex(new BasicDBObject(KEY, 1).append("unique", true));
+        coll.createIndex(new BasicDBObject(KEY,1).append("unique", true));
     }
 
     public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)  throws SQLException, IOException
     {
-        return doInsert(rowKey, mergeColumnFamily(cf, newcf));
+        return doUpdate(rowKey, mergeColumnFamily(cf, newcf));
     }
 
     public int insert(String rowKey, ColumnFamily cf)  throws SQLException, IOException
@@ -51,17 +51,20 @@ public class MongoInstance extends DBInstance
         query.put(KEY, rowKey);
         
         DBCursor cur = coll.find(query);
-        if (cur.hasNext())
-        {
-            return (byte[])cur.next().get(VALUE);
-        }
-        else
-        {
-            return null;
-        }
+        return cur.hasNext() ? (byte[])cur.next().get(VALUE) : null;
     }
 
-    synchronized int doInsert(String rowKey, byte[] cfValue)
+    private synchronized int doUpdate(String rowKey, byte[] cfValue)
+    {
+        DBObject olddoc = new BasicDBObject();
+        DBObject newdoc = new BasicDBObject();
+        olddoc.put(KEY, rowKey);
+        doc.put(VALUE, cfValue);
+        coll.update(olddoc, newdoc);
+        return 1;
+    }
+
+    private synchronized int doInsert(String rowKey, byte[] cfValue)
     {
         DBObject doc = new BasicDBObject();
         doc.put(KEY, rowKey);
@@ -70,7 +73,7 @@ public class MongoInstance extends DBInstance
         return 1;
     }
 
-    synchronized public int delete(String rowKey)
+    synchronized int delete(String rowKey)
     {
         DBObject doc = new BasicDBObject();
         doc.put(KEY, rowKey);
