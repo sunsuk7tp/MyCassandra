@@ -38,17 +38,17 @@ db_port: 3306
 db_user: root
 db_pass:  
 
-#db: Bigtable
-#db_host: 
-#db_port: 
-#db_user:
-#db_pass:
+# db: Bigtable
+# db_host: 
+# db_port: 
+# db_user:
+# db_pass:
 
-#db: Redis
-#db_host: localhost
-#db_port: 6379
-#db_user: 
-#db_pass:
+# db: Redis
+# db_host: localhost
+# db_port: 6379
+# db_user: 
+# db_pass:
 
 # See http://wiki.apache.org/cassandra/HintedHandoff
 hinted_handoff_enabled: true
