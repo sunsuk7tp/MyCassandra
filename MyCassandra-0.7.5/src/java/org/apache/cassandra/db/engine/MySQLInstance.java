@@ -32,7 +32,7 @@ public class MySQLInstance extends DBInstance
         this.cfName = PREFIX + cfName;
 
         /* define crud sql statements */
-        insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + KEY + " = ?"; 
+        insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + VALUE + " = ?"; 
         setSt = !this.ksName.equals(SYSTEM) ? "CALL set_row(?,?)" : "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
         getSt = !this.ksName.equals(SYSTEM) ? "CALL get_row(?)" : "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
         deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
