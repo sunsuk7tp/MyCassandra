@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import org.apache.cassandra.db.ColumnFamily;
-import org.apache.cassandra.db.filter.QueryFilter;
 
 import org.jredis.JRedis;
 import org.jredis.RedisException;

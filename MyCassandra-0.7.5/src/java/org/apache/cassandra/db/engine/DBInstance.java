@@ -7,13 +7,12 @@ import org.apache.cassandra.io.util.DataInputBuffer;
 import org.apache.cassandra.io.util.DataOutputBuffer;
 import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.ColumnFamilySerializer;
-import org.apache.cassandra.db.filter.QueryFilter;
 
 public abstract class DBInstance implements StorageEngineInterface
 {
     String ksName, cfName;
 
-    public ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException
+    public ColumnFamily get(String rowKey) throws SQLException, IOException
     {
         try
         {
@@ -28,7 +27,7 @@ public abstract class DBInstance implements StorageEngineInterface
 
     public int put(String rowKey, ColumnFamily cf, boolean isDelete) throws SQLException, IOException
     {
-        ColumnFamily oldcf = isDelete ? null : get(rowKey, null);
+        ColumnFamily oldcf = isDelete ? null : get(rowKey);
         return oldcf != null ? update(rowKey, cf, oldcf) : insert(rowKey, cf);
     }
 

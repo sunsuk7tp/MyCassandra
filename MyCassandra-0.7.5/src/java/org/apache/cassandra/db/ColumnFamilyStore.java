@@ -881,7 +881,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                     Set<ByteBuffer> cNames = columnFamily.getRemovedColumnNames();
                     if (!cNames.isEmpty())
                     {
-                        ColumnFamily cf = dbi.get(keyName, null);
+                        ColumnFamily cf = dbi.get(keyName);
                         for (Object cName : cNames.toArray())
                             cf.remove((ByteBuffer) cName);
                         if (dbi.put(keyName, cf, true) < 0)
@@ -1358,7 +1358,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     {
         try
         {
-            ColumnFamily rescf = dbi.get(filter.key.getTxtKey(), filter);
+            ColumnFamily rescf = dbi.get(filter.key.getTxtKey());
             return rescf != null ? filterColumnFamily(rescf, filter, gcBefore) : null;
         }
         catch (SQLException e)

@@ -7,18 +7,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.cassandra.db.ColumnFamily;
-import org.apache.cassandra.db.filter.QueryFilter;
 
 public class HSMySQLInstance extends DBInstance
 {
     HandlerSocket hs;
     private final String PREFIX = "";
     private final String ID = "1";
-    private final String KEY = "rkey";     
+    private final String KEY = "rkey";
     private final String VALUE = "cf";
 
     int debug = 0;
-    
+
     public HSMySQLInstance(String ksName, String cfName)
     {
         this.ksName = ksName;
@@ -34,20 +33,7 @@ public class HSMySQLInstance extends DBInstance
             System.err.println("can't open hs.");
         }
     }
-    
-    public int put(String rowKey, ColumnFamily cf) throws SQLException, IOException
-    {
-        ColumnFamily oldcf = get(rowKey, null);
-        if(oldcf != null)
-        {
-            return update(rowKey, cf, oldcf);
-        }
-        else
-        {
-            return insert(rowKey, cf);
-        }
-    }
-    
+
     public int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException
     {
         try
@@ -59,7 +45,7 @@ public class HSMySQLInstance extends DBInstance
             throw new IOException("can't insert: " + e);
         }
     }
-    
+
     public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException
     {
         try
@@ -75,7 +61,7 @@ public class HSMySQLInstance extends DBInstance
             throw new IOException("db update error: "+ e);
         }
     }
-    
+
     public byte[] select(String rowKey) throws SQLException, IOException
     {
         hs.command().find(ID, rowKey);
@@ -83,7 +69,7 @@ public class HSMySQLInstance extends DBInstance
         return null;
         //return res.size == 0 ? null : return res.get(0).getMessages();
     }
-    
+
     synchronized public int delete(String rowKey) throws SQLException
     {
         try
@@ -149,15 +135,15 @@ public class HSMySQLInstance extends DBInstance
             return -1;
         }
     }*/
-    
-    synchronized int doInsert(String rowKey, byte[] cfValue) throws IOException
+
+    private synchronized int doInsert(String rowKey, byte[] cfValue) throws IOException
     {
         hs.command().insert(ID, rowKey, cfValue);
         List<HandlerSocketResult> res = hs.execute();
         return res.get(0).getStatus();
     }
-    
-    synchronized int doUpdate(String rowKey, byte[] cfValue) throws SQLException, IOException
+
+    private synchronized int doUpdate(String rowKey, byte[] cfValue) throws SQLException, IOException
     {
         hs.command().findModifyUpdate(ID, rowKey, "=", "1", "0", cfValue);
         List<HandlerSocketResult> res = hs.execute();
