@@ -50,6 +50,13 @@ db_pass:
 # db_user: 
 # db_pass:
 
+# MOngoDB
+# db: MongoDB
+# db_host: loca;host
+# db_port: 27017
+# db)user: 
+# db_pass:
+
 # See http://wiki.apache.org/cassandra/HintedHandoff
 hinted_handoff_enabled: true
 # this defines the maximum amount of time a dead host will have hints
