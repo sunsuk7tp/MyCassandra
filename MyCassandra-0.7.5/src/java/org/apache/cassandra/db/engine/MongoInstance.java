@@ -54,7 +54,7 @@ public class MongoInstance extends DBInstance
         return cur.hasNext() ? (byte[])cur.next().get(VALUE) : null;
     }
 
-    synchronized int delete(String rowKey)
+    public synchronized int delete(String rowKey)
     {
         DBObject doc = new BasicDBObject();
         doc.put(KEY, rowKey);
@@ -77,7 +77,7 @@ public class MongoInstance extends DBInstance
         DBObject olddoc = new BasicDBObject();
         DBObject newdoc = new BasicDBObject();
         olddoc.put(KEY, rowKey);
-        doc.put(VALUE, cfValue);
+        newdoc.put(VALUE, cfValue);
         coll.update(olddoc, newdoc);
         return 1;
     }

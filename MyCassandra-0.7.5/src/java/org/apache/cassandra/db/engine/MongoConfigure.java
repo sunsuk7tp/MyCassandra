@@ -24,7 +24,7 @@ public class MongoConfigure
             DB db = mongo.getDB(dbInstance);
             if (dbUser != null && dbPass != null)
                 if (!db.authenticate(dbUser, dbPass.toCharArray()))
-                    throws new Exception("authentication error!!");
+                    throw new Exception("authentication error!!");
             return mongo.getDB(dbInstance);
         }
         catch (Exception e)

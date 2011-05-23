@@ -24,13 +24,13 @@ public class RedisInstance extends DBInstance
 
     public int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException
     {
-        doInsert(makeRowKey(rowKey), cf.toBytes());
+        return doInsert(makeRowKey(rowKey), cf.toBytes());
     }
 
     public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException
     {
         cf.addAll(newcf);
-        return doInsert(makeRowKey(rowKey), cf);
+        return doInsert(makeRowKey(rowKey), cf.toBytes());
     }
 
     public byte[] select(String rowKey) throws SQLException, IOException
