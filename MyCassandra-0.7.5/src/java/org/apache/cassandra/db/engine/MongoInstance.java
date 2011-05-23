@@ -34,7 +34,7 @@ public class MongoInstance extends DBInstance
         coll = conn.getCollection(this.cfName);
         coll.ensureIndex(new BasicDBObject(KEY, 1).append("unique", true));
     }
-    
+
     public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)  throws SQLException, IOException
     {
         return doInsert(rowKey, mergeColumnFamily(cf, newcf));
@@ -60,7 +60,7 @@ public class MongoInstance extends DBInstance
             return null;
         }
     }
-    
+
     synchronized int doInsert(String rowKey, byte[] cfValue)
     {
         DBObject doc = new BasicDBObject();

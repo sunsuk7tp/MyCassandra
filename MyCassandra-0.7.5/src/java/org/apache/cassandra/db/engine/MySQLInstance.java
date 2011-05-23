@@ -158,7 +158,7 @@ public class MySQLInstance extends DBInstance
             return -1;
         }
     }
-    
+
     public synchronized int createProcedure(int rowKeySize, int columnFamilySize)
     {
         try {

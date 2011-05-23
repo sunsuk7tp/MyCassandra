@@ -23,7 +23,7 @@ public class MongoConfigure
         }
         catch (Exception e)
         {
-            System.err.println("can't connect Redis");
+            System.err.println("can't connect MongoDB");
             System.exit(1);
         }
         return null;

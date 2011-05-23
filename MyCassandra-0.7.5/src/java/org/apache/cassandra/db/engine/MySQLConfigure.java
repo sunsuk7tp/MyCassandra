@@ -21,10 +21,12 @@ public class MySQLConfigure
         catch (ClassNotFoundException e)
         {
             System.err.println("Cannot read JDBC Driver. "+ e);
+            System.exit(1);
         }
         catch (SQLException e)
         {
-        	System.err.println("DB connection Error. "+ e);
+            System.err.println("DB connection Error. "+ e);
+            System.exit(1);
         }
         return null;
     }
