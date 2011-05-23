@@ -878,10 +878,10 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                     ColumnFamily cf = dbi.get(keyName, null);
                     for (Object cName : cNames.toArray())
                         cf.remove((ByteBuffer) cName);
-                    if (dbi.put(keyName, cf) < 0)
+                    if (dbi.put(keyName, cf, true) < 0)
                         throw new IOException("can't delete " + keyName + "in a storage.");
                 }
-                else if (dbi.put(keyName, columnFamily) < 0)
+                else if (dbi.put(keyName, columnFamily, false) < 0)
                     throw new IOException("can't insert or update " + keyName + "in a storage.");
                 return null;
             }

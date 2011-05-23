@@ -26,9 +26,9 @@ public abstract class DBInstance implements StorageEngineInterface
         }
     }
 
-    public int put(String rowKey, ColumnFamily cf) throws SQLException, IOException
+    public int put(String rowKey, ColumnFamily cf, boolean isDelete) throws SQLException, IOException
     {
-        ColumnFamily oldcf = get(rowKey, null);
+        ColumnFamily oldcf = isDelete ? null : get(rowKey, null);
         return oldcf != null ? update(rowKey, cf, oldcf) : insert(rowKey, cf);
     }
 
@@ -36,7 +36,7 @@ public abstract class DBInstance implements StorageEngineInterface
 
     public abstract int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType);
 
-    public abstract int createProcedure(int rowKeySize, int columnFanukySize);
+    public abstract int createProcedure(int rowKeySize, int columnFamilySize);
 
     public byte[] mergeColumnFamily(ColumnFamily cf, ColumnFamily newcf)
     {

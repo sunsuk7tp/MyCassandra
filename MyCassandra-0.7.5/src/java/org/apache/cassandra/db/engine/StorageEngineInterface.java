@@ -9,7 +9,7 @@ import org.apache.cassandra.db.filter.QueryFilter;
 public interface StorageEngineInterface
 {
 	
-	int put(String rowKey, ColumnFamily cf) throws SQLException, IOException;
+	int put(String rowKey, ColumnFamily cf, boolean isDelete) throws SQLException, IOException;
 	
 	ColumnFamily get(String rowKey, QueryFilter filter) throws SQLException, IOException;
 	
