@@ -77,7 +77,7 @@ public class ColumnFamily implements IColumnContainer, IIterableColumns
     private transient IColumnSerializer columnSerializer;
     final AtomicLong markedForDeleteAt = new AtomicLong(Long.MIN_VALUE);
     final AtomicInteger localDeletionTime = new AtomicInteger(Integer.MIN_VALUE);
-    private boolean deletionflag = false;
+    private boolean deletionFlag = false;
     private ConcurrentSkipListMap<ByteBuffer, IColumn> columns;
 
     public ColumnFamily(ColumnFamilyType type, AbstractType comparator, AbstractType subcolumnComparator, Integer cfid)
