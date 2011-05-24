@@ -77,8 +77,9 @@ public class ColumnFamily implements IColumnContainer, IIterableColumns
     private transient IColumnSerializer columnSerializer;
     final AtomicLong markedForDeleteAt = new AtomicLong(Long.MIN_VALUE);
     final AtomicInteger localDeletionTime = new AtomicInteger(Integer.MIN_VALUE);
+    private boolean deletionflag = false;
     private ConcurrentSkipListMap<ByteBuffer, IColumn> columns;
-    
+
     public ColumnFamily(ColumnFamilyType type, AbstractType comparator, AbstractType subcolumnComparator, Integer cfid)
     {
         this.type = type;
@@ -86,7 +87,7 @@ public class ColumnFamily implements IColumnContainer, IIterableColumns
         columns = new ConcurrentSkipListMap<ByteBuffer, IColumn>(comparator);
         this.cfid = cfid;
      }
-    
+
     public ColumnFamily cloneMeShallow()
     {
         ColumnFamily cf = new ColumnFamily(type, getComparator(), getSubComparator(), cfid);
@@ -164,8 +165,10 @@ public class ColumnFamily implements IColumnContainer, IIterableColumns
     {
         assert path.columnName != null : path;
         Column column;
-        if (timeToLive > 0)
+        if (timeToLive > 0) {
+            setDeletionFlag();
             column = new ExpiringColumn(path.columnName, value, timestamp, timeToLive);
+        }
         else
             column = new Column(path.columnName, value, timestamp);
         addColumn(path.superColumnName, column);
@@ -174,18 +177,31 @@ public class ColumnFamily implements IColumnContainer, IIterableColumns
     public void addTombstone(QueryPath path, ByteBuffer localDeletionTime, long timestamp)
     {
         assert path.columnName != null : path;
+        setDeletionFlag();
         addColumn(path.superColumnName, new DeletedColumn(path.columnName, localDeletionTime, timestamp));
     }
 
     public void addTombstone(QueryPath path, int localDeletionTime, long timestamp)
     {
         assert path.columnName != null : path;
+        setDeletionFlag();
         addColumn(path.superColumnName, new DeletedColumn(path.columnName, localDeletionTime, timestamp));
     }
 
     public void addTombstone(ByteBuffer name, int localDeletionTime, long timestamp)
     {
+        setDeletionFlag();
         addColumn(null, new DeletedColumn(name, localDeletionTime, timestamp));
+    }
+
+    public void setDeletionFlag()
+    {
+        deletionFlag = true;
+    }
+
+    public boolean isContainDeletion()
+    {
+        return deletionFlag;
     }
 
     public void addColumn(ByteBuffer superColumnName, Column column)
@@ -254,12 +270,15 @@ public class ColumnFamily implements IColumnContainer, IIterableColumns
 
     public Set<ByteBuffer> getRemovedColumnNames()
     {
+        if (!isContainDeletion())
+            return null;
         Set<ByteBuffer> cNames = new HashSet<ByteBuffer>();
         for (Map.Entry<ByteBuffer, IColumn> entry : getColumnsMap().entrySet())
         {
             ByteBuffer cName = entry.getKey();
             IColumn column = entry.getValue();
-            if (column.isMarkedForDelete()) cNames.add(cName);
+            if (column.isMarkedForDelete())
+                cNames.add(cName);
         }
         return cNames;
     }

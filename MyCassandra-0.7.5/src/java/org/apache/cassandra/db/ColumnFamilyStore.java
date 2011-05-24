@@ -879,7 +879,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                 else
                 {
                     Set<ByteBuffer> cNames = columnFamily.getRemovedColumnNames();
-                    if (!cNames.isEmpty())
+                    if (cNames != null && !cNames.isEmpty())
                     {
                         ColumnFamily cf = dbi.get(keyName);
                         for (Object cName : cNames.toArray())
