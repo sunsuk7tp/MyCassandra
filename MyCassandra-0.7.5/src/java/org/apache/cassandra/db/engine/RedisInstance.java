@@ -45,6 +45,11 @@ public class RedisInstance extends DBInstance
         }
     }
 
+    synchronized public int truncate()
+    {
+        return -1;
+    }
+
     synchronized public int delete(String rowKey) throws SQLException
     {
         try

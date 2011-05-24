@@ -1982,21 +1982,28 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         {
             public void runMayThrow() throws InterruptedException, IOException
             {
-                // putting markCompacted on the commitlogUpdater thread ensures it will run
-                // after any compactions that were in progress when truncate was called, are finished
-                for (ColumnFamilyStore cfs : concatWithIndexes())
+                if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
                 {
-                    List<SSTableReader> truncatedSSTables = new ArrayList<SSTableReader>();
-                    for (SSTableReader sstable : cfs.getSSTables())
+                    // putting markCompacted on the commitlogUpdater thread ensures it will run
+                    // after any compactions that were in progress when truncate was called, are finished
+                    for (ColumnFamilyStore cfs : concatWithIndexes())
                     {
-                        if (!sstable.newSince(truncatedAt))
-                            truncatedSSTables.add(sstable);
+                        List<SSTableReader> truncatedSSTables = new ArrayList<SSTableReader>();
+                        for (SSTableReader sstable : cfs.getSSTables())
+                        {
+                            if (!sstable.newSince(truncatedAt))
+                                truncatedSSTables.add(sstable);
+                        }
+                        cfs.markCompacted(truncatedSSTables);
                     }
-                    cfs.markCompacted(truncatedSSTables);
-                }
 
-                // Invalidate row cache
-                invalidateRowCache();
+                    // Invalidate row cache
+                    invalidateRowCache();
+                }
+                else
+                {
+                    dbi.truncate();
+                }
             }
         };
 

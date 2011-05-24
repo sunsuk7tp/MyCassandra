@@ -23,7 +23,7 @@ public class MySQLInstance extends DBInstance
     private final String SETPR = "set_row";
     private final String GETPR = "get_row";
 
-    private String insertSt, setSt, getSt, deleteSt, createSt, getPr, setPr;
+    private String insertSt, setSt, getSt, deleteSt, truncateSt, createSt, getPr, setPr;
 
     public MySQLInstance (String ksName, String cfName)
     {
@@ -35,6 +35,7 @@ public class MySQLInstance extends DBInstance
         setSt = !this.ksName.equals(SYSTEM) ? "CALL set_row(?,?)" : "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
         getSt = !this.ksName.equals(SYSTEM) ? "CALL get_row(?)" : "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
         deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
+        truncateSt = "TRUNCATE TABLE" + this.cfName;
         createSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` VARBINARY(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         setPr = "CREATE PROCEDURE set_row(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
         getPr = "CREATE PROCEDURE get_row(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
@@ -113,6 +114,19 @@ public class MySQLInstance extends DBInstance
         }
     }
 
+    public synchronized int truncate()
+    {
+        try {
+            Statement stmt = conn.createStatement();
+            return stmt.executeUpdate(truncateSt);
+        }
+        catch (SQLException e)
+        {
+            System.err.println("db truncation error" + e);
+            return -1;
+        }
+    }
+
     public synchronized int createDB()
     {
         try {
@@ -122,7 +136,7 @@ public class MySQLInstance extends DBInstance
               if (rs.getString(1).equals(ksName))
                   return 0;
           return stmt.executeUpdate("CREATE DATABASE " + ksName);
-         }
+        }
         catch (SQLException e) 
         {
             System.err.println("db database creation error "+ e);
@@ -137,7 +151,7 @@ public class MySQLInstance extends DBInstance
             Statement stmt = conn.createStatement();
             
             if (debug > 0)
-                stmt.executeUpdate("TRUNCATE TABLE " + cfName);
+                stmt.executeUpdate(truncateSt);
             
             ResultSet rs = stmt.executeQuery("SHOW TABLES");
             while (rs.next()) 

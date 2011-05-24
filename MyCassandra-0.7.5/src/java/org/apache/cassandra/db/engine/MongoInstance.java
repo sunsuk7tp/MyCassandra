@@ -53,6 +53,12 @@ public class MongoInstance extends DBInstance
         return cur.hasNext() ? (byte[])cur.next().get(VALUE) : null;
     }
 
+    public synchronized int truncate()
+    {
+        coll.drop();
+        return 1;
+    }
+    
     public synchronized int delete(String rowKey)
     {
         DBObject doc = new BasicDBObject();

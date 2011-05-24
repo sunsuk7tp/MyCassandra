@@ -70,7 +70,13 @@ public class HSMySQLInstance extends DBInstance
         //return res.size == 0 ? null : return res.get(0).getMessages();
     }
 
-    synchronized public int delete(String rowKey) throws SQLException
+
+    public synchronized int truncate()
+    {
+        return -1;
+    }
+
+    public synchronized int delete(String rowKey) throws SQLException
     {
         try
         {

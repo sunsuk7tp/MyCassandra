@@ -32,10 +32,12 @@ public abstract class DBInstance implements StorageEngineInterface
     }
 
     public abstract int delete(String rowKey) throws SQLException;
-
+    public abstract int truncate();
     public abstract int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType);
-
     public abstract int createProcedure(int rowKeySize, int columnFamilySize);
+    public abstract int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException;
+    public abstract int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException;
+    public abstract byte[] select(String rowKey) throws SQLException, IOException;
 
     public byte[] mergeColumnFamily(ColumnFamily cf, ColumnFamily newcf)
     {
@@ -47,10 +49,4 @@ public abstract class DBInstance implements StorageEngineInterface
     {
         return b != null ? new ColumnFamilySerializer().deserialize(new DataInputBuffer(b, 0, b.length)) : null;
     }
-
-    public abstract int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException;
-
-    public abstract int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException;
-
-    public abstract byte[] select(String rowKey) throws SQLException, IOException;
 }
