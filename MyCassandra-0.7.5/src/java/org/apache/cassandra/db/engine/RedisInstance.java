@@ -21,18 +21,18 @@ public class RedisInstance extends DBInstance
         conn = new RedisConfigure().connect();
     }
 
-    public int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException
+    public int insert(String rowKey, ColumnFamily cf)
     {
         return doInsert(makeRowKey(rowKey), cf.toBytes());
     }
 
-    public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException
+    public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)
     {
         cf.addAll(newcf);
         return doInsert(makeRowKey(rowKey), cf.toBytes());
     }
 
-    public byte[] select(String rowKey) throws SQLException, IOException
+    public byte[] select(String rowKey)
     {
         try
         {
@@ -50,7 +50,7 @@ public class RedisInstance extends DBInstance
         return -1;
     }
 
-    synchronized public int delete(String rowKey) throws SQLException
+    synchronized public int delete(String rowKey)
     {
         try
         {

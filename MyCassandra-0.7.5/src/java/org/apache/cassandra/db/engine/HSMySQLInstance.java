@@ -26,16 +26,16 @@ public class HSMySQLInstance extends DBInstance
         try
         {
             hs = new HSMySQLConfigure().connect();
-            hs.command().openIndex(ID, this.ksName, this.cfName, "PRIMARY", KEY+","+VALUE);
+            hs.command().openIndex(ID, this.ksName, this.cfName, "PRIMARY", KEY + "," + VALUE);
             hs.execute();
         }
         catch (IOException e)
         {
-            System.err.println("can't open hs.");
+            System.err.println("[MyCassandra] can't open hs.");
         }
     }
 
-    public int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException
+    public int insert(String rowKey, ColumnFamily cf)
     {
         try
         {
@@ -43,32 +43,37 @@ public class HSMySQLInstance extends DBInstance
         }
         catch (IOException e)
         {
-            throw new IOException("can't insert: " + e);
+            System.err.println("[MyCassandra] db insertion error: " + e);
+            return -1;
         }
     }
 
-    public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException
+    public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)
     {
         try
         {
             return doUpdate(rowKey, mergeColumnFamily(cf, newcf));
         }
-        catch (SQLException e)
-        {
-            throw new SQLException("db update error: "+ e);
-        }
         catch (IOException e)
         {
-            throw new IOException("db update error: "+ e);
+            System.err.println("[MyCassandra] db update error: "+ e);
+            return -1;
         }
     }
 
-    public byte[] select(String rowKey) throws SQLException, IOException
+    public byte[] select(String rowKey)
     {
-        hs.command().find(ID, rowKey);
-        List<HandlerSocketResult> res = hs.execute();
-        return null;
-        //return res.size == 0 ? null : return res.get(0).getMessages();
+       try
+       {
+           hs.command().find(ID, rowKey);
+           List<HandlerSocketResult> res = hs.execute();
+           return res.isEmpty() ? null : res.get(0).getMessages();
+       }
+       catch (IOException e)
+       {
+           System.err.println("[MyCassandra] db select error: " + e);
+           return null;
+       }
     }
 
 
@@ -77,7 +82,7 @@ public class HSMySQLInstance extends DBInstance
         return -1;
     }
 
-    public synchronized int delete(String rowKey) throws SQLException
+    public synchronized int delete(String rowKey)
     {
         try
         {
@@ -87,9 +92,9 @@ public class HSMySQLInstance extends DBInstance
         }
         catch (IOException e)
         {
-           System.err.println(e);
+            System.err.println("[MyCassandra] db deletion error: " + e);
+            return -1;
         }
-        return -1;
     }
 
     public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
@@ -150,7 +155,7 @@ public class HSMySQLInstance extends DBInstance
         return res.get(0).getStatus();
     }
 
-    private synchronized int doUpdate(String rowKey, byte[] cfValue) throws SQLException, IOException
+    private synchronized int doUpdate(String rowKey, byte[] cfValue) throws IOException
     {
         hs.command().findModifyUpdate(ID, rowKey, "=", "1", "0", cfValue);
         List<HandlerSocketResult> res = hs.execute();

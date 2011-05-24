@@ -7,8 +7,8 @@ import org.apache.cassandra.db.ColumnFamily;
 
 public interface StorageEngineInterface
 {
-    int put(String rowKey, ColumnFamily cf, boolean isDelete) throws SQLException, IOException;
-    ColumnFamily get(String rowKey) throws SQLException, IOException;
-    int delete(String rowKey) throws SQLException;
-    int truncate();
+    int put(String rowKey, ColumnFamily cf, boolean isDelete); /* put cf in a row specified rowKey. if isDelete is true, overwrite*/
+    ColumnFamily get(String rowKey); /* get a column family specified rowKey */
+    int delete(String rowKey); /* delete a row specified rowKey */
+    int truncate(); /* column family (table) truncation*/
 }

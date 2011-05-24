@@ -34,17 +34,17 @@ public class MongoInstance extends DBInstance
         coll.createIndex(new BasicDBObject(KEY,1).append("unique", true));
     }
 
-    public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)  throws SQLException, IOException
+    public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)
     {
         return doUpdate(rowKey, mergeColumnFamily(cf, newcf));
     }
 
-    public int insert(String rowKey, ColumnFamily cf)  throws SQLException, IOException
+    public int insert(String rowKey, ColumnFamily cf)
     {
         return doInsert(rowKey, cf.toBytes());
     }
 
-    public byte[] select(String rowKey) throws SQLException, IOException
+    public byte[] select(String rowKey)
     {
         BasicDBObject query = new BasicDBObject();
         query.put(KEY, rowKey);

@@ -57,11 +57,11 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-            System.err.println("db prepare state error "+ e);
+            System.err.println("[MyCassandra] db prepare state error "+ e);
         }
     }
 
-    public int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException
+    public int insert(String rowKey, ColumnFamily cf)
     {
         try
         {
@@ -69,12 +69,12 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-            System.err.println("db insertion error "+ e);
+            System.err.println("[MyCassandra] db insertion error: "+ e);
             return -1;
         }
     }
 
-    public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException
+    public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)
     {
         try
         {
@@ -82,35 +82,46 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-            System.err.println("db update error: "+ e);
+            System.err.println("[MyCassandra] db update error: " + e);
             return -1;
         }
     }
 
-    public byte[] select(String rowKey) throws SQLException, IOException
+    public byte[] select(String rowKey)
     {
-        PreparedStatement pstSelect = conn.prepareStatement(getSt);
-        pstSelect.setString(1, rowKey);
-        ResultSet rs = pstSelect.executeQuery();
-        byte[] b = null;
-        if (rs != null)
-            while (rs.next())
-                b = rs.getBytes(1);
-        rs.close();
-        pstSelect.close();
-        return b;
+        try
+        {
+            PreparedStatement pstSelect = conn.prepareStatement(getSt);
+            pstSelect.setString(1, rowKey);
+            ResultSet rs = pstSelect.executeQuery();
+            byte[] b = null;
+            if (rs != null)
+                while (rs.next())
+                    b = rs.getBytes(1);
+            rs.close();
+            pstSelect.close();
+            return b;
+        }
+        catch (SQLException e)
+        {
+            System.err.println("[MyCassandra] db select error: " + e);
+            return null;
+        }
     }
 
-    public synchronized int delete(String rowKey) throws SQLException
+    public synchronized int delete(String rowKey)
     {
-        PreparedStatement pstDelete = conn.prepareStatement(deleteSt);
         try {
+            PreparedStatement pstDelete = conn.prepareStatement(deleteSt);
             pstDelete.setString(1, rowKey);
-            return pstDelete.executeUpdate();
-        }
-        finally
-        {
+            int res = pstDelete.executeUpdate();
             pstDelete.close();
+            return res;
+        }
+        catch (SQLException e)
+        {
+            System.err.println("[MyCassandra] db row deletion error: " + e);
+            return -1;
         }
     }
 
@@ -122,7 +133,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-            System.err.println("db truncation error" + e);
+            System.err.println("[MyCassandra] db truncation error: " + e);
             return -1;
         }
     }
@@ -139,7 +150,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e) 
         {
-            System.err.println("db database creation error "+ e);
+            System.err.println("[MyCassandra] db database creation error: "+ e);
             return -1;
         }
     }
@@ -167,7 +178,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e) 
         {
-            System.err.println("db table creation error "+ e);
+            System.err.println("[MyCassandra] db table creation error: "+ e);
             return -1;
         }
     }
@@ -192,7 +203,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-            System.err.println("db procedure creation error " + e);
+            System.err.println("[MyCassandra] db procedure creation error: " + e);
             return -1;
         }
     }

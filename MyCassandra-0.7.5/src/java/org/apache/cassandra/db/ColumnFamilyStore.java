@@ -893,13 +893,10 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                 return null;
             }
         }
-        catch (SQLException e)
-        {
-            throw new IOError(e);
-        }
         catch (IOException e)
         {
-            throw new IOError(e);
+            logger.info("[MyCassandra] {}", e);
+            return null;
         }
         finally {
             writeStats.addNano(System.nanoTime() - start);
@@ -1356,20 +1353,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
     private ColumnFamily doGetCFDB(QueryFilter filter, int gcBefore)
     {
-        try
-        {
-            ColumnFamily rescf = dbi.get(filter.key.getTxtKey());
-            return rescf != null ? filterColumnFamily(rescf, filter, gcBefore) : null;
-        }
-        catch (SQLException e)
-        {
-            System.err.println(e);
-            return null;
-        }
-        catch (IOException e)
-        {
-            throw new IOError(e);
-        }
+        ColumnFamily rescf = dbi.get(filter.key.getTxtKey());
+        return rescf != null ? filterColumnFamily(rescf, filter, gcBefore) : null;
     }
 
     /** filter a cached row, which will not be modified by the filter, but may be modified by throwing out

@@ -12,32 +12,32 @@ public abstract class DBInstance implements StorageEngineInterface
 {
     String ksName, cfName;
 
-    public ColumnFamily get(String rowKey) throws SQLException, IOException
+    public ColumnFamily get(String rowKey)
     {
         try
         {
             return bytes2ColumnFamily(select(rowKey));
         }
-        catch (SQLException e)
+        catch (IOException e)
         {
-            System.err.println("db get error "+ e);
+            System.err.println("[MyCassandra] db get error: " + e);
             return null;
         }
     }
 
-    public int put(String rowKey, ColumnFamily cf, boolean isDelete) throws SQLException, IOException
+    public int put(String rowKey, ColumnFamily cf, boolean isDelete)
     {
         ColumnFamily oldcf = isDelete ? null : get(rowKey);
         return oldcf != null ? update(rowKey, cf, oldcf) : insert(rowKey, cf);
     }
 
-    public abstract int delete(String rowKey) throws SQLException;
+    public abstract int delete(String rowKey);
     public abstract int truncate();
     public abstract int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType);
     public abstract int createProcedure(int rowKeySize, int columnFamilySize);
-    public abstract int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException;
-    public abstract int update(String rowKey, ColumnFamily newcf, ColumnFamily cf) throws SQLException, IOException;
-    public abstract byte[] select(String rowKey) throws SQLException, IOException;
+    public abstract int insert(String rowKey, ColumnFamily cf);
+    public abstract int update(String rowKey, ColumnFamily newcf, ColumnFamily cf);
+    public abstract byte[] select(String rowKey);
 
     public byte[] mergeColumnFamily(ColumnFamily cf, ColumnFamily newcf)
     {
