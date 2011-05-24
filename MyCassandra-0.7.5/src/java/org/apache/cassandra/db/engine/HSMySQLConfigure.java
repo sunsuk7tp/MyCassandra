@@ -1,6 +1,7 @@
 package org.apache.cassandra.db.engine;
 import java.io.IOException;
 
+import org.handlersocket.*;
 import org.apache.cassandra.config.DatabaseDescriptor;
 
 public class HSMySQLConfigure
