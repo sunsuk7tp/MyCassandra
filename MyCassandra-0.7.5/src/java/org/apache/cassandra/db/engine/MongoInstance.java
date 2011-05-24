@@ -3,6 +3,9 @@ package org.apache.cassandra.db.engine;
 import java.sql.*;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.nio.ByteBuffer;
 
 import org.apache.cassandra.db.ColumnFamily;
 
@@ -51,6 +54,11 @@ public class MongoInstance extends DBInstance
 
         DBCursor cur = coll.find(query);
         return cur.hasNext() ? (byte[])cur.next().get(VALUE) : null;
+    }
+
+    public Map<ByteBuffer, ColumnFamily> getRangeSlice(String startWith, String stopAt, int maxResults)
+    {
+        return null;
     }
 
     public synchronized int truncate()

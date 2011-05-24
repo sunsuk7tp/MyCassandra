@@ -5,6 +5,9 @@ import java.sql.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.nio.ByteBuffer;
 
 import org.handlersocket.*;
 import org.apache.cassandra.db.ColumnFamily;
@@ -76,6 +79,10 @@ public class HSMySQLInstance extends DBInstance
        }
     }
 
+    public Map<ByteBuffer, ColumnFamily> getRangeSlice(String startWith, String stopAt, int maxResults)
+    {
+        return null;
+    }
 
     public synchronized int truncate()
     {

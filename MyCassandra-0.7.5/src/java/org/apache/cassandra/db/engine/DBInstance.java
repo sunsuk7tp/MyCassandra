@@ -2,6 +2,8 @@ package org.apache.cassandra.db.engine;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Map;
+import java.nio.ByteBuffer;
 
 import org.apache.cassandra.io.util.DataInputBuffer;
 import org.apache.cassandra.io.util.DataOutputBuffer;
@@ -11,6 +13,13 @@ import org.apache.cassandra.db.ColumnFamilySerializer;
 public abstract class DBInstance implements StorageEngineInterface
 {
     String ksName, cfName;
+
+
+    public int put(String rowKey, ColumnFamily cf, boolean isDelete)
+    {
+        ColumnFamily oldcf = isDelete ? null : get(rowKey);
+        return oldcf != null ? update(rowKey, cf, oldcf) : insert(rowKey, cf);
+    }
 
     public ColumnFamily get(String rowKey)
     {
@@ -25,12 +34,8 @@ public abstract class DBInstance implements StorageEngineInterface
         }
     }
 
-    public int put(String rowKey, ColumnFamily cf, boolean isDelete)
-    {
-        ColumnFamily oldcf = isDelete ? null : get(rowKey);
-        return oldcf != null ? update(rowKey, cf, oldcf) : insert(rowKey, cf);
-    }
-
+    public abstract Map<ByteBuffer, ColumnFamily> getRangeSlice(String startWith, String stopAt, int maxResults);
+    
     public abstract int delete(String rowKey);
     public abstract int truncate();
     public abstract int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType);

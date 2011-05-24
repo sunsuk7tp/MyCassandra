@@ -33,6 +33,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import com.google.common.collect.Iterables;
+
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -1506,11 +1507,22 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                || (!((Range)range).isWrapAround() || range.right.equals(StorageService.getPartitioner().getMinimumToken()))
                : range;
 
-        List<Row> rows = new ArrayList<Row>();
+        //List<Row> rows = new ArrayList<Row>();
         DecoratedKey startWith = new DecoratedKey(range.left, null);
         DecoratedKey stopAt = new DecoratedKey(range.right, null);
 
         QueryFilter filter = new QueryFilter(null, new QueryPath(columnFamily, superColumn, null), columnFilter);
+        
+        return DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE ? 
+                   getRangeSliceAtBigtable(filter, startWith, stopAt, range, maxResults)
+                   : getRangeSliceAtDB(filter, startWith, stopAt, maxResults);
+    }
+
+    public List<Row> getRangeSliceAtBigtable(QueryFilter filter, DecoratedKey startWith, DecoratedKey stopAt, final AbstractBounds range, int maxResults)
+    throws ExecutionException, InterruptedException
+    {
+        List<Row> rows = new ArrayList<Row>();
+        
         Collection<Memtable> memtables = new ArrayList<Memtable>();
         memtables.add(getMemtableThreadSafe());
         memtables.addAll(memtablesPendingFlush);
@@ -1562,6 +1574,19 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             }
         }
 
+        return rows;
+    }
+
+    public List<Row> getRangeSliceAtDB(QueryFilter filter, DecoratedKey startWith, DecoratedKey stopAt, int maxResults)
+    {
+        List<Row> rows = new ArrayList<Row>();
+        Map<ByteBuffer, ColumnFamily> rowMap = dbi.getRangeSlice(startWith.getTxtKey(), stopAt.getTxtKey(), maxResults);
+        Iterator rowMapIterator = rowMap.keySet().iterator();
+        while(rowMapIterator.hasNext())
+        {
+            ByteBuffer rkey = (ByteBuffer) rowMapIterator.next();
+            rows.add(new Row(partitioner.decorateKey(rkey), rowMap.get(rkey)));
+        }
         return rows;
     }
 

@@ -2,6 +2,10 @@ package org.apache.cassandra.db.engine;
 
 import java.sql.*;
 import java.io.IOException;
+import java.util.Map;
+import java.util.HashMap;
+
+import java.nio.ByteBuffer;
 
 import org.apache.cassandra.db.ColumnFamily;
 
@@ -23,9 +27,9 @@ public class MySQLInstance extends DBInstance
     private final String SETPR = "set_row";
     private final String GETPR = "get_row";
 
-    private String insertSt, setSt, getSt, deleteSt, truncateSt, createSt, getPr, setPr;
+    private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, createSt, getPr, setPr;
 
-    public MySQLInstance (String ksName, String cfName)
+    public MySQLInstance(String ksName, String cfName)
     {
         this.ksName = ksName;
         this.cfName = PREFIX + cfName;
@@ -34,6 +38,7 @@ public class MySQLInstance extends DBInstance
         insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + VALUE + " = ?"; 
         setSt = !this.ksName.equals(SYSTEM) ? "CALL set_row(?,?)" : "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
         getSt = !this.ksName.equals(SYSTEM) ? "CALL get_row(?)" : "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
+        rangeSt = "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + "WHERE " + KEY + " >= ? AND " + KEY + " < ? LIMIT = ?";
         deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
         truncateSt = "TRUNCATE TABLE " + this.cfName;
         createSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` VARBINARY(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
@@ -109,9 +114,40 @@ public class MySQLInstance extends DBInstance
         }
     }
 
+    public Map<ByteBuffer, ColumnFamily> getRangeSlice(String startWith, String stopAt, int maxResults)
+    {
+        Map<ByteBuffer, ColumnFamily> rowMap = new HashMap<ByteBuffer, ColumnFamily>();
+        try
+        {
+            PreparedStatement pstRange = conn.prepareStatement(rangeSt);
+            pstRange.setString(1, startWith);
+            pstRange.setString(2, stopAt);
+            pstRange.setInt(3, maxResults);
+            ResultSet rs = pstRange.executeQuery();
+            if (rs != null)
+                while (rs.next())
+                {
+                    rowMap.put(ByteBuffer.wrap(rs.getBytes(1)), bytes2ColumnFamily(rs.getBytes(2)));
+                }
+            rs.close();
+            pstRange.close();
+            return rowMap;
+        }
+        catch (SQLException e)
+        {
+            System.err.println("[MyCassandra] db get range slice error: " + e);
+        }
+        catch (IOException e)
+        {
+            System.err.println("[MyCassandr] db get range slice error: " + e);
+        }
+        return null;
+    }
+
     public synchronized int delete(String rowKey)
     {
-        try {
+        try
+        {
             PreparedStatement pstDelete = conn.prepareStatement(deleteSt);
             pstDelete.setString(1, rowKey);
             int res = pstDelete.executeUpdate();
@@ -127,7 +163,8 @@ public class MySQLInstance extends DBInstance
 
     public synchronized int truncate()
     {
-        try {
+        try
+        {
             Statement stmt = conn.createStatement();
             return stmt.executeUpdate(truncateSt);
         }
@@ -140,7 +177,8 @@ public class MySQLInstance extends DBInstance
 
     public synchronized int createDB()
     {
-        try {
+        try
+        {
           Statement stmt = new MySQLConfigure().connect("").createStatement();
           ResultSet rs = stmt.executeQuery("SHOW DATABASES");
           while (rs.next())
