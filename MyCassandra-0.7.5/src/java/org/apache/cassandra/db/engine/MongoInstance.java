@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.nio.ByteBuffer;
 
 import org.apache.cassandra.db.ColumnFamily;
+import org.apache.cassandra.db.DecoratedKey;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -56,7 +57,7 @@ public class MongoInstance extends DBInstance
         return cur.hasNext() ? (byte[])cur.next().get(VALUE) : null;
     }
 
-    public Map<ByteBuffer, ColumnFamily> getRangeSlice(String startWith, String stopAt, int maxResults)
+    public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults)
     {
         return null;
     }

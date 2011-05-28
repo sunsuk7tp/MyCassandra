@@ -1580,7 +1580,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     public List<Row> getRangeSliceAtDB(QueryFilter filter, DecoratedKey startWith, DecoratedKey stopAt, int maxResults)
     {
         List<Row> rows = new ArrayList<Row>();
-        Map<ByteBuffer, ColumnFamily> rowMap = dbi.getRangeSlice(startWith.getTxtKey(), stopAt.getTxtKey(), maxResults);
+        // startWith and stopAt is token and not value.
+        Map<ByteBuffer, ColumnFamily> rowMap = dbi.getRangeSlice(startWith, stopAt, maxResults);
         Iterator rowMapIterator = rowMap.keySet().iterator();
         while(rowMapIterator.hasNext())
         {

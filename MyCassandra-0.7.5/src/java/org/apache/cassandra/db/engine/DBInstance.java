@@ -9,6 +9,7 @@ import org.apache.cassandra.io.util.DataInputBuffer;
 import org.apache.cassandra.io.util.DataOutputBuffer;
 import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.ColumnFamilySerializer;
+import org.apache.cassandra.db.DecoratedKey;
 
 public abstract class DBInstance implements StorageEngineInterface
 {
@@ -34,7 +35,7 @@ public abstract class DBInstance implements StorageEngineInterface
         }
     }
 
-    public abstract Map<ByteBuffer, ColumnFamily> getRangeSlice(String startWith, String stopAt, int maxResults);
+    public abstract Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults);
     
     public abstract int delete(String rowKey);
     public abstract int truncate();

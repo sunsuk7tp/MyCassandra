@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.nio.ByteBuffer;
 
 import org.apache.cassandra.db.ColumnFamily;
+import org.apache.cassandra.db.DecoratedKey;
 
 public class MySQLInstance extends DBInstance
 {
@@ -114,14 +115,14 @@ public class MySQLInstance extends DBInstance
         }
     }
 
-    public Map<ByteBuffer, ColumnFamily> getRangeSlice(String startWith, String stopAt, int maxResults)
+    public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults)
     {
         Map<ByteBuffer, ColumnFamily> rowMap = new HashMap<ByteBuffer, ColumnFamily>();
         try
         {
             PreparedStatement pstRange = conn.prepareStatement(rangeSt);
-            pstRange.setString(1, startWith);
-            pstRange.setString(2, stopAt);
+            pstRange.setObject(1, startWith);
+            pstRange.setObject(2, stopAt);
             pstRange.setInt(3, maxResults);
             ResultSet rs = pstRange.executeQuery();
             if (rs != null)
