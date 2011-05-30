@@ -63,7 +63,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-            System.err.println("[MyCassandra] db prepare state error "+ e);
+            errorMsg("db prepare state error", e);
         }
     }
 
@@ -75,7 +75,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-            System.err.println("[MyCassandra] db insertion error: "+ e);
+            errorMsg("db insertion error", e);
             return -1;
         }
     }
@@ -88,7 +88,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-            System.err.println("[MyCassandra] db update error: " + e);
+            errorMsg("db update error" , e);
             return -1;
         }
     }
@@ -110,7 +110,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-            System.err.println("[MyCassandra] db select error: " + e);
+            errorMsg("db select error", e);
             return null;
         }
     }
@@ -136,11 +136,11 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-            System.err.println("[MyCassandra] db get range slice error: " + e);
+            errorMsg("db get range slice error", e);
         }
         catch (IOException e)
         {
-            System.err.println("[MyCassandr] db get range slice error: " + e);
+            errorMsg("db get range slice error", e);
         }
         return null;
     }
@@ -157,7 +157,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-            System.err.println("[MyCassandra] db row deletion error: " + e);
+            errorMsg("db row deletion error", e);
             return -1;
         }
     }
@@ -171,7 +171,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-            System.err.println("[MyCassandra] db truncation error: " + e);
+            errorMsg("db truncation error", e);
             return -1;
         }
     }
@@ -189,7 +189,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e) 
         {
-            System.err.println("[MyCassandra] db database creation error: "+ e);
+            errorMsg("db database creation error", e);
             return -1;
         }
     }
@@ -217,7 +217,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e) 
         {
-            System.err.println("[MyCassandra] db table creation error: "+ e);
+            errorMsg("db table creation error", e);
             return -1;
         }
     }
@@ -243,7 +243,7 @@ public class MySQLInstance extends DBInstance
         }
         catch (SQLException e)
         {
-            System.err.println("[MyCassandra] db procedure creation error: " + e);
+            errorMsg("db procedure creation error", e);
             return -1;
         }
     }
@@ -263,6 +263,11 @@ public class MySQLInstance extends DBInstance
         return 1;
     }
     */
+
+    private void errorMsg(String msg, Exception e)
+    {
+        System.err.println("[MyCassandra (" + " Keyspace:" + ksName + "/ CF: " + cfName + ")] " + msg + ": " + e);
+    }
 
     private synchronized int doInsert(String rowKey, byte[] cfValue) throws SQLException
     {
