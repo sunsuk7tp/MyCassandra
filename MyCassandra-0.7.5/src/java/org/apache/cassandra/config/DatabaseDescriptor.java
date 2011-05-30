@@ -98,10 +98,14 @@ public class DatabaseDescriptor
 
     public static int dataBase;
 
+    // column family type
+    public static final String BINARY = "BINARY";
+    public static final String BLOB = "BLOB";
+
     // mysql default setting
     public static final String defaultStorageEngineType = "InnoDB";
     public static final int defaultRowKeySize = 64;
-    public static final String defaultColumnFamilyType = "VARBINARY";
+    public static final String defaultColumnFamilyType = BINARY;
     public static final int defaultColumnFamilySize = 30 * 1024;
 
     /**

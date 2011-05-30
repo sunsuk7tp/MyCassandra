@@ -287,7 +287,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             case DatabaseDescriptor.MYSQL:
             default:
                 dbi = new MySQLInstance(new String(table.name), columnFamilyName);
-                dbi.create(DatabaseDescriptor.defaultRowKeySize, DatabaseDescriptor.defaultColumnFamilySize, DatabaseDescriptor.defaultColumnFamilyType, DatabaseDescriptor.defaultStorageEngineType);
+                if(columnFamily.equals("Migrations")) dbi.create(DatabaseDescriptor.defaultRowKeySize, DatabaseDescriptor.defaultColumnFamilySize, "BLOB", "MyISAM");
+                else dbi.create(DatabaseDescriptor.defaultRowKeySize, DatabaseDescriptor.defaultColumnFamilySize, DatabaseDescriptor.defaultColumnFamilyType, DatabaseDescriptor.defaultStorageEngineType);
                 dbi.createProcedure(DatabaseDescriptor.defaultRowKeySize, DatabaseDescriptor.defaultColumnFamilySize);
                 break;
             case DatabaseDescriptor.MONGODB:
@@ -903,10 +904,10 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                         for (Object cName : cNames.toArray())
                             cf.remove((ByteBuffer) cName);
                         if (dbi.put(keyName, cf, true) < 0)
-                            throw new IOException("can't delete " + keyName + "in a storage.");
+                            throw new IOException("can't delete " + keyName + " in a storage.");
                     }
                     else if (dbi.put(keyName, columnFamily, false) < 0)
-                        throw new IOException("can't insert or update " + keyName + "in a storage.");
+                        throw new IOException("can't insert or update " + keyName + " in a storage.");
                 }
                 return null;
             }

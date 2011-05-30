@@ -27,8 +27,11 @@ public class MySQLInstance extends DBInstance
     private final String SYSTEM = "system";
     private final String SETPR = "set_row";
     private final String GETPR = "get_row";
+    
+    private final String BINARY = "BINARY";
+    private final String BLOB = "BLOB";
 
-    private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, createSt, getPr, setPr;
+    private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, createSt, createBlobSt, getPr, setPr;
 
     public MySQLInstance(String ksName, String cfName)
     {
@@ -60,6 +63,7 @@ public class MySQLInstance extends DBInstance
         deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
         truncateSt = "TRUNCATE TABLE " + this.cfName;
         createSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` VARBINARY(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
+        createBlobSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` LONGBLOB(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
         getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
     }
@@ -195,7 +199,7 @@ public class MySQLInstance extends DBInstance
           ResultSet rs = stmt.executeQuery("SHOW DATABASES");
           while (rs.next())
               if (rs.getString(1).equals(ksName))
-                  return 0;
+                  return 1;
           return stmt.executeUpdate("CREATE DATABASE " + ksName);
         }
         catch (SQLException e) 
@@ -219,11 +223,20 @@ public class MySQLInstance extends DBInstance
                 if (rs.getString(1).equals(cfName))
                     return 0;
 
-            PreparedStatement pst = conn.prepareStatement(createSt);
-            pst.setInt(1, rowKeySize);
-            pst.setInt(2, columnFamilySize);
-            pst.setString(3, storageEngineType);
-            
+            PreparedStatement pst = null;
+            if (columnFamilyType.equals(BLOB))
+            {
+                pst = conn.prepareStatement(createBlobSt);
+                pst.setInt(1, rowKeySize);
+                pst.setString(2, storageEngineType);
+            }
+            else
+            {
+                pst = conn.prepareStatement(createSt);
+                pst.setInt(1, rowKeySize);
+                pst.setInt(2, columnFamilySize);
+                pst.setString(3, storageEngineType);
+            }
             return pst.executeUpdate();
         }
         catch (SQLException e) 
