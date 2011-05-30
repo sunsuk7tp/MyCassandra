@@ -299,7 +299,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         }
         if (DatabaseDescriptor.dataBase != DatabaseDescriptor.BIGTABLE)
         {
-            dbis.put(columnFamily, dbi);
+            setDBInstance(dbi);
         }
     }
 
@@ -489,6 +489,16 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             count++;
         }
         return count > 0 ? (int) (sum / count) : 0;
+    }
+
+    public void setDBInstance(DBInstance dbi)
+    {
+        dbis.put(columnFamily, dbi);
+    }
+
+    public DBInstance getDBInstance()
+    {
+        return dbis.get(columnFamily);
     }
 
     public static ColumnFamilyStore createColumnFamilyStore(Table table, String columnFamily)
@@ -879,7 +889,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             else
             {
                 String keyName = key.getTxtKey();
-                DBInstance dbi = dbis.get(this.columnFamily);
+                DBInstance dbi = getDBInstance();
                 if (columnFamily.isMarkedForDelete())
                 {
                     dbi.delete(keyName);
@@ -1361,7 +1371,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
     private ColumnFamily doGetCFDB(QueryFilter filter, int gcBefore)
     {
-        ColumnFamily rescf = dbis.get(this.columnFamily).get(filter.key.getTxtKey());
+        ColumnFamily rescf = getDBInstance().get(filter.key.getTxtKey());
         return rescf != null ? filterColumnFamily(rescf, filter, gcBefore) : null;
     }
 
@@ -1588,7 +1598,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     {
         List<Row> rows = new ArrayList<Row>();
         // startWith and stopAt is token and not value.
-        Map<ByteBuffer, ColumnFamily> rowMap = dbis.get(this.columnFamily).getRangeSlice(startWith, stopAt, maxResults);
+        Map<ByteBuffer, ColumnFamily> rowMap = getDBInstance().getRangeSlice(startWith, stopAt, maxResults);
         Iterator rowMapIterator = rowMap.keySet().iterator();
         while(rowMapIterator.hasNext())
         {
@@ -2020,7 +2030,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                 }
                 else
                 {
-                    dbis.get(columnFamily).truncate();
+                    getDBInstance().truncate();
                 }
             }
         };
