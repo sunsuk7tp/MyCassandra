@@ -232,7 +232,9 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
   private static final int __MEMTABLE_FLUSH_AFTER_MINS_ISSET_ID = 9;
   private static final int __MEMTABLE_THROUGHPUT_IN_MB_ISSET_ID = 10;
   private static final int __MEMTABLE_OPERATIONS_IN_MILLIONS_ISSET_ID = 11;
-  private BitSet __isset_bit_vector = new BitSet(12);
+  private static final int __MAX_KEY_SIZE_ID = 12;
+  private static final int __MAX_CF_SIZE_ID = 13;
+  private BitSet __isset_bit_vector = new BitSet(14);
 
   public static final Map<_Fields, FieldMetaData> metaDataMap;
   static {
@@ -758,9 +760,17 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     return this;
   }
 
+  public boolean isSetMax_key_size() {
+    return this.max_key_size > 0;
+  }
+
   public CfDef setMax_cf_size(int max_cf_size) {
     this.max_cf_size = max_cf_size;
     return this;
+  }
+
+  public boolean isSetMax_cf_size() {
+    return this.max_cf_size > 0;
   }
 
   public void unsetMax_compaction_threshold() {
@@ -889,6 +899,14 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
 
   public void setMemtable_operations_in_millionsIsSet(boolean value) {
     __isset_bit_vector.set(__MEMTABLE_OPERATIONS_IN_MILLIONS_ISSET_ID, value);
+  }
+  
+  public void setMax_key_size(boolean value) {
+    __isset_bit_vector.set(__MAX_KEY_SIZE_ID, value);
+  }
+
+  public void setMax_cf_size(boolean value) {
+    __isset_bit_vector.set(__MAX_CF_SIZE_ID, value);
   }
 
   public void setFieldValue(_Fields field, Object value) {
@@ -1864,6 +1882,22 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
+        case 24: // MAX_KEY_SIZE
+          if (field.type == TType.I32) {
+            this.max_key_size = iprot.readI32();
+            setMax_key_size(true);
+          } else {
+            TProtocolUtil.skip(iprot, field.type);
+          }
+          break;
+        case 25: // MAX_CF_SIZE
+            if (field.type == TType.I32) {
+              this.max_cf_size = iprot.readI32();
+              setMax_cf_size(true);
+            } else {
+              TProtocolUtil.skip(iprot, field.type);
+            }
+          break;
         default:
           TProtocolUtil.skip(iprot, field.type);
       }
@@ -1997,6 +2031,16 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
       oprot.writeFieldBegin(MEMTABLE_OPERATIONS_IN_MILLIONS_FIELD_DESC);
       oprot.writeDouble(this.memtable_operations_in_millions);
       oprot.writeFieldEnd();
+    }
+    if (isSetMax_key_size()) {
+        oprot.writeFieldBegin(MAX_KEY_SIZE);
+        oprot.writeI32(this.max_key_size);
+        oprot.writeFieldEnd();
+    }
+    if (isSetMax_cf_size()) {
+        oprot.writeFieldBegin(MAX_CF_SIZE);
+        oprot.writeI32(this.max_cf_size);
+        oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();
     oprot.writeStructEnd();
@@ -2153,6 +2197,18 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
       sb.append("memtable_operations_in_millions:");
       sb.append(this.memtable_operations_in_millions);
       first = false;
+    }
+    if (isSetMax_key_size()) {
+        if (!first) sb.append(", ");
+        sb.append("max_key_size:");
+        sb.append(this.max_key_size);
+        first = false;
+    }
+    if (isSetMax_cf_size()) {
+        if (!first) sb.append(", ");
+        sb.append("max_cf_size:");
+        sb.append(this.max_cf_size);
+        first = false;
     }
     sb.append(")");
     return sb.toString();
