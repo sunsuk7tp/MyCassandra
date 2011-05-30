@@ -479,6 +479,13 @@ public class ThriftValidation
                 if (cfType == ColumnFamilyType.Super && c.index_type != null)
                     throw new InvalidRequestException("Secondary indexes are not supported on supercolumns");
             }
+            
+            int maxKeySize = cf_def.max_key_size;
+            int maxCFSize = cf_def.max_cf_size;
+            if(maxKeySize <= 0 || maxKeySize > 65535)
+                throw new InvalidRequestException("Too small or large max_key_size: " + maxKeySize);
+            if (maxCFSize <= 0 || maxCFSize > 65535)
+                throw new InvalidRequestException("Too small or large max_cf_size: " + maxCFSize);
         }
         catch (ConfigurationException e)
         {

@@ -151,6 +151,9 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     // Locally held row/key cache scheduled tasks
     private volatile ScheduledFuture<?> saveRowCacheTask;
     private volatile ScheduledFuture<?> saveKeyCacheTask;
+    
+    private int maxKeySize = DatabaseDescriptor.defaultRowKeySize;
+    private int maxCFSize = DatabaseDescriptor.defaultColumnFamilySize;
 
     public void reload()
     {
@@ -220,6 +223,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         this.rowCacheSaveInSeconds = new DefaultInteger(metadata.getRowCacheSavePeriodInSeconds());
         this.keyCacheSaveInSeconds = new DefaultInteger(metadata.getKeyCacheSavePeriodInSeconds());
         this.partitioner = partitioner;
+        this.maxKeySize = metadata.getMaxKeySize();
+        this.maxCFSize = metadata.getMaxCFSize();
         fileIndexGenerator.set(generation);
         memtable = new Memtable(this);
         binaryMemtable = new AtomicReference<BinaryMemtable>(new BinaryMemtable(this));
@@ -287,9 +292,9 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             case DatabaseDescriptor.MYSQL:
             default:
                 dbi = new MySQLInstance(new String(table.name), columnFamilyName);
-                if(columnFamily.equals("Migrations")) dbi.create(DatabaseDescriptor.defaultRowKeySize, DatabaseDescriptor.defaultColumnFamilySize, "BLOB", "MyISAM");
-                else dbi.create(DatabaseDescriptor.defaultRowKeySize, DatabaseDescriptor.defaultColumnFamilySize, DatabaseDescriptor.defaultColumnFamilyType, DatabaseDescriptor.defaultStorageEngineType);
-                dbi.createProcedure(DatabaseDescriptor.defaultRowKeySize, DatabaseDescriptor.defaultColumnFamilySize);
+                if(columnFamily.equals("Migrations")) dbi.create(maxKeySize, maxCFSize, "BLOB", "MyISAM");
+                else dbi.create(maxKeySize, maxCFSize, DatabaseDescriptor.defaultColumnFamilyType, DatabaseDescriptor.defaultStorageEngineType);
+                dbi.createProcedure(maxKeySize, maxCFSize);
                 break;
             case DatabaseDescriptor.MONGODB:
                 dbi = new MongoInstance(new String(table.name), columnFamilyName);

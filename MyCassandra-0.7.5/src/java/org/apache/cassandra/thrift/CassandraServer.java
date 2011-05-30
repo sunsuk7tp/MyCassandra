@@ -882,6 +882,8 @@ public class CassandraServer implements Cassandra.Iface
                               cf_def.isSetMemtable_flush_after_mins() ? cf_def.memtable_flush_after_mins : CFMetaData.DEFAULT_MEMTABLE_LIFETIME_IN_MINS,
                               cf_def.isSetMemtable_throughput_in_mb() ? cf_def.memtable_throughput_in_mb : CFMetaData.DEFAULT_MEMTABLE_THROUGHPUT_IN_MB,
                               cf_def.isSetMemtable_operations_in_millions() ? cf_def.memtable_operations_in_millions : CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS,
+                              cf_def.isSetMax_key_size() ? cf_def.max_key_size : CFMetaData.DEFAULT_MAX_KEY_SIZE,
+                              cf_def.isSetMax_cf_size() ? cf_def.max_cf_size : CFMetaData.DEFAULT_MAX_CF_SIZE,
                               ColumnDefinition.fromColumnDef(cf_def.column_metadata));
     }
 
