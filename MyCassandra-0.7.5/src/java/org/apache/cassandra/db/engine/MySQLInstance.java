@@ -37,14 +37,14 @@ public class MySQLInstance extends DBInstance
 
         /* define crud sql statements */
         insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + VALUE + " = ?"; 
-        setSt = !this.ksName.equals(SYSTEM) ? "CALL set_row(?,?)" : "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
-        getSt = !this.ksName.equals(SYSTEM) ? "CALL get_row(?)" : "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
+        setSt = !this.ksName.equals(SYSTEM) ? "CALL " + SETPR + this.cfName + "(?,?)" : "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
+        getSt = !this.ksName.equals(SYSTEM) ? "CALL " + GETPR + this.cfName + "(?)" : "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
         rangeSt = "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + "WHERE " + KEY + " >= ? AND " + KEY + " < ? LIMIT = ?";
         deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
         truncateSt = "TRUNCATE TABLE " + this.cfName;
         createSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` VARBINARY(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
-        setPr = "CREATE PROCEDURE set_row(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
-        getPr = "CREATE PROCEDURE get_row(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
+        setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
+        getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
 
         createDB();
         conn = new MySQLConfigure().connect(this.ksName);
@@ -104,6 +104,7 @@ public class MySQLInstance extends DBInstance
             if (rs != null)
                 while (rs.next())
                     b = rs.getBytes(1);
+            System.out.println(ksName+"/"+cfName+"#"+rowKey+"#"+b);
             rs.close();
             pstSelect.close();
             return b;
@@ -229,11 +230,12 @@ public class MySQLInstance extends DBInstance
             
             ResultSet rs = stmt.executeQuery("SHOW PROCEDURE STATUS");
             while (rs.next())
-                if (rs.getString(1).equals(ksName) && ( rs.getString(2).equals(GETPR) || rs.getString(2).equals(SETPR)))
+                if (rs.getString(1).equals(ksName) && ( rs.getString(2).equals(GETPR + cfName) || rs.getString(2).equals(SETPR + cfName)))
                     return 0;
             PreparedStatement gst = conn.prepareStatement(getPr);
             PreparedStatement sst = conn.prepareStatement(setPr);
             
+
             gst.setInt(1, rowKeySize);
             sst.setInt(1, columnFamilySize);
             sst.setInt(2, rowKeySize);
