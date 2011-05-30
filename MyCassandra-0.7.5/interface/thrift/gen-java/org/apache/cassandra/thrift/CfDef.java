@@ -71,6 +71,9 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
   private static final TField MEMTABLE_FLUSH_AFTER_MINS_FIELD_DESC = new TField("memtable_flush_after_mins", TType.I32, (short)21);
   private static final TField MEMTABLE_THROUGHPUT_IN_MB_FIELD_DESC = new TField("memtable_throughput_in_mb", TType.I32, (short)22);
   private static final TField MEMTABLE_OPERATIONS_IN_MILLIONS_FIELD_DESC = new TField("memtable_operations_in_millions", TType.DOUBLE, (short)23);
+  private static final TField MAX_KEY_SIZE = new TField("max_key_size", TType.I32, (short)24);
+  private static final TField MAX_CF_SIZE = new TField("max_cf_size", TType.I32, (short)25);
+
 
   public String keyspace;
   public String name;
@@ -92,6 +95,8 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
   public int memtable_flush_after_mins;
   public int memtable_throughput_in_mb;
   public double memtable_operations_in_millions;
+  public int max_key_size;
+  public int max_cf_size;
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements TFieldIdEnum {
@@ -114,7 +119,9 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     KEY_CACHE_SAVE_PERIOD_IN_SECONDS((short)20, "key_cache_save_period_in_seconds"),
     MEMTABLE_FLUSH_AFTER_MINS((short)21, "memtable_flush_after_mins"),
     MEMTABLE_THROUGHPUT_IN_MB((short)22, "memtable_throughput_in_mb"),
-    MEMTABLE_OPERATIONS_IN_MILLIONS((short)23, "memtable_operations_in_millions");
+    MEMTABLE_OPERATIONS_IN_MILLIONS((short)23, "memtable_operations_in_millions"),
+    MAX_KEY_SIZE((short)24, "max_key_size"),
+    MAX_CF_SIZE((short)25, "max_cf_size");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -169,6 +176,10 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
           return MEMTABLE_THROUGHPUT_IN_MB;
         case 23: // MEMTABLE_OPERATIONS_IN_MILLIONS
           return MEMTABLE_OPERATIONS_IN_MILLIONS;
+        case 24: // MAX_KEY_SIZE
+          return MAX_KEY_SIZE;
+        case 25: // MAX_CF_SIZE
+          return MAX_CF_SIZE;
         default:
           return null;
       }
@@ -267,6 +278,10 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
         new FieldValueMetaData(TType.I32)));
     tmpMap.put(_Fields.MEMTABLE_OPERATIONS_IN_MILLIONS, new FieldMetaData("memtable_operations_in_millions", TFieldRequirementType.OPTIONAL, 
         new FieldValueMetaData(TType.DOUBLE)));
+    tmpMap.put(_Fields.MAX_KEY_SIZE, new FieldMetaData("max_key_size", TFieldRequirementType.OPTIONAL, 
+            new FieldValueMetaData(TType.I32)));
+    tmpMap.put(_Fields.MAX_CF_SIZE, new FieldMetaData("max_cf_size", TFieldRequirementType.OPTIONAL, 
+            new FieldValueMetaData(TType.I32)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(CfDef.class, metaDataMap);
   }
@@ -735,6 +750,16 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
   public CfDef setMax_compaction_threshold(int max_compaction_threshold) {
     this.max_compaction_threshold = max_compaction_threshold;
     setMax_compaction_thresholdIsSet(true);
+    return this;
+  }
+
+  public CfDef setMax_key_size(int max_key_size) {
+    this.max_key_size = max_key_size;
+    return this;
+  }
+
+  public CfDef setMax_cf_size(int max_cf_size) {
+    this.max_cf_size = max_cf_size;
     return this;
   }
 

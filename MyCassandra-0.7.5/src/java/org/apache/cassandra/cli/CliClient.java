@@ -915,6 +915,12 @@ public class CliClient extends CliUserHelp
             case MAX_COMPACTION_THRESHOLD:
                 cfDef.setMax_compaction_threshold(Integer.parseInt(mValue));
                 break;
+            case MAX_KEY_SIZE:
+                cfDef.setMax_key_size(Integer.parseInt(mValue));
+                break;
+            case MAX_CF_SIZE:
+                cfDef.setMax_cf_size(Integer.parseInt(mValue));
+                break;
             default:
                 //must match one of the above or we'd throw an exception at the valueOf statement above.
                 assert(false);

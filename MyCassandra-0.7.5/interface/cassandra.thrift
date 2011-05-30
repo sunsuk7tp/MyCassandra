@@ -366,6 +366,8 @@ struct CfDef {
     21: optional i32 memtable_flush_after_mins,
     22: optional i32 memtable_throughput_in_mb,
     23: optional double memtable_operations_in_millions,
+    24: optional i32 max_key_size,
+    25: optional i32 max_cf_size,
 }
 
 /* describes a keyspace. */
