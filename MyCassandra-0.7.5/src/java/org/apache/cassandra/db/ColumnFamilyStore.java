@@ -139,7 +139,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     private volatile DefaultInteger memsize;
     private volatile DefaultDouble memops;
     
-    private static HashMap<String, DBInstance> dbis;
+    private static HashMap<String, DBInstance> dbis = new HashMap<String, DBInstance>();
     //private static DBInstance dbi;
     
     private volatile DefaultInteger rowCacheSaveInSeconds;
