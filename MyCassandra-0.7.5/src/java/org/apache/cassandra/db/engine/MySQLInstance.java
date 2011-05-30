@@ -104,7 +104,6 @@ public class MySQLInstance extends DBInstance
             if (rs != null)
                 while (rs.next())
                     b = rs.getBytes(1);
-            System.out.println(ksName+"/"+cfName+"#"+rowKey+"#"+b);
             rs.close();
             pstSelect.close();
             return b;
