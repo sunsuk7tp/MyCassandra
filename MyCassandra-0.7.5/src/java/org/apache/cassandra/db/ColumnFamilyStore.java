@@ -139,7 +139,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     private volatile DefaultInteger memsize;
     private volatile DefaultDouble memops;
     
-    private static DBInstance dbi;
+    private static HashMap<String, DBInstance> dbis;
+    //private static DBInstance dbi;
     
     private volatile DefaultInteger rowCacheSaveInSeconds;
     private volatile DefaultInteger keyCacheSaveInSeconds;
@@ -209,7 +210,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     {
         assert metadata != null : "null metadata for " + table + ":" + columnFamilyName;
         this.table = table;
-        columnFamily = columnFamilyName; 
+        columnFamily = columnFamilyName;
         this.metadata = metadata;
         this.minCompactionThreshold = new DefaultInteger(metadata.getMinCompactionThreshold());
         this.maxCompactionThreshold = new DefaultInteger(metadata.getMaxCompactionThreshold());
@@ -275,6 +276,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             throw new RuntimeException(e);
         }
 
+        DBInstance dbi = null;
         switch(DatabaseDescriptor.dataBase)
         {
             case DatabaseDescriptor.BIGTABLE:
@@ -294,6 +296,10 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             case DatabaseDescriptor.HSMYSQL:
                 dbi = new HSMySQLInstance(new String(table.name), columnFamilyName);
                 break;
+        }
+        if (DatabaseDescriptor.dataBase != DatabaseDescriptor.BIGTABLE)
+        {
+            dbis.put(columnFamily, dbi);
         }
     }
 
@@ -873,6 +879,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             else
             {
                 String keyName = key.getTxtKey();
+                DBInstance dbi = dbis.get(this.columnFamily);
                 if (columnFamily.isMarkedForDelete())
                 {
                     dbi.delete(keyName);
@@ -1354,7 +1361,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
     private ColumnFamily doGetCFDB(QueryFilter filter, int gcBefore)
     {
-        ColumnFamily rescf = dbi.get(filter.key.getTxtKey());
+        ColumnFamily rescf = dbis.get(this.columnFamily).get(filter.key.getTxtKey());
         return rescf != null ? filterColumnFamily(rescf, filter, gcBefore) : null;
     }
 
@@ -1581,7 +1588,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     {
         List<Row> rows = new ArrayList<Row>();
         // startWith and stopAt is token and not value.
-        Map<ByteBuffer, ColumnFamily> rowMap = dbi.getRangeSlice(startWith, stopAt, maxResults);
+        Map<ByteBuffer, ColumnFamily> rowMap = dbis.get(this.columnFamily).getRangeSlice(startWith, stopAt, maxResults);
         Iterator rowMapIterator = rowMap.keySet().iterator();
         while(rowMapIterator.hasNext())
         {
@@ -2013,7 +2020,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                 }
                 else
                 {
-                    dbi.truncate();
+                    dbis.get(columnFamily).truncate();
                 }
             }
         };
