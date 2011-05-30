@@ -44,7 +44,7 @@ public class RedisInstance extends DBInstance
         }
         catch (RedisException e)
         {
-            System.err.println("db get error: "+ e);
+            errorMsg("db get error", e);
             return null;
         }
     }
@@ -68,9 +68,9 @@ public class RedisInstance extends DBInstance
         }
         catch (RedisException e)
         {
-            System.err.println("db deletion error: "+ e);
+            errorMsg("db deletion error", e);
+            return -1;
         }
-        return -1;
     }
 
     public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
@@ -78,7 +78,7 @@ public class RedisInstance extends DBInstance
         return 0;
     }
 
-    public int createProcedure(int rowKeySize, int columnFanukySize)
+    public int createProcedure(int rowKeySize, int columnFamilySize)
     {
         return 0;
     }
@@ -92,7 +92,7 @@ public class RedisInstance extends DBInstance
         }
         catch (RedisException e)
         {
-            System.err.println("db insertion/update error: "+ e);
+            errorMsg("db insertion/update error", e);
             return -1;
         }
     }

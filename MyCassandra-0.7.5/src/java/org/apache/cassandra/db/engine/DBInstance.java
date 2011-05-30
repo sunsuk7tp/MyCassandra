@@ -55,4 +55,9 @@ public abstract class DBInstance implements StorageEngineInterface
     {
         return b != null ? new ColumnFamilySerializer().deserialize(new DataInputBuffer(b, 0, b.length)) : null;
     }
+
+    public void errorMsg(String msg, Exception e)
+    {
+        System.err.println("[MyCassandra (" + " Keyspace:" + ksName + "/ CF: " + cfName + ")] " + msg + ": " + e);
+    }
 }

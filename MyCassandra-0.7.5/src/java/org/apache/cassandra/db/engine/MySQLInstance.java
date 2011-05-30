@@ -35,26 +35,9 @@ public class MySQLInstance extends DBInstance
         this.ksName = ksName;
         this.cfName = PREFIX + cfName;
 
-        /* define crud sql statements */
-        insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + VALUE + " = ?"; 
-        setSt = !this.ksName.equals(SYSTEM) ? "CALL " + SETPR + this.cfName + "(?,?)" : "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
-        getSt = !this.ksName.equals(SYSTEM) ? "CALL " + GETPR + this.cfName + "(?)" : "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
-        rangeSt = "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + "WHERE " + KEY + " >= ? AND " + KEY + " < ? LIMIT = ?";
-        deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
-        truncateSt = "TRUNCATE TABLE " + this.cfName;
-        createSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` VARBINARY(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
-        setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
-        getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
-
+        setStatementDefinition();
         createDB();
         conn = new MySQLConfigure().connect(this.ksName);
-        /*
-         *try {
-             conn.setAutoCommit(false);
-        } catch(SQLException e) {
-             System.out.println(e);
-        }
-        */
 
         try
         {
@@ -64,6 +47,34 @@ public class MySQLInstance extends DBInstance
         catch (SQLException e)
         {
             errorMsg("db prepare state error", e);
+        }
+    }
+
+    private void setStatementDefinition()
+    {
+        /* define CRUD statements */
+        insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + VALUE + " = ?"; 
+        setSt = !this.ksName.equals(SYSTEM) ? "CALL " + SETPR + this.cfName + "(?,?)" : "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
+        getSt = !this.ksName.equals(SYSTEM) ? "CALL " + GETPR + this.cfName + "(?)" : "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
+        rangeSt = "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + "WHERE " + KEY + " >= ? AND " + KEY + " < ? LIMIT = ?";
+        deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
+        truncateSt = "TRUNCATE TABLE " + this.cfName;
+        createSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` VARBINARY(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
+        setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
+        getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
+    }
+    
+    private int NonAutoCommit()
+    {
+        try
+        {
+            conn.setAutoCommit(false);
+            return 1;
+        }
+        catch (SQLException e)
+        {
+            errorMsg("set not auto commit error", e);
+            return -1;
         }
     }
 
@@ -263,12 +274,6 @@ public class MySQLInstance extends DBInstance
         return 1;
     }
     */
-
-    private void errorMsg(String msg, Exception e)
-    {
-        System.err.println("[MyCassandra (" + " Keyspace:" + ksName + "/ CF: " + cfName + ")] " + msg + ": " + e);
-    }
-
     private synchronized int doInsert(String rowKey, byte[] cfValue) throws SQLException
     {
         pstInsert.setString(1, rowKey);

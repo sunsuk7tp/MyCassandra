@@ -36,7 +36,7 @@ public class HSMySQLInstance extends DBInstance
         }
         catch (IOException e)
         {
-            System.err.println("[MyCassandra] can't open hs.");
+            errorMsg("can't open hs", e);
         }
     }
 
@@ -48,7 +48,7 @@ public class HSMySQLInstance extends DBInstance
         }
         catch (IOException e)
         {
-            System.err.println("[MyCassandra] db insertion error: " + e);
+            errorMsg("db insertion error", e);
             return -1;
         }
     }
@@ -61,7 +61,7 @@ public class HSMySQLInstance extends DBInstance
         }
         catch (IOException e)
         {
-            System.err.println("[MyCassandra] db update error: "+ e);
+            errorMsg("db update error", e);
             return -1;
         }
     }
@@ -76,7 +76,7 @@ public class HSMySQLInstance extends DBInstance
        }
        catch (IOException e)
        {
-           System.err.println("[MyCassandra] db select error: " + e);
+           errorMsg("db select error", e);
            return null;
        }
     }
@@ -101,7 +101,7 @@ public class HSMySQLInstance extends DBInstance
         }
         catch (IOException e)
         {
-            System.err.println("[MyCassandra] db deletion error: " + e);
+            errorMsg("db deletion error", e);
             return -1;
         }
     }
