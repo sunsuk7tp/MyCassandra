@@ -63,7 +63,7 @@ public class MySQLInstance extends DBInstance
         deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
         truncateSt = "TRUNCATE TABLE " + this.cfName;
         createSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` VARBINARY(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
-        createBlobSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` LONGBLOB(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
+        createBlobSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` LONGBLOB," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
         getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
     }
