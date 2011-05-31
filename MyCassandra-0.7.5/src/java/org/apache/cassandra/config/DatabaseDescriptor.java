@@ -674,26 +674,53 @@ public class DatabaseDescriptor
                     ByteBuffer columnName = ByteBufferUtil.bytes(rcd.name);
                     metadata.put(columnName, new ColumnDefinition(columnName, rcd.validator_class, rcd.index_type, rcd.index_name));
                 }
-
-                cfDefs[j++] = new CFMetaData(keyspace.name, 
-                                             cf.name, 
-                                             cfType,
-                                             comparator, 
-                                             subcolumnComparator, 
-                                             cf.comment, 
-                                             cf.rows_cached,
-                                             cf.keys_cached, 
-                                             cf.read_repair_chance,
-                                             cf.gc_grace_seconds,
-                                             default_validator,
-                                             cf.min_compaction_threshold,
-                                             cf.max_compaction_threshold,
-                                             cf.row_cache_save_period_in_seconds,
-                                             cf.key_cache_save_period_in_seconds,
-                                             cf.memtable_flush_after_mins,
-                                             cf.memtable_throughput_in_mb,
-                                             cf.memtable_operations_in_millions,
-                                             metadata);
+                
+                if (dataBase == MYSQL)
+                {
+                     cfDefs[j++] = new CFMetaData(keyspace.name, 
+                                                 cf.name, 
+                                                 cfType,
+                                                 comparator, 
+                                                 subcolumnComparator, 
+                                                 cf.comment, 
+                                                 cf.rows_cached,
+                                                 cf.keys_cached, 
+                                                 cf.read_repair_chance,
+                                                 cf.gc_grace_seconds,
+                                                 default_validator,
+                                                 cf.min_compaction_threshold,
+                                                 cf.max_compaction_threshold,
+                                                 cf.row_cache_save_period_in_seconds,
+                                                 cf.key_cache_save_period_in_seconds,
+                                                 cf.memtable_flush_after_mins,
+                                                 cf.memtable_throughput_in_mb,
+                                                 cf.memtable_operations_in_millions,
+                                                 rowKeySize,
+                                                 columnFamilySize,
+                                                 metadata);
+                }
+                else
+                {
+                    cfDefs[j++] = new CFMetaData(keyspace.name, 
+                                                 cf.name, 
+                                                 cfType,
+                                                 comparator, 
+                                                 subcolumnComparator, 
+                                                 cf.comment, 
+                                                 cf.rows_cached,
+                                                 cf.keys_cached, 
+                                                 cf.read_repair_chance,
+                                                 cf.gc_grace_seconds,
+                                                 default_validator,
+                                                 cf.min_compaction_threshold,
+                                                 cf.max_compaction_threshold,
+                                                 cf.row_cache_save_period_in_seconds,
+                                                 cf.key_cache_save_period_in_seconds,
+                                                 cf.memtable_flush_after_mins,
+                                                 cf.memtable_throughput_in_mb,
+                                                 cf.memtable_operations_in_millions,
+                                                 metadata);
+                }
             }
             defs.add(new KSMetaData(keyspace.name,
                                     strategyClass,

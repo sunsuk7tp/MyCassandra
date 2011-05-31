@@ -59,8 +59,8 @@ public final class CFMetaData
     public final static int DEFAULT_MEMTABLE_LIFETIME_IN_MINS = 60 * 24;
     public final static int DEFAULT_MEMTABLE_THROUGHPUT_IN_MB = sizeMemtableThroughput();
     public final static double DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS = sizeMemtableOperations(DEFAULT_MEMTABLE_THROUGHPUT_IN_MB);
-    public final static int DEFAULT_MAX_KEY_SIZE = 16;
-    public final static int DEFAULT_MAX_CF_SIZE = 2048;
+    public final static int DEFAULT_MAX_KEY_SIZE = 64;
+    public final static int DEFAULT_MAX_CF_SIZE = 30 *1024;
 
     private static final int MIN_CF_ID = 1000;
 
@@ -159,8 +159,8 @@ public final class CFMetaData
     private int memtableFlushAfterMins;               // default 60 
     private int memtableThroughputInMb;               // default based on heap size
     private double memtableOperationsInMillions;      // default based on throughput
-    private int maxKeySize;                           // default 16
-    private int maxCFSize;                            // default 2048
+    private int maxKeySize;                           // default 64
+    private int maxCFSize;                            // default 65535
     // NOTE: if you find yourself adding members to this class, make sure you keep the convert methods in lockstep.
 
     private final Map<ByteBuffer, ColumnDefinition> column_metadata;
@@ -270,6 +270,11 @@ public final class CFMetaData
                                             : memtableOperationsInMillions;
         this.cfId = cfId;
         this.column_metadata = new HashMap<ByteBuffer, ColumnDefinition>(column_metadata);
+        if (this.maxKeySize <= 0 || this.maxCFSize <= 0)
+        {
+            this.maxKeySize = DEFAULT_MAX_KEY_SIZE;
+            this.maxCFSize = DEFAULT_MAX_CF_SIZE;
+        }
     }
     
     /** adds this cfm to the map. */
