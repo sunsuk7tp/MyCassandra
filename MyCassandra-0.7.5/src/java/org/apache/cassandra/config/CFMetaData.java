@@ -166,6 +166,59 @@ public final class CFMetaData
     private final Map<ByteBuffer, ColumnDefinition> column_metadata;
 
     private CFMetaData(String tableName,
+            String cfName,
+            ColumnFamilyType cfType,
+            AbstractType comparator,
+            AbstractType subcolumnComparator,
+            String comment,
+            double rowCacheSize,
+            double keyCacheSize,
+            double readRepairChance,
+            int gcGraceSeconds,
+            AbstractType defaultValidator,
+            int minCompactionThreshold,
+            int maxCompactionThreshold,
+            int rowCacheSavePeriodInSeconds,
+            int keyCacheSavePeriodInSeconds,
+            int memtableFlushAfterMins,
+            Integer memtableThroughputInMb,
+            Double memtableOperationsInMillions,
+            int maxKeySize,
+            int maxCFSize,
+            Integer cfId,
+            Map<ByteBuffer, ColumnDefinition> column_metadata)
+    {
+        this(
+            tableName,
+            cfName,
+            cfType,
+            comparator,
+            subcolumnComparator,
+            comment,
+            rowCacheSize,
+            keyCacheSize,
+            readRepairChance,
+            gcGraceSeconds,
+            defaultValidator,
+            minCompactionThreshold,
+            maxCompactionThreshold,
+            rowCacheSavePeriodInSeconds,
+            keyCacheSavePeriodInSeconds,
+            memtableFlushAfterMins,
+            memtableThroughputInMb,
+            memtableOperationsInMillions,
+            cfId,
+            column_metadata
+        );
+        this.maxKeySize = maxKeySize > 0
+                          ? maxKeySize
+                          : DEFAULT_MAX_KEY_SIZE;
+        this.maxCFSize = maxCFSize > 0
+                         ? maxCFSize
+                         : DEFAULT_MAX_CF_SIZE;
+    }
+
+    private CFMetaData(String tableName,
                        String cfName,
                        ColumnFamilyType cfType,
                        AbstractType comparator,
@@ -274,12 +327,12 @@ public final class CFMetaData
                 memOps,
                 nextId(),
                 column_metadata);
-        this.maxKeySize = maxKeySize <= 0
-                          ? DEFAULT_MAX_KEY_SIZE
-                          : maxKeySize;
-        this.maxCFSize = maxCFSize <= 0
-                          ? DEFAULT_MAX_CF_SIZE
-                          : maxCFSize;
+        this.maxKeySize = maxKeySize > 0
+                          ? maxKeySize
+                          : DEFAULT_MAX_KEY_SIZE;
+        this.maxCFSize = maxCFSize > 0
+                          ? maxCFSize
+                          : DEFAULT_MAX_CF_SIZE;
     }
 
     public CFMetaData(String tableName,
@@ -475,6 +528,8 @@ public final class CFMetaData
         Integer memtable_flush_after_mins = cf.memtable_flush_after_mins == null ? DEFAULT_MEMTABLE_LIFETIME_IN_MINS : cf.memtable_flush_after_mins;
         Integer memtable_throughput_in_mb = cf.memtable_throughput_in_mb == null ? DEFAULT_MEMTABLE_THROUGHPUT_IN_MB : cf.memtable_throughput_in_mb;
         Double memtable_operations_in_millions = cf.memtable_operations_in_millions == null ? DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS : cf.memtable_operations_in_millions;
+        Integer max_key_size = cf.max_key_size == null ? DEFAULT_MAX_KEY_SIZE : cf.max_key_size;
+        Integer max_cf_size = cf.max_cf_size == null ? DEFAULT_MAX_CF_SIZE : cf.max_cf_size;
 
         return new CFMetaData(cf.keyspace.toString(),
                               cf.name.toString(),
@@ -494,6 +549,8 @@ public final class CFMetaData
                               memtable_flush_after_mins,
                               memtable_throughput_in_mb,
                               memtable_operations_in_millions,
+                              max_key_size,
+                              max_cf_size,
                               cf.id,
                               column_metadata);
     }
@@ -610,6 +667,8 @@ public final class CFMetaData
             .append(memtableFlushAfterMins, rhs.memtableFlushAfterMins)
             .append(memtableThroughputInMb, rhs.memtableThroughputInMb)
             .append(memtableOperationsInMillions, rhs.memtableOperationsInMillions)
+            .append(maxKeySize, rhs.maxKeySize)
+            .append(maxCFSize, rhs.maxCFSize)
             .isEquals();
     }
 
@@ -636,6 +695,8 @@ public final class CFMetaData
             .append(memtableFlushAfterMins)
             .append(memtableThroughputInMb)
             .append(memtableOperationsInMillions)
+            .append(maxKeySize)
+            .append(maxCFSize)
             .toHashCode();
     }
 
@@ -669,7 +730,11 @@ public final class CFMetaData
         if (cf_def.memtable_throughput_in_mb == null)
             cf_def.memtable_throughput_in_mb = CFMetaData.DEFAULT_MEMTABLE_THROUGHPUT_IN_MB;
         if (cf_def.memtable_operations_in_millions == null)
-            cf_def.memtable_operations_in_millions = CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS; 
+            cf_def.memtable_operations_in_millions = CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS;
+        if (cf_def.max_key_size == null)
+            cf_def.max_key_size = CFMetaData.DEFAULT_MAX_KEY_SIZE;
+        if (cf_def.max_cf_size == null)
+            cf_def.max_key_size = CFMetaData.DEFAULT_MAX_CF_SIZE;
     }
     
     /** applies implicit defaults to cf definition. useful in updates */
@@ -734,6 +799,8 @@ public final class CFMetaData
         memtableFlushAfterMins = cf_def.memtable_flush_after_mins;
         memtableThroughputInMb = cf_def.memtable_throughput_in_mb;
         memtableOperationsInMillions = cf_def.memtable_operations_in_millions;
+        maxKeySize = cf_def.max_key_size;
+        maxCFSize = cf_def.max_cf_size;
         
         // adjust secondary indexes. figure out who is coming and going.
         Set<ByteBuffer> toRemove = new HashSet<ByteBuffer>();
@@ -798,6 +865,8 @@ public final class CFMetaData
         def.setMemtable_flush_after_mins(cfm.memtableFlushAfterMins);
         def.setMemtable_throughput_in_mb(cfm.memtableThroughputInMb);
         def.setMemtable_operations_in_millions(cfm.memtableOperationsInMillions);
+        def.setMax_key_size(cfm.maxKeySize);
+        def.setMax_cf_size(cfm.maxCFSize);
         List<org.apache.cassandra.thrift.ColumnDef> column_meta = new ArrayList< org.apache.cassandra.thrift.ColumnDef>(cfm.column_metadata.size());
         for (ColumnDefinition cd : cfm.column_metadata.values())
         {
@@ -839,6 +908,8 @@ public final class CFMetaData
         def.memtable_flush_after_mins = cfm.memtableFlushAfterMins;
         def.memtable_throughput_in_mb = cfm.memtableThroughputInMb;
         def.memtable_operations_in_millions = cfm.memtableOperationsInMillions;
+        def.max_key_size = cfm.maxKeySize;
+        def.max_cf_size = cfm.maxCFSize;
         List<org.apache.cassandra.avro.ColumnDef> column_meta = new ArrayList<org.apache.cassandra.avro.ColumnDef>(cfm.column_metadata.size());
         for (ColumnDefinition cd : cfm.column_metadata.values())
         {
@@ -849,7 +920,7 @@ public final class CFMetaData
             tcd.validation_class = cd.getValidator().getClass().getName();
             column_meta.add(tcd);
         }
-        def.column_metadata = column_meta;   
+        def.column_metadata = column_meta;
         return def;
     }
     
@@ -870,6 +941,8 @@ public final class CFMetaData
         newDef.memtable_flush_after_mins = def.getMemtable_flush_after_mins();
         newDef.memtable_operations_in_millions = def.getMemtable_operations_in_millions();
         newDef.memtable_throughput_in_mb = def.getMemtable_throughput_in_mb();
+        newDef.max_key_size = def.getMax_key_size();
+        newDef.max_cf_size = def.getMax_cf_size();
         newDef.min_compaction_threshold = def.getMin_compaction_threshold();
         newDef.read_repair_chance = def.getRead_repair_chance();
         newDef.row_cache_save_period_in_seconds = def.getRow_cache_save_period_in_seconds();

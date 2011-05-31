@@ -764,6 +764,10 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     return this.max_key_size > 0;
   }
 
+  public int getMax_key_size() {
+    return this.max_key_size;
+  }
+
   public CfDef setMax_cf_size(int max_cf_size) {
     this.max_cf_size = max_cf_size;
     return this;
@@ -771,6 +775,10 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
 
   public boolean isSetMax_cf_size() {
     return this.max_cf_size > 0;
+  }
+
+  public int getMax_cf_size() {
+    return this.max_cf_size;
   }
 
   public void unsetMax_compaction_threshold() {
