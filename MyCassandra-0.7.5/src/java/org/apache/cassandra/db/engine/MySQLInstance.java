@@ -67,7 +67,7 @@ public class MySQLInstance extends DBInstance
         setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
         getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
     }
-    
+
     private int NonAutoCommit()
     {
         try

@@ -607,7 +607,7 @@ public class DatabaseDescriptor
                     mdbi.create(rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
                     mdbi.createProcedure(rowKeySize, columnFamilySize);
                 }
-                
+
                 ColumnFamilyType cfType = cf.column_type == null ? ColumnFamilyType.Standard : cf.column_type;
                 if (cfType == ColumnFamilyType.Super)
                 {
