@@ -63,6 +63,7 @@ public class DatabaseDescriptor
     private static InetAddress listenAddress; // leave null so we can fall through to getLocalHost
     private static InetAddress rpcAddress;
     private static Set<InetAddress> seeds = new HashSet<InetAddress>();
+    private static Set<InetAddress> hosts = new HashSet<InetAddress>();
     /* Current index into the above list of directories */
     private static int currentIndex = 0;
     private static int consistencyThreads = 4; // not configurable
@@ -89,11 +90,11 @@ public class DatabaseDescriptor
     public static final UUID INITIAL_VERSION = new UUID(4096, 0); // has type nibble set to 1, everything else to zero.
     private static volatile UUID defsVersion = INITIAL_VERSION;
 
-    public static final int BIGTABLE = 0;
-    public static final int MYSQL = 1;
+    public static final int BIGTABLE = 1;
     public static final int REDIS = 2;
-    public static final int MONGODB = 3;
+    public static final int MYSQL = 3;
     public static final int HSMYSQL = 4;
+    public static final int MONGODB = 5;
     public static final int defaultDataBase = MYSQL;
 
     public static int dataBase;
@@ -430,6 +431,17 @@ public class DatabaseDescriptor
                 catch (UnknownHostException e)
                 {
                     throw new ConfigurationException("Unknown seed " + seedString + ".  Consider using IP addresses instead of host names");
+                }
+            }
+            for (String hostString : conf.hosts)
+            {
+                try
+                {
+                    hosts.add(InetAddress.getByName(hostString));
+                }
+                catch (UnknownHostException e)
+                {
+                    throw new ConfigurationException("Unknown host" + hostString + ".  Consider using IP addresses instead of host names");
                 }
             }
         }
@@ -1001,10 +1013,15 @@ public class DatabaseDescriptor
     {
         return conf.saved_caches_directory;
     }
-    
+
     public static Set<InetAddress> getSeeds()
     {
         return seeds;
+    }
+
+    public static Set<InetAddress> getHosts()
+    {
+        return hosts;
     }
 
     /*
