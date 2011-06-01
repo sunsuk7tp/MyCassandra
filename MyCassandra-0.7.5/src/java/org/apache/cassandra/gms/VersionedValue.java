@@ -60,11 +60,19 @@ public class VersionedValue implements Comparable<VersionedValue>
 
     public final int version;
     public final String value;
+    public int stype;
 
     private VersionedValue(String value, int version)
     {
         this.value = value;
         this.version = version;
+    }
+
+    public VersionedValue(String value int version, int stype)
+    {
+        this.value = value;
+        this.version = version;
+        this.stype = stype;
     }
 
     private VersionedValue(String value)
@@ -76,6 +84,16 @@ public class VersionedValue implements Comparable<VersionedValue>
     public int compareTo(VersionedValue value)
     {
         return this.version - value.version;
+    }
+
+    public int getStorageType()
+    {
+        return stype;
+    }
+
+    public void setStorageType(int storageType)
+    {
+        stype = storageType;
     }
 
     public static class VersionedValueFactory
@@ -155,13 +173,15 @@ public class VersionedValue implements Comparable<VersionedValue>
         {
             dos.writeUTF(value.value);
             dos.writeInt(value.version);
+            dos.writeInt(value.stype)
         }
 
         public VersionedValue deserialize(DataInputStream dis) throws IOException
         {
             String value = dis.readUTF();
             int version = dis.readInt();
-            return new VersionedValue(value, version);
+            int stype = dis.readInt();
+            return new VersionedValue(value, version, stype);
         }
     }
 }

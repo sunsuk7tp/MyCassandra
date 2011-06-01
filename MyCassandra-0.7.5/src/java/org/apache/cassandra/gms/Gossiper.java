@@ -36,6 +36,8 @@ import org.apache.cassandra.net.Message;
 import org.apache.cassandra.net.MessagingService;
 import org.apache.cassandra.service.StorageService;
 
+import org.apache.cassandra.utils.FBUtilities;
+
 /**
  * This module is responsible for Gossiping information for the local endpoint. This abstraction
  * maintains the list of live and dead endpoints. Periodically i.e. every 1 second this module
@@ -137,6 +139,9 @@ public class Gossiper implements IFailureDetectionEventListener
 
     /* map where key is the endpoint and value is the state associated with the endpoint */
     Map<InetAddress, EndpointState> endpointStateMap_ = new ConcurrentHashMap<InetAddress, EndpointState>();
+
+    /* storage type map for mycassandra cluster*/
+    Map<InetAddress, EndpointState> storageMap_ = new ConcurrentHashMap<InetAddress, Integer>();
 
     /* map where key is endpoint and value is timestamp when this endpoint was removed from
      * gossip. We will ignore any gossip regarding these endpoints for QUARANTINE_DELAY time
@@ -358,6 +363,11 @@ public class Gossiper implements IFailureDetectionEventListener
         MessagingService.instance().sendOneWay(message, to);
         return seeds_.contains(to);
     }
+    /* Sends storage type */
+    boolean sendStorageGossip(Message message, Set<InetAddess> epSet)
+    {
+        return sendGossip(message, epSet);
+    }
 
     /* Sends a Gossip message to a live member and returns true if the recipient was a seed */
     boolean doGossipToLiveMember(Message message)
@@ -494,7 +504,7 @@ public class Gossiper implements IFailureDetectionEventListener
             int localHbVersion = epState.getHeartBeatState().getHeartBeatVersion();
             if ( localHbVersion > version )
             {
-                reqdEndpointState = new EndpointState(epState.getHeartBeatState());
+                reqdEndpointState = new EndpointState(epState.getHeartBeatState(), epState.getStorageType());
                 if (logger_.isTraceEnabled())
                     logger_.trace("local heartbeat version " + localHbVersion + " greater than " + version + " for " + forEndpoint);
             }
@@ -506,7 +516,7 @@ public class Gossiper implements IFailureDetectionEventListener
                 {
                     if ( reqdEndpointState == null )
                     {
-                        reqdEndpointState = new EndpointState(epState.getHeartBeatState());
+                        reqdEndpointState = new EndpointState(epState.getHeartBeatState(), epState.getStorageType());
                     }
                     final ApplicationState key = entry.getKey();
                     if (logger_.isTraceEnabled())
@@ -664,6 +674,8 @@ public class Gossiper implements IFailureDetectionEventListener
             */
             if ( localEpStatePtr != null )
             {
+            	if(remoteState.getStorageType() <= 0)
+            		remoteState.setStorageType(localEpStatePtr.getStorageType());
             	int localGeneration = localEpStatePtr.getHeartBeatState().getGeneration();
             	int remoteGeneration = remoteState.getHeartBeatState().getGeneration();
 
@@ -900,7 +912,7 @@ public class Gossiper implements IFailureDetectionEventListener
         if ( localState == null )
         {
             HeartBeatState hbState = new HeartBeatState(generationNbr);
-            localState = new EndpointState(hbState);
+            localState = new EndpointState(hbState, FBUtilities.getStorageType());
             localState.isAlive(true);
             localState.isAGossiper(true);
             endpointStateMap_.put(localEndpoint_, localState);
