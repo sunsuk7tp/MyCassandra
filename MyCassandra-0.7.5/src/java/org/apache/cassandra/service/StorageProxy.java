@@ -106,7 +106,7 @@ public class StorageProxy implements StorageProxyMBean
                 String table = rm.getTable();
                 AbstractReplicationStrategy rs = Table.open(table).getReplicationStrategy();
 
-                List<InetAddress> naturalEndpoints = ss.getNaturalEndpoints(table, rm.key());
+                Set<InetAddress> naturalEndpoints = ss.getNaturalEndpoints(table, rm.key());
                 Collection<InetAddress> writeEndpoints = ss.getTokenMetadata().getWriteEndpoints(StorageService.getPartitioner().getToken(rm.key()), table, naturalEndpoints);
                 Multimap<InetAddress, InetAddress> hintedEndpoints = rs.getHintedEndpoints(writeEndpoints);
                 
@@ -319,8 +319,8 @@ public class StorageProxy implements StorageProxyMBean
             assert !command.isDigestQuery();
             logger.debug("Command/ConsistencyLevel is {}/{}", command, consistency_level);
 
-            List<InetAddress> endpoints = StorageService.instance.getLiveNaturalEndpoints(command.table, command.key);
-            DatabaseDescriptor.getEndpointSnitch().sortByProximity(FBUtilities.getLocalAddress(), endpoints);
+            Map<InetAddress, Integer> endpointMap = StorageService.instance.getLiveMap(command.table, command.key);
+            List<InetAddress> endpoints = DatabaseDescriptor.getEndpointSnitch().sortByStorageType(2, endpointMap);
 
             RowDigestResolver resolver = new RowDigestResolver(command.table, command.key);
             ReadCallback<Row> handler = getReadCallback(resolver, command, consistency_level, endpoints);
