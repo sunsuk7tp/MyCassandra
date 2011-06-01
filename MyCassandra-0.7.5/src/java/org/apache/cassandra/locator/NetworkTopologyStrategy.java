@@ -24,6 +24,8 @@ package org.apache.cassandra.locator;
 import java.net.InetAddress;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang.StringUtils;
@@ -71,9 +73,9 @@ public class NetworkTopologyStrategy extends AbstractReplicationStrategy
         logger.debug("Configured datacenter replicas are {}", FBUtilities.toString(datacenters));
     }
 
-    public List<InetAddress> calculateNaturalEndpoints(Token searchToken, TokenMetadata tokenMetadata)
+    public Map<InetAddress, Integer> calculateNaturalEndpoints(Token searchToken, TokenMetadata tokenMetadata)
     {
-        List<InetAddress> endpoints = new ArrayList<InetAddress>(getReplicationFactor());
+        Map<InetAddress, Integer> endpoints = new HashMap<InetAddress, Integer>(getReplicationFactor());
 
         for (Entry<String, Integer> dcEntry : datacenters.entrySet())
         {
@@ -88,7 +90,7 @@ public class NetworkTopologyStrategy extends AbstractReplicationStrategy
                     dcTokens.updateNormalToken(tokenEntry.getKey(), tokenEntry.getValue());
             }
 
-            List<InetAddress> dcEndpoints = new ArrayList<InetAddress>(dcReplicas);
+            Map<InetAddress, Integer> dcEndpoints = new HashMap<InetAddress, Integer>(dcReplicas);
             Set<String> racks = new HashSet<String>();
             // first pass: only collect replicas on unique racks
             for (Iterator<Token> iter = TokenMetadata.ringIterator(dcTokens.sortedTokens(), searchToken, false);
@@ -99,7 +101,7 @@ public class NetworkTopologyStrategy extends AbstractReplicationStrategy
                 String rack = snitch.getRack(endpoint);
                 if (!racks.contains(rack))
                 {
-                    dcEndpoints.add(endpoint);
+                    dcEndpoints.add(endpoint, dcTokens.getStorageType(endpoint));
                     racks.add(rack);
                 }
             }
@@ -111,7 +113,7 @@ public class NetworkTopologyStrategy extends AbstractReplicationStrategy
                 Token token = iter.next();
                 InetAddress endpoint = dcTokens.getEndpoint(token);
                 if (!dcEndpoints.contains(endpoint))
-                    dcEndpoints.add(endpoint);
+                    dcEndpoints.add(endpoint, dcTokens.getStorageType(endpoint));
             }
 
             if (dcEndpoints.size() < dcReplicas)
@@ -120,7 +122,7 @@ public class NetworkTopologyStrategy extends AbstractReplicationStrategy
             if (logger.isDebugEnabled())
                 logger.debug("{} endpoints in datacenter {} for token {} ",
                              new Object[] { StringUtils.join(dcEndpoints, ","), dcName, searchToken});
-            endpoints.addAll(dcEndpoints);
+            endpoints.putAll(dcEndpoints);
         }
 
         return endpoints;

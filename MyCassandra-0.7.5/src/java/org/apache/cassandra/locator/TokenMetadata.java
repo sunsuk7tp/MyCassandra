@@ -41,6 +41,7 @@ public class TokenMetadata
 
     /* Maintains token to endpoint map of every node in the cluster. */
     private BiMap<Token, InetAddress> tokenToEndpointMap;
+    private Map<InetAddress, Integer> endPointToStypeMap;
 
     // Suppose that there is a ring of nodes A, C and E, with replication factor 3.
     // Node D bootstraps between C and E, so its pending ranges will be E-A, A-C and C-D.
@@ -77,6 +78,7 @@ public class TokenMetadata
         if (tokenToEndpointMap == null)
             tokenToEndpointMap = HashBiMap.create();
         this.tokenToEndpointMap = tokenToEndpointMap;
+        endPointToStypeMap = new HashMap<InetAddress, Integer>();
         sortedTokens = sortTokens();
     }
 
@@ -96,6 +98,45 @@ public class TokenMetadata
             if (sourceRange.contains(token))
                 n++;
         return n;
+    }
+
+    public void updateStorageType(InetAddress endpoint, int apStorageType)
+    {
+        assert endpoint != null;
+        if (apStorageType > 0)
+            endPointToStypeMap.put(endpoint, apStorageType)
+    }
+
+    public void updateNormalToken(Token token, InetAddress endpoint, int apStorageType)
+    {
+        assert token != null;
+        assert endpoint != null;
+
+        lock.writeLock().lock();
+        try
+        {
+            if(apStorageType > 0)
+            {
+                endPointToStypeMap.remove(endpoint);
+                endPointToStypeMap.put(endpoint, apStorageType);
+            }
+
+            bootstrapTokens.inverse().remove(endpoint);
+            tokenToEndpointMap.inverse().remove(endpoint);
+            InetAddress prev = tokenToEndpointMap.put(token, endpoint);
+            if (!endpoint.equals(prev))
+            {
+                if (prev != null)
+                    logger.warn("Token " + token + " changing ownership from " + prev + " to " + endpoint);
+                sortedTokens = sortTokens();
+            }
+            leavingEndpoints.remove(endpoint);
+            invalidateCaches();
+        }
+        finally
+        {
+            lock.writeLock().unlock();
+        }
     }
 
     public void updateNormalToken(Token token, InetAddress endpoint)
@@ -122,6 +163,16 @@ public class TokenMetadata
         {
             lock.writeLock().unlock();
         }
+    }
+
+    public void addBootstrapToken(Token token, InetAddress endpoint, int apStorageType)
+    {
+        if(apStorageType > 0)
+        {
+            endPointToStypeMap.remove(endpoint);
+            endPointToStypeMap.put(endpoint, apStorageType);
+        }
+        addBootstrapToken(token, endpoint);
     }
 
     public void addBootstrapToken(Token token, InetAddress endpoint)
@@ -294,6 +345,40 @@ public class TokenMetadata
         try
         {
             return tokenToEndpointMap.get(token);
+        }
+        finally
+        {
+            lock.readLock().unlock();
+        }
+    }
+
+    public int getStorageType(InetAddress address)
+    {
+        lock.readLock().lock();
+        try
+        {
+            if(endPointToStypeMap.containsKey(address))
+                return endPointToStypeMap.get(address);
+            else
+                return 0;
+        }
+        finally
+        {
+            lock.readLock().unlock();
+        }
+    }
+
+    public Map<InetAddress, Integer> getAddrToStypeMap(List<InetAddress> addrs)
+    {
+        lock.readLock().lock();
+        try
+        {
+            Map<InetAddress, Integer> map = new HashMap<InetAddress, Integer>(addrs.size());
+            for (InetAddress addr : addrs)
+            {
+                map.put(addr, endPointToStypeMap.get(addr));
+            }
+            return map;
         }
         finally
         {
