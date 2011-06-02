@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import org.apache.cassandra.dht.Token;
 
@@ -41,10 +42,10 @@ public class OldNetworkTopologyStrategy extends AbstractReplicationStrategy
         super(table, tokenMetadata, snitch, configOptions);
     }
 
-    public List<InetAddress> calculateNaturalEndpoints(Token token, TokenMetadata metadata)
+    public Map<InetAddress, Integer> calculateNaturalEndpoints(Token token, TokenMetadata metadata)
     {
         int replicas = getReplicationFactor();
-        List<InetAddress> endpoints = new ArrayList<InetAddress>(replicas);
+        Map<InetAddress, Integer> endpoints = new HashMap<InetAddress, Integer>(replicas);
         ArrayList<Token> tokens = metadata.sortedTokens();
 
         if (tokens.isEmpty())
@@ -52,7 +53,8 @@ public class OldNetworkTopologyStrategy extends AbstractReplicationStrategy
 
         Iterator<Token> iter = TokenMetadata.ringIterator(tokens, token, false);
         Token primaryToken = iter.next();
-        endpoints.add(metadata.getEndpoint(primaryToken));
+        InetAddress addr = metadata.getEndpoint(primaryToken);
+        endpoints.put(addr, metadata.getStorageType(addr));
 
         boolean bDataCenter = false;
         boolean bOtherRack = false;
@@ -65,7 +67,8 @@ public class OldNetworkTopologyStrategy extends AbstractReplicationStrategy
                 // If we have already found something in a diff datacenter no need to find another
                 if (!bDataCenter)
                 {
-                    endpoints.add(metadata.getEndpoint(t));
+                    InetAddress endpoint = metadata.getEndpoint(t);
+                    endpoints.put(endpoint, metadata.getStorageType(endpoint));
                     bDataCenter = true;
                 }
                 continue;
@@ -77,7 +80,8 @@ public class OldNetworkTopologyStrategy extends AbstractReplicationStrategy
                 // If we have already found something in a diff rack no need to find another
                 if (!bOtherRack)
                 {
-                    endpoints.add(metadata.getEndpoint(t));
+                    InetAddress endpoint = metadata.getEndpoint(t);
+                    endpoints.put(endpoint, metadata.getStorageType(endpoint));
                     bOtherRack = true;
                 }
             }
@@ -92,8 +96,11 @@ public class OldNetworkTopologyStrategy extends AbstractReplicationStrategy
             while (endpoints.size() < replicas && iter.hasNext())
             {
                 Token t = iter.next();
-                if (!endpoints.contains(metadata.getEndpoint(t)))
-                    endpoints.add(metadata.getEndpoint(t));
+                if (!endpoints.containsKey(metadata.getEndpoint(t)))
+                {
+                    InetAddress endpoint = metadata.getEndpoint(t);
+                    endpoints.put(endpoint, metadata.getStorageType(endpoint));
+                }
             }
 
             if (endpoints.size() < replicas)

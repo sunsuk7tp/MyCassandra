@@ -23,6 +23,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -125,7 +126,7 @@ public interface StorageServiceMBean
      * @param key - key for which we need to find the endpoint return value -
      * the endpoint responsible for this key
      */
-    public List<InetAddress> getNaturalEndpoints(String table, byte[] key);
+    public Set<InetAddress> getNaturalEndpoints(String table, byte[] key);
 
     /**
      * Takes the snapshot for a given table.

@@ -43,6 +43,7 @@ public class Config
     public String db_pass;
     
     public String[] seeds;
+    public String[] hosts;
     public DiskAccessMode disk_access_mode = DiskAccessMode.auto;
     
     /* Address where to run the job tracker */

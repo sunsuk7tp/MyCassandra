@@ -21,6 +21,7 @@ package org.apache.cassandra.locator;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This interface helps determine location of node in the data center relative to another node.
@@ -49,6 +50,12 @@ public interface IEndpointSnitch
      * This method will sort the <tt>List</tt> by proximity to the given address.
      */
     public void sortByProximity(InetAddress address, List<InetAddress> addresses);
+
+    /**
+     * 
+     * This method will sort the <tt>List</tt> by storage type to the given address and stype.
+     */
+    public List<InetAddress> sortByStorageType(int queryType, Map<InetAddress, Integer> map);
 
     /**
      * compares two endpoints in relation to the target endpoint, returning as Comparator.compare would

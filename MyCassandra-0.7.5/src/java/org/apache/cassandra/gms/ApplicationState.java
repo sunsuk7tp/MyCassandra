@@ -35,4 +35,5 @@ public enum ApplicationState
     X3,
     X4,
     X5,
+//    STORAGETYPE,
 }
