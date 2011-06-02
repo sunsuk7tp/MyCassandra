@@ -50,7 +50,6 @@ db_pass:
 # db_user: 
 # db_pass:
 
-# MOngoDB
 # db: MongoDB
 # db_host: loca;host
 # db_port: 27017
@@ -152,6 +151,9 @@ reduce_cache_capacity_to: 0.6
 seeds:
     - 127.0.0.1
 
+# MyCassandra is not spaced a replica on tha same hosts.
+# MyCassandra nodes use this list of hosts to recognize which nodes is 
+# placed on the same host with itself.  
 hosts:
     - 127.0.0.2
 
