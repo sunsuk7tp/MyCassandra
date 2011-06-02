@@ -104,7 +104,7 @@ public class TokenMetadata
     {
         assert endpoint != null;
         if (apStorageType > 0)
-            endPointToStypeMap.put(endpoint, apStorageType)
+            endPointToStypeMap.put(endpoint, apStorageType);
     }
 
     public void updateNormalToken(Token token, InetAddress endpoint, int apStorageType)

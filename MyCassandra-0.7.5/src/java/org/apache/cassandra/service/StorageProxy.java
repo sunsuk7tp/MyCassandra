@@ -483,8 +483,7 @@ public class StorageProxy implements StorageProxyMBean
             {
                 Map<InetAddress, Integer> liveMap = StorageService.instance.getLiveMap(command.keyspace, range.right);
                 //DatabaseDescriptor.getEndpointSnitch().sortByProximity(FBUtilities.getLocalAddress(), liveEndpoints);
-                DatabaseDescriptor.getEndpointSnitch().sortByStorageType(2, liveMap);
-                List<InetAddress> liveEndpoints = liveMap.keySet();
+                List<InetAddress> liveEndpoints = DatabaseDescriptor.getEndpointSnitch().sortByStorageType(2, liveMap);
 
                 if (consistency_level == ConsistencyLevel.ONE && !liveEndpoints.isEmpty() && liveEndpoints.get(0).equals(FBUtilities.getLocalAddress())) 
                 {
@@ -760,9 +759,8 @@ public class StorageProxy implements StorageProxyMBean
         {
             Map<InetAddress, Integer> liveMap = StorageService.instance.getLiveMap(keyspace, range.right);
             //DatabaseDescriptor.getEndpointSnitch().sortByProximity(FBUtilities.getLocalAddress(), liveEndpoints);
-            DatabaseDescriptor.getEndPointSnitch().sortByStorageType(2, liveMap);
-            List<InetAddress> liveEndpoints = liveMap.keySet();
-            
+            List<InetAddress> liveEndpoints = DatabaseDescriptor.getEndpointSnitch().sortByStorageType(2, liveMap);
+
             // collect replies and resolve according to consistency level
             RangeSliceResponseResolver resolver = new RangeSliceResponseResolver(keyspace, liveEndpoints);
             IReadCommand iCommand = new IReadCommand()

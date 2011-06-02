@@ -98,15 +98,16 @@ public abstract class AbstractReplicationStrategy
         {
             TokenMetadata tokenMetadataClone = tokenMetadata.cloneOnlyTokenMap();
             keyToken = TokenMetadata.firstToken(tokenMetadataClone.sortedTokens(), searchToken);
-            endpoints = new NonBlockingHashMap<InetAddress, Integer>(calculateNaturalEndpoints(searchToken, tokenMetadataClone));
+            endpoints = new NonBlockingHashMap<InetAddress, Integer>();
+            endpoints.putAll(calculateNaturalEndpoints(searchToken, tokenMetadataClone));
             cacheEndpoint(keyToken, endpoints);
             // calculateNaturalEndpoints should have checked this already, this is a safety
             assert getReplicationFactor() <= endpoints.size() : String.format("endpoints %s generated for RF of %s",
-                                                                              Arrays.toString(endpoints.toArray()),
+                                                                              Arrays.toString(endpoints.keySet().toArray()),
                                                                               getReplicationFactor());
         }
 
-        return new ArrayList<InetAddress>(endpoints);
+        return endpoints;
     }
 
     /**

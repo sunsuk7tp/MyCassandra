@@ -68,7 +68,7 @@ public class VersionedValue implements Comparable<VersionedValue>
         this.version = version;
     }
 
-    public VersionedValue(String value int version, int stype)
+    public VersionedValue(String value, int version, int stype)
     {
         this.value = value;
         this.version = version;
@@ -173,7 +173,7 @@ public class VersionedValue implements Comparable<VersionedValue>
         {
             dos.writeUTF(value.value);
             dos.writeInt(value.version);
-            dos.writeInt(value.stype)
+            dos.writeInt(value.stype);
         }
 
         public VersionedValue deserialize(DataInputStream dis) throws IOException

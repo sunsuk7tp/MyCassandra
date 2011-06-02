@@ -38,11 +38,8 @@ public class LocalStrategy extends AbstractReplicationStrategy
     public Map<InetAddress, Integer> calculateNaturalEndpoints(Token token, TokenMetadata metadata)
     {
         Map<InetAddress, Integer> endpoints = new HashMap<InetAddress, Integer>();
-        ArrayList<InetAddress> addrs = FBUtilities.getLocalAddress();
-        for (InetAddress addr : addrs)
-        {
-            endpoints.put(addr, metadata.getStorageType(addr));
-        }
+        InetAddress addr = FBUtilities.getLocalAddress();
+        endpoints.put(addr, metadata.getStorageType(addr));
         return endpoints;
     }
 }

@@ -54,7 +54,7 @@ public class OldNetworkTopologyStrategy extends AbstractReplicationStrategy
         Iterator<Token> iter = TokenMetadata.ringIterator(tokens, token, false);
         Token primaryToken = iter.next();
         InetAddress addr = metadata.getEndpoint(primaryToken);
-        endpoints.add(addr, metadata.getStorageType(addr));
+        endpoints.put(addr, metadata.getStorageType(addr));
 
         boolean bDataCenter = false;
         boolean bOtherRack = false;
@@ -67,8 +67,8 @@ public class OldNetworkTopologyStrategy extends AbstractReplicationStrategy
                 // If we have already found something in a diff datacenter no need to find another
                 if (!bDataCenter)
                 {
-                    InetAddress addr = metadata.getEndpoint(t);
-                    endpoints.add(addr, metadata.getStorageType(addr));
+                    InetAddress endpoint = metadata.getEndpoint(t);
+                    endpoints.put(endpoint, metadata.getStorageType(endpoint));
                     bDataCenter = true;
                 }
                 continue;
@@ -80,8 +80,8 @@ public class OldNetworkTopologyStrategy extends AbstractReplicationStrategy
                 // If we have already found something in a diff rack no need to find another
                 if (!bOtherRack)
                 {
-                    InetAddress addr = metadata.getEndpoint(t);
-                    endpoints.add(addr, metadata.getStorageType(addr));
+                    InetAddress endpoint = metadata.getEndpoint(t);
+                    endpoints.put(endpoint, metadata.getStorageType(endpoint));
                     bOtherRack = true;
                 }
             }
@@ -96,8 +96,11 @@ public class OldNetworkTopologyStrategy extends AbstractReplicationStrategy
             while (endpoints.size() < replicas && iter.hasNext())
             {
                 Token t = iter.next();
-                if (!endpoints.contains(metadata.getEndpoint(t)))
-                    endpoints.add(metadata.getEndpoint(t));
+                if (!endpoints.containsKey(metadata.getEndpoint(t)))
+                {
+                    InetAddress endpoint = metadata.getEndpoint(t);
+                    endpoints.put(endpoint, metadata.getStorageType(endpoint));
+                }
             }
 
             if (endpoints.size() < replicas)

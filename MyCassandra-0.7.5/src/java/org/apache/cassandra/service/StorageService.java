@@ -549,7 +549,7 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
 
         /* All the ranges for the tokens */
         Map<Range, List<String>> map = new HashMap<Range, List<String>>();
-        for (Map.Entry<Range,List<InetAddress>> entry : getRangeToAddressMap(keyspace).entrySet())
+        for (Map.Entry<Range,Set<InetAddress>> entry : getRangeToAddressMap(keyspace).entrySet())
         {
             map.put(entry.getKey(), stringify(entry.getValue()));
         }
@@ -572,7 +572,7 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
         return map;
     }
 
-    public Map<Range, List<InetAddress>> getRangeToAddressMap(String keyspace)
+    public Map<Range, Set<InetAddress>> getRangeToAddressMap(String keyspace)
     {
         List<Range> ranges = getAllRanges(tokenMetadata_.sortedTokens());
         return constructRangeToEndpointMap(keyspace, ranges);
@@ -595,12 +595,12 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
      * @param ranges
      * @return mapping of ranges to the replicas responsible for them.
     */
-    private Map<Range, List<InetAddress>> constructRangeToEndpointMap(String keyspace, List<Range> ranges)
+    private Map<Range, Set<InetAddress>> constructRangeToEndpointMap(String keyspace, List<Range> ranges)
     {
-        Map<Range, List<InetAddress>> rangeToEndpointMap = new HashMap<Range, List<InetAddress>>();
+        Map<Range, Set<InetAddress>> rangeToEndpointMap = new HashMap<Range, Set<InetAddress>>();
         for (Range range : ranges)
         {
-            rangeToEndpointMap.put(range, Table.open(keyspace).getReplicationStrategy().getNaturalEndpoints(range.right));
+            rangeToEndpointMap.put(range, Table.open(keyspace).getReplicationStrategy().getNaturalEndpoints(range.right).keySet());
         }
         return rangeToEndpointMap;
     }
@@ -971,8 +971,11 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
         for (Range range : ranges)
         {
             Collection<InetAddress> possibleRanges = rangeAddresses.get(range);
+            Map<InetAddress, Integer> endpointMap = new HashMap<InetAddress, Integer>(possibleRanges.size());
+            for(InetAddress endpoint : possibleRanges)
+                endpointMap.put(endpoint, tokenMetadata_.getStorageType(endpoint));
             IEndpointSnitch snitch = DatabaseDescriptor.getEndpointSnitch();
-            List<InetAddress> sources = snitch.sortByStorageType(2, possibleRanges);
+            List<InetAddress> sources = snitch.sortByStorageType(2, endpointMap);
 
             assert (!sources.contains(myAddress));
 
@@ -1477,12 +1480,12 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
      * @param key - key for which we need to find the endpoint return value -
      * the endpoint responsible for this key
      */
-    public List<InetAddress> getNaturalEndpoints(String table, ByteBuffer key)
+    public Set<InetAddress> getNaturalEndpoints(String table, ByteBuffer key)
     {
         return getNaturalEndpoints(table, partitioner.getToken(key));
     }
 
-    public List<InetAddress> getNaturalEndpoints(String table, byte[] key)
+    public Set<InetAddress> getNaturalEndpoints(String table, byte[] key)
     {
         return getNaturalEndpoints(table, ByteBuffer.wrap(key));
     }
@@ -1506,7 +1509,7 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
 
     public Map<InetAddress, Integer> getNaturalMap(String table, Token token)
     {
-        return getReplicationStrategy(table).getNaturalEndpoints(token, table);
+        return Table.open(table).getReplicationStrategy().getNaturalEndpoints(token);
     }
 
     /**
@@ -1537,13 +1540,13 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
 
     public Map<InetAddress, Integer> getLiveMap(String table, ByteBuffer key)
     {
-        return getLiveMap(table, partitioner_.getToken(key));
+        return getLiveMap(table, partitioner.getToken(key));
     }
 
     public Map<InetAddress, Integer> getLiveMap(String table, Token token)
     {
         Map<InetAddress, Integer> liveEps = new HashMap<InetAddress, Integer>();
-        Map<InetAddress, Integer> map = getReplicationStrategy(table).getNaturalEndpoints(token, table);
+        Map<InetAddress, Integer> map = Table.open(table).getReplicationStrategy().getNaturalEndpoints(token);
 
         for (InetAddress endpoint : map.keySet())
         {

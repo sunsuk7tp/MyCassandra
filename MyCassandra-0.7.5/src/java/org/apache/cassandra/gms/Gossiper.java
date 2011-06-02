@@ -141,7 +141,7 @@ public class Gossiper implements IFailureDetectionEventListener
     Map<InetAddress, EndpointState> endpointStateMap_ = new ConcurrentHashMap<InetAddress, EndpointState>();
 
     /* storage type map for mycassandra cluster*/
-    Map<InetAddress, EndpointState> storageMap_ = new ConcurrentHashMap<InetAddress, Integer>();
+    Map<InetAddress, Integer> storageMap_ = new ConcurrentHashMap<InetAddress, Integer>();
 
     /* map where key is endpoint and value is timestamp when this endpoint was removed from
      * gossip. We will ignore any gossip regarding these endpoints for QUARANTINE_DELAY time
@@ -364,7 +364,7 @@ public class Gossiper implements IFailureDetectionEventListener
         return seeds_.contains(to);
     }
     /* Sends storage type */
-    boolean sendStorageGossip(Message message, Set<InetAddess> epSet)
+    boolean sendStorageGossip(Message message, Set<InetAddress> epSet)
     {
         return sendGossip(message, epSet);
     }

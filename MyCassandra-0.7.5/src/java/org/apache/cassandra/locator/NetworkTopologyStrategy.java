@@ -101,7 +101,7 @@ public class NetworkTopologyStrategy extends AbstractReplicationStrategy
                 String rack = snitch.getRack(endpoint);
                 if (!racks.contains(rack))
                 {
-                    dcEndpoints.add(endpoint, dcTokens.getStorageType(endpoint));
+                    dcEndpoints.put(endpoint, dcTokens.getStorageType(endpoint));
                     racks.add(rack);
                 }
             }
@@ -112,8 +112,8 @@ public class NetworkTopologyStrategy extends AbstractReplicationStrategy
             {
                 Token token = iter.next();
                 InetAddress endpoint = dcTokens.getEndpoint(token);
-                if (!dcEndpoints.contains(endpoint))
-                    dcEndpoints.add(endpoint, dcTokens.getStorageType(endpoint));
+                if (!dcEndpoints.containsKey(endpoint))
+                    dcEndpoints.put(endpoint, dcTokens.getStorageType(endpoint));
             }
 
             if (dcEndpoints.size() < dcReplicas)
@@ -121,7 +121,7 @@ public class NetworkTopologyStrategy extends AbstractReplicationStrategy
                                                               dcName, dcReplicas - dcEndpoints.size()));
             if (logger.isDebugEnabled())
                 logger.debug("{} endpoints in datacenter {} for token {} ",
-                             new Object[] { StringUtils.join(dcEndpoints, ","), dcName, searchToken});
+                             new Object[] { StringUtils.join(dcEndpoints.keySet(), ","), dcName, searchToken});
             endpoints.putAll(dcEndpoints);
         }
 
