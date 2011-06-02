@@ -60,6 +60,8 @@ public class FBUtilities
 
     private static volatile InetAddress localInetAddress_;
 
+    private static volatile int localStorageType_ = -1;
+
     private static final ThreadLocal<MessageDigest> localMD5Digest = new ThreadLocal<MessageDigest>()
     {
         @Override
@@ -125,6 +127,11 @@ public class FBUtilities
                 throw new RuntimeException(e);
             }
         return localInetAddress_;
+    }
+
+    public static int getStorageType()
+    {
+        return localStorageType_ < 0 ? DatabaseDescriptor.getStorageType() : localStorageType_;
     }
 
     /**
