@@ -91,7 +91,7 @@ public class DatabaseDescriptor
     public static final UUID INITIAL_VERSION = new UUID(4096, 0); // has type nibble set to 1, everything else to zero.
     private static volatile UUID defsVersion = INITIAL_VERSION;
 
-    public static final EngineMeta engineMeta = new EngineMeta();
+    public static EngineMeta engineMeta = new EngineMeta();
 
     /**
      * Inspect the classpath to find storage configuration file
