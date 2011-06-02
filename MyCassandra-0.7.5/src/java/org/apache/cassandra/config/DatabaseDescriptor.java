@@ -89,11 +89,11 @@ public class DatabaseDescriptor
     public static final UUID INITIAL_VERSION = new UUID(4096, 0); // has type nibble set to 1, everything else to zero.
     private static volatile UUID defsVersion = INITIAL_VERSION;
 
-    public static final int BIGTABLE = 0;
-    public static final int MYSQL = 1;
+    public static final int BIGTABLE = 1;
     public static final int REDIS = 2;
-    public static final int MONGODB = 3;
+    public static final int MYSQL = 3;
     public static final int HSMYSQL = 4;
+    public static final int MONGODB = 5;
     public static final int defaultDataBase = MYSQL;
 
     public static int dataBase;
