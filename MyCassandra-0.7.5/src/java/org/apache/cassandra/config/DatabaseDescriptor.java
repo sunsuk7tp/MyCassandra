@@ -40,6 +40,7 @@ import org.apache.cassandra.db.DefsTable;
 import org.apache.cassandra.db.Table;
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.migration.Migration;
+import org.apache.cassandra.db.engine.EngineMeta;
 import org.apache.cassandra.db.engine.MySQLInstance;
 import org.apache.cassandra.dht.IPartitioner;
 import org.apache.cassandra.io.sstable.Descriptor;
@@ -90,14 +91,7 @@ public class DatabaseDescriptor
     public static final UUID INITIAL_VERSION = new UUID(4096, 0); // has type nibble set to 1, everything else to zero.
     private static volatile UUID defsVersion = INITIAL_VERSION;
 
-    public static final int BIGTABLE = 1;
-    public static final int REDIS = 2;
-    public static final int MYSQL = 3;
-    public static final int HSMYSQL = 4;
-    public static final int MONGODB = 5;
-    public static final int defaultDataBase = MYSQL;
-
-    public static int dataBase;
+    public static final EngineMeta engineMeta = new EngineMeta();
 
     // column family type
     public static final String BINARY = "BINARY";
@@ -365,7 +359,7 @@ public class DatabaseDescriptor
             
             if (conf.db.equals("Bigtable"))
             {
-               dataBase = BIGTABLE;
+               engineMeta.setStorageType(EngineMeta.BIGTABLE);
                if (conf.commitlog_directory != null && conf.data_file_directories != null && conf.saved_caches_directory != null)
                {
                    for (String datadir : conf.data_file_directories)
@@ -390,15 +384,15 @@ public class DatabaseDescriptor
                }
             }
             else if (conf.db.equals("MySQL"))
-                dataBase = MYSQL;
+                engineMeta.setStorageType(EngineMeta.MYSQL);
             else if (conf.db.equals("Redis"))
-                dataBase = REDIS;
+                engineMeta.setStorageType(EngineMeta.REDIS);
             else if (conf.db.equals("MongoDB"))
-                dataBase = MONGODB;
+                engineMeta.setStorageType(EngineMeta.MONGODB);
             else if (conf.db.equals("HSMySQL"))
-                dataBase = HSMYSQL;
+                engineMeta.setStorageType(EngineMeta.HSMYSQL);
             else // default storage engine
-                dataBase = MYSQL;
+                engineMeta.setStorageType(EngineMeta.MYSQL);
 
             // Hardcoded system tables
             KSMetaData systemMeta = new KSMetaData(Table.SYSTEM_TABLE,
@@ -611,15 +605,15 @@ public class DatabaseDescriptor
 
                 int rowKeySize = (cf.rowkeysize > 0 ? cf.rowkeysize : defaultRowKeySize);
                 int columnFamilySize = (cf.columnfamilysize > 0 ? cf.columnfamilysize : defaultColumnFamilySize);
-                String columnFamilyType =(cf.columnfamilytype != null ? cf.columnfamilytype : defaultColumnFamilyType);
-                String storageEngineType = (cf.storageenginetype != null ? cf.storageenginetype : defaultStorageEngineType);
-                if(dataBase == MYSQL)
+                if(engineMeta.isMySQL())
                 {
+                    String columnFamilyType =(cf.columnfamilytype != null ? cf.columnfamilytype : defaultColumnFamilyType);
+                    String storageEngineType = (cf.storageenginetype != null ? cf.storageenginetype : defaultStorageEngineType);
                     MySQLInstance mdbi = new MySQLInstance(keyspace.name, cf.name);
                     mdbi.create(rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
                     mdbi.createProcedure(rowKeySize, columnFamilySize);
                 }
-                
+
                 ColumnFamilyType cfType = cf.column_type == null ? ColumnFamilyType.Standard : cf.column_type;
                 if (cfType == ColumnFamilyType.Super)
                 {
@@ -687,7 +681,7 @@ public class DatabaseDescriptor
                     metadata.put(columnName, new ColumnDefinition(columnName, rcd.validator_class, rcd.index_type, rcd.index_name));
                 }
                 
-                if (dataBase == MYSQL)
+                if (engineMeta.isMySQL())
                 {
                      cfDefs[j++] = new CFMetaData(keyspace.name, 
                                                  cf.name, 
@@ -1211,7 +1205,12 @@ public class DatabaseDescriptor
 
     public static int getStorageType()
     {
-        return dataBase;
+        return engineMeta.getStorageType();
+    }
+
+    public static boolean isBigtable()
+    {
+        return engineMeta.isBigtable();
     }
 
     public static String getDBHost()
