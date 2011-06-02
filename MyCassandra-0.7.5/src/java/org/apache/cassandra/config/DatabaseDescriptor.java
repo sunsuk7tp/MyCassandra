@@ -1195,6 +1195,11 @@ public class DatabaseDescriptor
         return engineMeta.isBigtable();
     }
 
+    public static boolean isMySQL()
+    {
+        return engineMeta.isMySQL();
+    }
+
     public static String getDBHost()
     {
         return conf.db_host;

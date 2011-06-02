@@ -51,4 +51,31 @@ public class EngineMeta
             }
         return emeta;
     }
+
+    public static DBInstance getDBInstance(int storageType, String tableName, String cfName, int maxKeySize, int maxCFSize, boolean isLong)
+    {
+        DBInstance dbi = null;
+        switch (storageType)
+        {
+            case BIGTABLE:
+                break;
+            case REDIS:
+                dbi = new RedisInstance(tableName, cfName);
+                break;
+            case MYSQL:
+            default:
+                dbi = new MySQLInstance(tableName, cfName);
+                if(isLong) dbi.create(maxKeySize, maxCFSize, BLOB, "MyISAM");
+                else dbi.create(maxKeySize, maxCFSize, defaultColumnFamilyType, defaultStorageEngineType);
+                dbi.createProcedure(maxKeySize, maxCFSize);
+                break;
+            case MONGODB:
+                dbi = new MongoInstance(tableName, cfName);
+                break;
+            case HSMYSQL:
+                dbi = new HSMySQLInstance(tableName, cfName);
+                break;
+        }
+        return dbi;
+    }
 }
