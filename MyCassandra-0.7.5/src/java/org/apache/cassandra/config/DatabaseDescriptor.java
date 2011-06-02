@@ -93,16 +93,6 @@ public class DatabaseDescriptor
 
     public static final EngineMeta engineMeta = new EngineMeta();
 
-    // column family type
-    public static final String BINARY = "BINARY";
-    public static final String BLOB = "BLOB";
-
-    // mysql default setting
-    public static final String defaultStorageEngineType = "InnoDB";
-    public static final int defaultRowKeySize = 64;
-    public static final String defaultColumnFamilyType = BINARY;
-    public static final int defaultColumnFamilySize = 30 * 1024;
-
     /**
      * Inspect the classpath to find storage configuration file
      */
@@ -603,12 +593,12 @@ public class DatabaseDescriptor
                 AbstractType subcolumnComparator = null;
                 AbstractType default_validator = getComparator(cf.default_validation_class);
 
-                int rowKeySize = (cf.rowkeysize > 0 ? cf.rowkeysize : defaultRowKeySize);
-                int columnFamilySize = (cf.columnfamilysize > 0 ? cf.columnfamilysize : defaultColumnFamilySize);
+                int rowKeySize = (cf.rowkeysize > 0 ? cf.rowkeysize : EngineMeta.defaultRowKeySize);
+                int columnFamilySize = (cf.columnfamilysize > 0 ? cf.columnfamilysize : EngineMeta.defaultColumnFamilySize);
                 if(engineMeta.isMySQL())
                 {
-                    String columnFamilyType =(cf.columnfamilytype != null ? cf.columnfamilytype : defaultColumnFamilyType);
-                    String storageEngineType = (cf.storageenginetype != null ? cf.storageenginetype : defaultStorageEngineType);
+                    String columnFamilyType =(cf.columnfamilytype != null ? cf.columnfamilytype : EngineMeta.defaultColumnFamilyType);
+                    String storageEngineType = (cf.storageenginetype != null ? cf.storageenginetype : EngineMeta.defaultStorageEngineType);
                     MySQLInstance mdbi = new MySQLInstance(keyspace.name, cf.name);
                     mdbi.create(rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
                     mdbi.createProcedure(rowKeySize, columnFamilySize);

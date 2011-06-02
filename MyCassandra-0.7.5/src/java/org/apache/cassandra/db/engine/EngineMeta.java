@@ -10,6 +10,15 @@ public class EngineMeta
     public static final int HSMYSQL = 4;
     public static final int MONGODB = 5;
 
+    // for mysql params
+    public static final String BINARY = "BINARY";
+    public static final String BLOB = "BLOB";
+    // mysql default setting
+    public static final String defaultStorageEngineType = "InnoDB";
+    public static final int defaultRowKeySize = 64;
+    public static final String defaultColumnFamilyType = BINARY;
+    public static final int defaultColumnFamilySize = 30 * 1024;
+
     private int storageType = MYSQL;
 
     public void setStorageType(int storageType)

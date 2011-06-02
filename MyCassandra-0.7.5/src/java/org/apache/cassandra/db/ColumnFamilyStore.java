@@ -153,8 +153,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     private volatile ScheduledFuture<?> saveRowCacheTask;
     private volatile ScheduledFuture<?> saveKeyCacheTask;
     
-    private int maxKeySize = DatabaseDescriptor.defaultRowKeySize;
-    private int maxCFSize = DatabaseDescriptor.defaultColumnFamilySize;
+    private int maxKeySize = EngineMeta.defaultRowKeySize;
+    private int maxCFSize = EngineMeta.defaultColumnFamilySize;
 
     public void reload()
     {
@@ -294,7 +294,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             default:
                 dbi = new MySQLInstance(new String(table.name), columnFamilyName);
                 if(columnFamily.equals("Migrations")) dbi.create(maxKeySize, maxCFSize, "BLOB", "MyISAM");
-                else dbi.create(maxKeySize, maxCFSize, DatabaseDescriptor.defaultColumnFamilyType, DatabaseDescriptor.defaultStorageEngineType);
+                else dbi.create(maxKeySize, maxCFSize, EngineMeta.defaultColumnFamilyType, EngineMeta.defaultStorageEngineType);
                 dbi.createProcedure(maxKeySize, maxCFSize);
                 break;
             case EngineMeta.MONGODB:
