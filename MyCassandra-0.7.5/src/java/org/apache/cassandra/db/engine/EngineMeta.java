@@ -1,7 +1,5 @@
 package org.apache.cassandra.db.engine;
 
-import java.io.IOException;
-
 public class EngineMeta
 {
     public static final int BIGTABLE = 1;
@@ -9,6 +7,7 @@ public class EngineMeta
     public static final int MYSQL = 3;
     public static final int HSMYSQL = 4;
     public static final int MONGODB = 5;
+    public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "HSMySQL", "MongoDB"};
 
     // for mysql params
     public static final String BINARY = "BINARY";
@@ -39,5 +38,17 @@ public class EngineMeta
     public boolean isMySQL()
     {
         return storageType == MYSQL ? true : false;
+    }
+
+    public static EngineMeta getEngineMeta(String label)
+    {
+        EngineMeta emeta = new EngineMeta();
+        for (int i = 0; i < storageLabels.length; i++)
+            if (label.equals(storageLabels[i]))
+            {
+                emeta.setStorageType(i+1);
+                return emeta;
+            }
+        return emeta;
     }
 }

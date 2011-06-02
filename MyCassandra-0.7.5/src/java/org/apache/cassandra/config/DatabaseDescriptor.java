@@ -91,7 +91,7 @@ public class DatabaseDescriptor
     public static final UUID INITIAL_VERSION = new UUID(4096, 0); // has type nibble set to 1, everything else to zero.
     private static volatile UUID defsVersion = INITIAL_VERSION;
 
-    public static EngineMeta engineMeta = new EngineMeta();
+    public static EngineMeta engineMeta;
 
     /**
      * Inspect the classpath to find storage configuration file
@@ -373,16 +373,8 @@ public class DatabaseDescriptor
                        throw new ConfigurationException("saved_caches_directory missing");
                }
             }
-            else if (conf.db.equals("MySQL"))
-                engineMeta.setStorageType(EngineMeta.MYSQL);
-            else if (conf.db.equals("Redis"))
-                engineMeta.setStorageType(EngineMeta.REDIS);
-            else if (conf.db.equals("MongoDB"))
-                engineMeta.setStorageType(EngineMeta.MONGODB);
-            else if (conf.db.equals("HSMySQL"))
-                engineMeta.setStorageType(EngineMeta.HSMYSQL);
-            else // default storage engine
-                engineMeta.setStorageType(EngineMeta.MYSQL);
+            else
+                engineMeta = EngineMeta.getEngineMeta(conf.db);
 
             // Hardcoded system tables
             KSMetaData systemMeta = new KSMetaData(Table.SYSTEM_TABLE,
