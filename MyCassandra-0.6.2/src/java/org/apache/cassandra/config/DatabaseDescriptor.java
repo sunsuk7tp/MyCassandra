@@ -148,10 +148,10 @@ public class DatabaseDescriptor
     public static final int HSMYSQL = 6;
     public static final int defaultDataBase = MSTABLE;
     
-    public static final String defaultStorageEngineType = "InnoDB";
     public static final int defaultRowKeySize = 64;
-    public static final String defaultColumnFamilyType = "VARBINARY";
-    public static final int defaultColumnFamilySize = 30 * 1024; // 6KB
+    public static final int defaultColumnFamilySize = 30 * 1024; // 30KB
+    public static final String defaultStorageSize = "VARBINARY";
+    public static final String defaultStorageEngine = "InnoDB";
     
     public static int dataBase;
     
@@ -686,8 +686,8 @@ public class DatabaseDescriptor
                 /* System Table Configure */
                 if (dataBase == MYSQL) {
                     try {
-                        new MySQLInstance("system", "LocationInfo").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
-                        new MySQLInstance("system", "HintsColumnFamily").create(defaultRowKeySize,defaultColumnFamilySize, defaultColumnFamilyType, defaultStorageEngineType);
+                        new MySQLInstance("system", "LocationInfo").create(defaultRowKeySize,defaultColumnFamilySize, defaultStorageSize, defaultStorageEngine);
+                        new MySQLInstance("system", "HintsColumnFamily").create(defaultRowKeySize,defaultColumnFamilySize, defaultStorageSize, defaultStorageEngine);
                     } catch (SQLException e) {
                         System.out.println("db connection error "+ e);
                     }
@@ -731,8 +731,8 @@ public class DatabaseDescriptor
                     // sql table config
                     int rowKeySize = defaultRowKeySize;
                     int columnFamilySize = defaultColumnFamilySize;
-                    String columnFamilyType = defaultColumnFamilyType;
-                    String storageEngineType = defaultStorageEngineType;
+                    String storageSize = defaultStorageSize;
+                    String storageEngine = defaultStorageEngine;
             		
                     if ((value = XMLUtils.getAttributeValue(columnFamily, "RowKeySize")) != null)
                     {
@@ -744,18 +744,18 @@ public class DatabaseDescriptor
                     }
                     if ((value = XMLUtils.getAttributeValue(columnFamily, "StorageType")) != null)
                     {
-                    	columnFamilyType = value;
+                    	storageSize = value;
                     }
                     if ((value = XMLUtils.getAttributeValue(columnFamily, "StorageEngine")) != null)
                     {
-                    	storageEngineType = value;
+                    	storageEngine = value;
                     }
                     
                     if(dataBase == MYSQL) {
                     	// make sql table
                     	MySQLInstance dbi = new MySQLInstance(ksName, cfName);
                     	try {
-                    		dbi.create(rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
+                    		dbi.create(rowKeySize, columnFamilySize, storageSize, storageEngine);
                     	} catch (SQLException e) {
                     		System.out.println("db connection error "+ e);
                     	}

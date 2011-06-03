@@ -40,7 +40,6 @@ public class HSMySQLInstance implements DBInstance {
             return insert(rowKey, cf);
         //}
     }
-
     
     int insert(String rowKey, ColumnFamily cf) throws SQLException, IOException {
         if(debug > 0) System.out.print("SQLInsert: ");
@@ -112,7 +111,7 @@ public class HSMySQLInstance implements DBInstance {
     }
     
     // Init MySQL Table for Keyspaces
-    /*public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType) throws SQLException {
+    /*public int create(int rowKeySize, int columnFamilySize, String storageType, String storageEngine) throws SQLException {
         
         try {
             Statement stmt = conn.createStatement();
@@ -131,9 +130,9 @@ public class HSMySQLInstance implements DBInstance {
             String sPrepareSQL = "CREATE Table "+table + "(" +
                 //"`ID` INT NOT NULL AUTO_INCREMENT," + 
                 "`Row_Key` VARCHAR(?) NOT NULL," +
-                "`ColumnFamily` VARBINARY(?)," +
+                "`ColumnFamily` " + storageType + "(?)," +
                 "PRIMARY KEY (`Row_Key`)" +
-            ")";// PARTITION BY KEY(`Row_Key`) PARTITIONS 2;";
+            ") ENGINE = " + storageEngine;
             
             PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
             pst.setInt(1,rowKeySize);
