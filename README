@@ -28,28 +28,39 @@ db_pass: rootpass
 
 # 2) You define the database schema at storage-conf.xml.
 
-# Example, if you want to make "mykeyspace" keyspace and "mycf1","mycf2" column families in that.
+# Example, if you want to make "mykeyspace" keyspace and "mycf1","mycf2","mycf3" column families in that.
+# If you use MySQL storage engine, you must specify several schema parameters.
+# - rowkey_size/RowKeySize: key size (byte)
+# - columnfamily_size/ColumnFamilySize: columnFamily object size (byte)
+# - storage_size/StorageSize: 'BINARY' or 'BLOB'. With 'BINARY', the max columnFamily size is 65534 bytes, and with 'BLOB', 4 GB. It depends on data type constraints of MySQL (VARBINARY or LONGBLOB). 
+# - storage_engine/StorageEngine: 'InnoDB', 'MyISAM', etc. MySQL storage engine itself. 
 # @0.7
 keyspaces:
     - name: mykeyspace
       :
       column_families:
         - name: mycf1
-          rowkeysize: 16
-          columnfamilysize: 2048
-          storageenginetype: InnoDB
+          rowkey_size: 16
+          columnfamily_size: 2048
+          storage_size: BINARY
+          storage_engine: InnoDB
           :
         - name: mycf2
-          rowkeysize: 32
-          columnfamilysize: 4096
-          storageenginetype: MyISAM
+          rowkey_size: 32
+          columnfamily_size: 4096
+          storage_size: BINARY          
+          storage_engine: MyISAM
           :
+        - name: mycf3
+          rowkey_size: 64
+          storage_size: BLOB
+          storage_engine: MyISAM
 
 # @0.6
 <Keyspaces>
   <Keyspace Name="mykeyspace">
-    <ColumnFamily Name="mycf1" RowKeySize="16" ColumnFamilySize="2048" ColumnFamilyType="VARBINARY" CompareWith="BytesType" StorageEngineType="InnoDB" />
-    <ColumnFamily Name="mycf2" RowKeySize="32" ColumnFamilySize="4096" ColumnFamilyType="VARBINARY" CompareWith="BytesType" StorageEngineType="MyISAM" />
+    <ColumnFamily Name="mycf1" RowKeySize="16" ColumnFamilySize="2048" StorageSize="VARBINARY" StorageEngine="InnoDB" />
+    <ColumnFamily Name="mycf2" RowKeySize="32" ColumnFamilySize="4096" StorageSize="VARBINARY" StorageEngine="MyISAM" />
     <ReplicaPlacementStrategy>org.apache.cassandra.locator.RackAwareStrategy</ReplicaPlacementStrategy>
     <ReplicationFactor>1</ReplicationFactor>
     <EndPointSnitch>org.apache.cassandra.locator.EndPointSnitch</EndPointSnitch>
@@ -84,6 +95,14 @@ $ ./bin/cassandra
 # 5) schema load. (0.7~)
 
 $ ./bin/schmatool localhost 8080 import
+
+# 6) dynamicaly create keyspace/columnfamily
+$ ./bin/cassandra-cli
+> connect localhost/9160;
+> create keyspace myksp;
+> use keyspace;
+> create column family mycf1 with max_key_size = 64 and max_cf_size = 2048 and storage_size = BINARY and storage_engine = InnoDB;
+
 
 # If you have something, please contact me!!
 # E-mail: sunsuk7tp at gmail.com
