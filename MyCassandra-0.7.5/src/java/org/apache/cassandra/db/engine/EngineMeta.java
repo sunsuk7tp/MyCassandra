@@ -10,14 +10,13 @@ public class EngineMeta
     public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "HSMySQL", "MongoDB"};
 
     // for mysql params
-    public static final String BINARY = "BINARY";
-    public static final String BLOB = "BLOB";
+    public static final String BINARY = "VARBINARY";
+    public static final String BLOB = "LONGBLOB";
     // mysql default setting
     public static final int defaultRowKeySize = 64;
     public static final int defaultColumnFamilySize = 30 * 1024;
     public static final String defaultStorageSize = BINARY;
     public static final String defaultStorageEngine = "InnoDB";
-
 
     private int storageType = MYSQL;
 

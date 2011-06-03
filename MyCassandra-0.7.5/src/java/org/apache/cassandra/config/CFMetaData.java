@@ -61,7 +61,7 @@ public final class CFMetaData
     public final static double DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS = sizeMemtableOperations(DEFAULT_MEMTABLE_THROUGHPUT_IN_MB);
     public final static int DEFAULT_MAX_KEY_SIZE = 64;
     public final static int DEFAULT_MAX_CF_SIZE = 30 *1024;
-    public final static String DEFAULT_STORAGE_SIZE = "BINARY";
+    public final static String DEFAULT_STORAGE_SIZE = "VARBINARY";
     public final static String DEFAULT_STORAGE_ENGINE = "INNODB";
 
     private static final int MIN_CF_ID = 1000;
@@ -163,7 +163,7 @@ public final class CFMetaData
     private double memtableOperationsInMillions;      // default based on throughput
     private int maxKeySize;                           // default 64
     private int maxCFSize;                            // default 30 * 1024
-    private String storageSize;                       // default BINARY
+    private String storageSize;                       // default VARBINARY
     private String storageEngine;                     // default INNODB
     // NOTE: if you find yourself adding members to this class, make sure you keep the convert methods in lockstep.
 

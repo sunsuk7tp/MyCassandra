@@ -32,7 +32,7 @@ db_pass: rootpass
 # If you use MySQL storage engine, you must specify several schema parameters.
 # - rowkey_size/RowKeySize: key size (byte)
 # - columnfamily_size/ColumnFamilySize: columnFamily object size (byte)
-# - storage_size/StorageSize: 'BINARY' or 'BLOB'. With 'BINARY', the max columnFamily size is 65534 bytes, and with 'BLOB', 4 GB. It depends on data type constraints of MySQL (VARBINARY or LONGBLOB). 
+# - storage_size/StorageSize: columnfamily size (MySQL data type). With 'VARBINARY', the max columnFamily size is 65535 bytes, and with 'LONGBLOB', 4 GB. It depends on data type constraints of MySQL (VARBINARY or LONGBLOB or the others). 
 # - storage_engine/StorageEngine: 'InnoDB', 'MyISAM', etc. MySQL storage engine itself. 
 # @0.7
 keyspaces:
@@ -42,18 +42,19 @@ keyspaces:
         - name: mycf1
           rowkey_size: 16
           columnfamily_size: 2048
-          storage_size: BINARY
+          storage_size: VARBINARY
           storage_engine: InnoDB
           :
         - name: mycf2
           rowkey_size: 32
           columnfamily_size: 4096
-          storage_size: BINARY          
+          storage_size: VARBINARY          
           storage_engine: MyISAM
           :
         - name: mycf3
           rowkey_size: 64
-          storage_size: BLOB
+          columnfamily_size:
+          storage_size: LONGBLOB
           storage_engine: MyISAM
 
 # @0.6

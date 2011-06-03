@@ -423,7 +423,7 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     setMax_cf_sizeIsSet(false);
     this.max_cf_size = 30 * 1024;
     setStorage_sizeIsSet(false);
-    this.storage_size = "BINARY";
+    this.storage_size = "VARBINARY";
     setStorage_engineIsSet(false);
     this.storage_engine = "INNODB";
   }

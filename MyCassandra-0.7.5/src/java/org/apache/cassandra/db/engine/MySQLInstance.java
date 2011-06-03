@@ -31,7 +31,7 @@ public class MySQLInstance extends DBInstance
     private final String BINARY = "BINARY";
     private final String BLOB = "BLOB";
 
-    private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, createSt, createBlobSt, getPr, setPr;
+    private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, getPr, setPr;
 
     public MySQLInstance(String ksName, String cfName)
     {
@@ -62,10 +62,15 @@ public class MySQLInstance extends DBInstance
         rangeSt = "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + "WHERE " + KEY + " >= ? AND " + KEY + " < ? LIMIT = ?";
         deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
         truncateSt = "TRUNCATE TABLE " + this.cfName;
-        createSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` VARBINARY(?)," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
-        createBlobSt = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` LONGBLOB," + "PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
         getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
+    }
+
+    private String getCreateSt(String statement)
+    {
+        String createStHeader = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` ";
+        String createStFooter = ", PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
+        return createStHeader + statement + createStFooter;
     }
 
     private int NonAutoCommit()
@@ -210,7 +215,7 @@ public class MySQLInstance extends DBInstance
     }
 
     // Init MySQL Table for Keyspaces
-    public synchronized int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
+    public synchronized int create(int rowKeySize, int columnFamilySize, String storageSize, String storageEngine)
     {
         try {
             Statement stmt = conn.createStatement();
@@ -223,27 +228,38 @@ public class MySQLInstance extends DBInstance
                 if (rs.getString(1).equals(cfName))
                     return 0;
 
-            PreparedStatement pst = null;
-            if (columnFamilyType.equals(BLOB))
-            {
-                pst = conn.prepareStatement(createBlobSt);
-                pst.setInt(1, rowKeySize);
-                pst.setString(2, storageEngineType);
-            }
-            else
-            {
-                pst = conn.prepareStatement(createSt);
-                pst.setInt(1, rowKeySize);
-                pst.setInt(2, columnFamilySize);
-                pst.setString(3, storageEngineType);
-            }
-            return pst.executeUpdate();
+            return getCreatePreparedSt(rowKeySize, columnFamilySize, storageSize, storageEngine).executeUpdate();
         }
         catch (SQLException e) 
         {
             errorMsg("db table creation error", e);
             return -1;
         }
+    }
+
+    private PreparedStatement getCreatePreparedSt (int rowKeySize, int columnFamilySize, String storageSize, String storageEngine)
+    {
+        PreparedStatement pst = null;
+        try {
+            if (storageSize.contains(BLOB))
+            {
+                pst = conn.prepareStatement(getCreateSt(storageSize));
+                pst.setInt(1, rowKeySize);
+                pst.setString(2, storageEngine);
+            }
+            else
+            {
+                pst = conn.prepareStatement(getCreateSt(storageSize + "(?)"));
+                pst.setInt(1, rowKeySize);
+                pst.setInt(2, columnFamilySize);
+                pst.setString(3, storageEngine);
+            }
+        }
+        catch (SQLException e)
+        {
+            errorMsg("db table create statement error", e);
+        }
+        return pst;
     }
 
     public synchronized int createProcedure(int rowKeySize, int columnFamilySize)

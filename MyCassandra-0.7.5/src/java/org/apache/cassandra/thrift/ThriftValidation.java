@@ -488,8 +488,9 @@ public class ThriftValidation
                 throw new InvalidRequestException("Too small or large max_key_size: " + maxKeySize);
             if (maxCFSize <= 0 || maxCFSize > 65535)
                 throw new InvalidRequestException("Too small or large max_cf_size: " + maxCFSize);
-            if (!storageSize.equals("BINARY") && !storageSize.equals("BLOB"))
-                throw new InvalidRequestException("Invalid storage size: " + storageSize);
+            //TODO MyCassandra: validation for MySQL's data type
+            //if (!storageSize.contains("BINARY") && !storageSize.contains("BLOB"))
+            //    throw new InvalidRequestException("Invalid storage size: " + storageSize);
             //TODO MyCassandra: validation for MySQL's storage engine
         }
         catch (ConfigurationException e)

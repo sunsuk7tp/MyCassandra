@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
 import java.nio.ByteBuffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.apache.cassandra.io.util.DataInputBuffer;
 import org.apache.cassandra.io.util.DataOutputBuffer;
@@ -13,8 +15,8 @@ import org.apache.cassandra.db.DecoratedKey;
 
 public abstract class DBInstance implements StorageEngineInterface
 {
+    private static final Logger logger = LoggerFactory.getLogger(DBInstance.class);
     String ksName, cfName;
-
 
     public int put(String rowKey, ColumnFamily cf, boolean isDelete)
     {
@@ -30,7 +32,7 @@ public abstract class DBInstance implements StorageEngineInterface
         }
         catch (IOException e)
         {
-            System.err.println("[MyCassandra] db get error: " + e);
+            errorMsg("db get error", e);
             return null;
         }
     }
@@ -58,6 +60,6 @@ public abstract class DBInstance implements StorageEngineInterface
 
     public void errorMsg(String msg, Exception e)
     {
-        System.err.println("[MyCassandra (" + " Keyspace:" + ksName + "/ CF: " + cfName + ")] " + msg + ": " + e);
+        logger.info("[MyCassandra (" + " Keyspace:" + ksName + "/ CF: " + cfName + ")] " + msg + ": " + e);
     }
 }
