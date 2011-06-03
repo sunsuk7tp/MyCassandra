@@ -282,13 +282,14 @@ public final class CFMetaData
                                             : memtableOperationsInMillions;
         this.cfId = cfId;
         this.column_metadata = new HashMap<ByteBuffer, ColumnDefinition>(column_metadata);
-        if (this.maxKeySize <= 0 || this.maxCFSize <= 0 || this.storageSize != null || this.storageEngine != null)
-        {
+        if (this.maxKeySize <= 0)
             this.maxKeySize = DEFAULT_MAX_KEY_SIZE;
+        if (this.maxCFSize <= 0)
             this.maxCFSize = DEFAULT_MAX_CF_SIZE;
+        if (this.storageSize.isEmpty())
             this.storageSize = DEFAULT_STORAGE_SIZE;
+        if (this.storageEngine.isEmpty())
             this.storageEngine = DEFAULT_STORAGE_ENGINE;
-        }
     }
     
     /** adds this cfm to the map. */
@@ -354,10 +355,10 @@ public final class CFMetaData
         this.maxCFSize = maxCFSize > 0
                           ? maxCFSize
                           : DEFAULT_MAX_CF_SIZE;
-        this.storageSize = storageSize != null
+        this.storageSize = !storageSize.isEmpty()
                            ? storageSize
                            : DEFAULT_STORAGE_SIZE;
-        this.storageEngine = storageEngine != null
+        this.storageEngine = !storageEngine.isEmptry()
                              ? storageEngine
                              : DEFAULT_STORAGE_ENGINE;
     }
@@ -403,13 +404,14 @@ public final class CFMetaData
              memOps,
              nextId(),
              column_metadata);
-        if (this.maxKeySize <= 0 || this.maxCFSize <= 0 || this.storageSize != null || this.storageEngine != null)
-        {
+        if (this.maxKeySize <= 0)
             this.maxKeySize = DEFAULT_MAX_KEY_SIZE;
+        if (this.maxCFSize <= 0)
             this.maxCFSize = DEFAULT_MAX_CF_SIZE;
+        if (this.storageSize.isEmpty())
             this.storageSize = DEFAULT_STORAGE_SIZE;
+        if (this.storageEngine.isEmpty())
             this.storageEngine = DEFAULT_STORAGE_ENGINE;
-        }
     }
     
     public static CFMetaData newIndexMetadata(CFMetaData parent, ColumnDefinition info, AbstractType columnComparator)
