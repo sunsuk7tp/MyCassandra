@@ -13,10 +13,11 @@ public class EngineMeta
     public static final String BINARY = "BINARY";
     public static final String BLOB = "BLOB";
     // mysql default setting
-    public static final String defaultStorageEngineType = "InnoDB";
     public static final int defaultRowKeySize = 64;
-    public static final String defaultColumnFamilyType = BINARY;
     public static final int defaultColumnFamilySize = 30 * 1024;
+    public static final String defaultStorageSize = BINARY;
+    public static final String defaultStorageEngine = "InnoDB";
+
 
     private int storageType = MYSQL;
 
@@ -52,7 +53,7 @@ public class EngineMeta
         return emeta;
     }
 
-    public static DBInstance getDBInstance(int storageType, String tableName, String cfName, int maxKeySize, int maxCFSize, boolean isLong)
+    public static DBInstance getDBInstance(int storageType, String tableName, String cfName, int maxKeySize, int maxCFSize, String storageSize, String storageEngine, boolean isLong)
     {
         DBInstance dbi = null;
         switch (storageType)
@@ -66,7 +67,7 @@ public class EngineMeta
             default:
                 dbi = new MySQLInstance(tableName, cfName);
                 if(isLong) dbi.create(maxKeySize, maxCFSize, BLOB, "MyISAM");
-                else dbi.create(maxKeySize, maxCFSize, defaultColumnFamilyType, defaultStorageEngineType);
+                else dbi.create(maxKeySize, maxCFSize, storageSize, storageEngine);
                 dbi.createProcedure(maxKeySize, maxCFSize);
                 break;
             case MONGODB:

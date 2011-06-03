@@ -369,10 +369,10 @@ keyspaces:
       replication_factor: 1
       column_families:
         - name: data
-          rowkeysize: 16
-          columnfamilysize: 2048
-          columnfamilytype: VARBINARY
-          storageenginetype: InnoDB
+          rowkey_size: 16
+          columnfamily_size: 2048
+          storage_size: BINARY
+          storage_engine: InnoDB
           compare_with: BytesType
           keys_cached: 10000
           rows_cached: 1000

@@ -155,6 +155,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     
     private int maxKeySize = EngineMeta.defaultRowKeySize;
     private int maxCFSize = EngineMeta.defaultColumnFamilySize;
+    private String storageSize = EngineMeta.defaultStorageSize;
+    private String storageEngine = EngineMeta.defaultStorageEngine;
 
     public void reload()
     {
@@ -226,6 +228,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         this.partitioner = partitioner;
         this.maxKeySize = metadata.getMaxKeySize();
         this.maxCFSize = metadata.getMaxCFSize();
+        this.storageSize = metadata.getStorageSize();
+        this.storageEngine = metadata.getStorageEngine();
         fileIndexGenerator.set(generation);
         memtable = new Memtable(this);
         binaryMemtable = new AtomicReference<BinaryMemtable>(new BinaryMemtable(this));
@@ -283,7 +287,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         }
 
         boolean isLong = DatabaseDescriptor.isMySQL() && columnFamily.equals("Migrations") ? true : false;
-        DBInstance dbi = EngineMeta.getDBInstance(DatabaseDescriptor.getStorageType(), new String(table.name), columnFamilyName, maxKeySize, maxCFSize, isLong);
+        DBInstance dbi = EngineMeta.getDBInstance(DatabaseDescriptor.getStorageType(), new String(table.name), columnFamilyName, maxKeySize, maxCFSize, storageSize, storageEngine, isLong);
         if (!DatabaseDescriptor.isBigtable())
         {
             setDBInstance(dbi);

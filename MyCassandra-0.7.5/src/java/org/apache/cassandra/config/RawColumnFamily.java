@@ -47,9 +47,9 @@ public class RawColumnFamily
     public Integer memtable_throughput_in_mb;
     public Double memtable_operations_in_millions;
     
-    //mycassandra extends
-    public int rowkeysize;
-    public int columnfamilysize;
-    public String columnfamilytype;
-    public String storageenginetype;
+    //MyCassandra extends
+    public int rowkey_size;
+    public int columnfamily_size;
+    public String storage_size;
+    public String storage_engine;
 }
