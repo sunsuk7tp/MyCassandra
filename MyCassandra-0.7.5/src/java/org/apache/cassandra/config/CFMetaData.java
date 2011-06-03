@@ -358,7 +358,7 @@ public final class CFMetaData
         this.storageSize = !storageSize.isEmpty()
                            ? storageSize
                            : DEFAULT_STORAGE_SIZE;
-        this.storageEngine = !storageEngine.isEmptry()
+        this.storageEngine = !storageEngine.isEmpty()
                              ? storageEngine
                              : DEFAULT_STORAGE_ENGINE;
     }
