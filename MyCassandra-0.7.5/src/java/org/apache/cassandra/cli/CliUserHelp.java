@@ -51,6 +51,8 @@ public class CliUserHelp {
         MAX_COMPACTION_THRESHOLD,
         MAX_KEY_SIZE,
         MAX_CF_SIZE,
+        STORAGE_SIZE,
+        STORAGE_ENGINE
     }
 
     protected EnumMap<ColumnFamilyArgument, String> argumentExplanations = new EnumMap<ColumnFamilyArgument, String>(ColumnFamilyArgument.class)
@@ -70,8 +72,10 @@ public class CliUserHelp {
         put(ColumnFamilyArgument.GC_GRACE, "Discard tombstones after this many seconds");
         put(ColumnFamilyArgument.MIN_COMPACTION_THRESHOLD, "Avoid minor compactions of less than this number of sstable files");
         put(ColumnFamilyArgument.MAX_COMPACTION_THRESHOLD, "Compact no more than this number of sstable files at once");
-        put(ColumnFamilyArgument.MAX_KEY_SIZE, "Max Key Size (16-65535) With MyCassandra-MySQL");
-        put(ColumnFamilyArgument.MAX_CF_SIZE, "Max CF Size (1024-65535) With MyCassandra-MySQL");
+        put(ColumnFamilyArgument.MAX_KEY_SIZE, "Max Key Size (16-) With MyCassandra-MySQL");
+        put(ColumnFamilyArgument.MAX_CF_SIZE, "Max CF Size (1024-) With MyCassandra-MySQL");
+        put(ColumnFamilyArgument.STORAGE_SIZE, "CF Size (MySQL data type) With MyCassandra-MySQL");
+        put(ColumnFamilyArgument.STORAGE_ENGINE, "Storage Engine With MyCassandra-MySQL");
     }};
     
     protected void printCmdHelp(Tree statement, CliSessionState state)
