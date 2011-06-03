@@ -50,6 +50,6 @@ public class RawColumnFamily
     //MyCassandra extends
     public int rowkey_size;
     public int columnfamily_size;
-    public String storage_size;
+    public String columnfamily_type;
     public String storage_engine;
 }
