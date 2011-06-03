@@ -286,9 +286,9 @@ public final class CFMetaData
             this.maxKeySize = DEFAULT_MAX_KEY_SIZE;
         if (this.maxCFSize <= 0)
             this.maxCFSize = DEFAULT_MAX_CF_SIZE;
-        if (this.storageSize.isEmpty())
+        if (this.storageSize != null)
             this.storageSize = DEFAULT_STORAGE_SIZE;
-        if (this.storageEngine.isEmpty())
+        if (this.storageEngine != null)
             this.storageEngine = DEFAULT_STORAGE_ENGINE;
     }
     
@@ -355,10 +355,10 @@ public final class CFMetaData
         this.maxCFSize = maxCFSize > 0
                           ? maxCFSize
                           : DEFAULT_MAX_CF_SIZE;
-        this.storageSize = !storageSize.isEmpty()
+        this.storageSize = storageSize != null
                            ? storageSize
                            : DEFAULT_STORAGE_SIZE;
-        this.storageEngine = !storageEngine.isEmpty()
+        this.storageEngine = storageEngine != null
                              ? storageEngine
                              : DEFAULT_STORAGE_ENGINE;
     }
@@ -408,9 +408,9 @@ public final class CFMetaData
             this.maxKeySize = DEFAULT_MAX_KEY_SIZE;
         if (this.maxCFSize <= 0)
             this.maxCFSize = DEFAULT_MAX_CF_SIZE;
-        if (this.storageSize.isEmpty())
+        if (this.storageSize != null)
             this.storageSize = DEFAULT_STORAGE_SIZE;
-        if (this.storageEngine.isEmpty())
+        if (this.storageEngine != null)
             this.storageEngine = DEFAULT_STORAGE_ENGINE;
     }
     
