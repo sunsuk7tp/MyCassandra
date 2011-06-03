@@ -583,7 +583,7 @@ public class DatabaseDescriptor
 
                 int rowKeySize = (cf.rowkey_size > 0 ? cf.rowkey_size : EngineMeta.defaultRowKeySize);
                 int columnFamilySize = (cf.columnfamily_size > 0 ? cf.columnfamily_size : EngineMeta.defaultColumnFamilySize);
-                String storageSize =(cf.storage_size != null ? cf.storage_size : EngineMeta.defaultStorageSize);
+                String storageSize =(cf.columnfamily_type != null ? cf.columnfamily_type : EngineMeta.defaultStorageSize);
                 String storageEngine = (cf.storage_engine != null ? cf.storage_engine : EngineMeta.defaultStorageEngine);
                 if(engineMeta.isMySQL())
                 {
