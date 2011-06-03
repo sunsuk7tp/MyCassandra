@@ -151,7 +151,7 @@ public class DatabaseDescriptor
     public static final String defaultStorageEngineType = "InnoDB";
     public static final int defaultRowKeySize = 64;
     public static final String defaultColumnFamilyType = "VARBINARY";
-    public static final int defaultColumnFamilySize = 6 * 1024; // 6KB
+    public static final int defaultColumnFamilySize = 30 * 1024; // 6KB
     
     public static int dataBase;
     
@@ -742,11 +742,11 @@ public class DatabaseDescriptor
                     {
                     	columnFamilySize = Integer.parseInt(value);
                     }
-                    if ((value = XMLUtils.getAttributeValue(columnFamily, "ColumnFamilyType")) != null)
+                    if ((value = XMLUtils.getAttributeValue(columnFamily, "StorageType")) != null)
                     {
                     	columnFamilyType = value;
                     }
-                    if ((value = XMLUtils.getAttributeValue(columnFamily, "StorageEngineType")) != null)
+                    if ((value = XMLUtils.getAttributeValue(columnFamily, "StorageEngine")) != null)
                     {
                     	storageEngineType = value;
                     }
