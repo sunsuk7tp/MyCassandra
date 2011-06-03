@@ -346,10 +346,9 @@ public class DatabaseDescriptor
             
             
             /* data file and commit log directories. they get created later, when they're needed. */
-            
-            if (conf.db.equals("Bigtable"))
+            engineMeta = EngineMeta.getEngineMeta(conf.db);
+            if (engineMeta.isBigtable())
             {
-               engineMeta.setStorageType(EngineMeta.BIGTABLE);
                if (conf.commitlog_directory != null && conf.data_file_directories != null && conf.saved_caches_directory != null)
                {
                    for (String datadir : conf.data_file_directories)
@@ -373,8 +372,6 @@ public class DatabaseDescriptor
                        throw new ConfigurationException("saved_caches_directory missing");
                }
             }
-            else
-                engineMeta = EngineMeta.getEngineMeta(conf.db);
 
             // Hardcoded system tables
             KSMetaData systemMeta = new KSMetaData(Table.SYSTEM_TABLE,
