@@ -585,14 +585,14 @@ public class DatabaseDescriptor
                 AbstractType subcolumnComparator = null;
                 AbstractType default_validator = getComparator(cf.default_validation_class);
 
-                int rowKeySize = (cf.rowkeysize > 0 ? cf.rowkeysize : EngineMeta.defaultRowKeySize);
-                int columnFamilySize = (cf.columnfamilysize > 0 ? cf.columnfamilysize : EngineMeta.defaultColumnFamilySize);
+                int rowKeySize = (cf.rowkey_size > 0 ? cf.rowkey_size : EngineMeta.defaultRowKeySize);
+                int columnFamilySize = (cf.columnfamily_size > 0 ? cf.columnfamily_size : EngineMeta.defaultColumnFamilySize);
+                String storageSize =(cf.storage_size != null ? cf.storage_size : EngineMeta.defaultStorageSize);
+                String storageEngine = (cf.storage_engine != null ? cf.storage_engine : EngineMeta.defaultStorageEngine);
                 if(engineMeta.isMySQL())
                 {
-                    String columnFamilyType =(cf.columnfamilytype != null ? cf.columnfamilytype : EngineMeta.defaultColumnFamilyType);
-                    String storageEngineType = (cf.storageenginetype != null ? cf.storageenginetype : EngineMeta.defaultStorageEngineType);
                     MySQLInstance mdbi = new MySQLInstance(keyspace.name, cf.name);
-                    mdbi.create(rowKeySize, columnFamilySize, columnFamilyType, storageEngineType);
+                    mdbi.create(rowKeySize, columnFamilySize, storageSize, storageEngine);
                     mdbi.createProcedure(rowKeySize, columnFamilySize);
                 }
 
@@ -685,6 +685,8 @@ public class DatabaseDescriptor
                                                  cf.memtable_operations_in_millions,
                                                  rowKeySize,
                                                  columnFamilySize,
+                                                 storageSize,
+                                                 storageEngine,
                                                  metadata);
                 }
                 else

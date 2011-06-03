@@ -157,6 +157,8 @@ protocol Cassandra {
         union { null, double} memtable_operations_in_millions = null;
         union { int, null } max_key_size;
         union { int, null } max_cf_size;
+        union { string, null } storage_size;
+        union { string, null } storage_engine;
         union { int, null } id;
         union { array<ColumnDef>, null } column_metadata;
     }

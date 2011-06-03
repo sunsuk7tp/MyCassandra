@@ -34,9 +34,9 @@ public class RawKeyspace
     public Integer replication_factor;
     public RawColumnFamily[] column_families;
     
-    //mycassandra elements
-    public int rowkeysize;
-    public int columnfamilysize;
-    public String columnfamilytype;
-    public String storageenginetype;
+    //MyCassandra elements
+    public int rowkey_size;
+    public int columnfamily_size;
+    public String storage_size;
+    public String storagee_ngine;
 }

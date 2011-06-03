@@ -884,6 +884,8 @@ public class CassandraServer implements Cassandra.Iface
                               cf_def.isSetMemtable_operations_in_millions() ? cf_def.memtable_operations_in_millions : CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS,
                               cf_def.isSetMax_key_size() ? cf_def.max_key_size : CFMetaData.DEFAULT_MAX_KEY_SIZE,
                               cf_def.isSetMax_cf_size() ? cf_def.max_cf_size : CFMetaData.DEFAULT_MAX_CF_SIZE,
+                              cf_def.isSetStorage_size() ? cf_def.storage_size : CFMetaData.DEFAULT_STORAGE_SIZE,
+                              cf_def.isSetStorage_engine() ? cf_def.storage_engine : CFMetaData.DEFAULT_STORAGE_ENGINE,
                               ColumnDefinition.fromColumnDef(cf_def.column_metadata));
     }
 
