@@ -194,7 +194,7 @@ public class CliUserHelp {
                 state.out.println("create column family Bar;");
                 state.out.println("create column family Bar with <att1>=<value1>;");
                 state.out.println("create column family Bar with <att1>=<value1> and <att2>=<value2>...;\n");
-                state.out.println("create column family Bar with max_key_size = 32 and max_cf_size = 2048 and storage_size = 'VARBINARY' and storage_engine = 'MyISAM'")
+                state.out.println("create column family Bar with max_key_size = 32 and max_cf_size = 2048 and storage_size = 'VARBINARY' and storage_engine = 'MyISAM'");
                 state.out.println("Create a new column family with the specified values for the given set of");
                 state.out.println("attributes. Note that you must be using a keyspace.\n");
                 state.out.println("valid attributes are:");
