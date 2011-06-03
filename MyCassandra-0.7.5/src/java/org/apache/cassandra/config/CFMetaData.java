@@ -60,13 +60,9 @@ public final class CFMetaData
     public final static int DEFAULT_MEMTABLE_THROUGHPUT_IN_MB = sizeMemtableThroughput();
     public final static double DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS = sizeMemtableOperations(DEFAULT_MEMTABLE_THROUGHPUT_IN_MB);
     public final static int DEFAULT_MAX_KEY_SIZE = 64;
-<<<<<<< HEAD
-    public final static int DEFAULT_MAX_CF_SIZE = 30 * 1024;
-=======
     public final static int DEFAULT_MAX_CF_SIZE = 30 *1024;
     public final static String DEFAULT_STORAGE_SIZE = "BINARY";
     public final static String DEFAULT_STORAGE_ENGINE = "INNODB";
->>>>>>> bca2f60ba90123d3cafb07711109f5d3155cec5b
 
     private static final int MIN_CF_ID = 1000;
 
