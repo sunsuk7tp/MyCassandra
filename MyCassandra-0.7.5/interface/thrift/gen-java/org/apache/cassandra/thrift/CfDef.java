@@ -917,6 +917,7 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
 
   public CfDef setMax_key_size(int max_key_size) {
     this.max_key_size = max_key_size;
+    setMax_key_sizeIsSet(true);
     return this;
   }
 
@@ -938,6 +939,7 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
 
   public CfDef setMax_cf_size(int max_cf_size) {
     this.max_cf_size = max_cf_size;
+    setMax_cf_sizeIsSet(true);
     return this;
   }
 
@@ -959,6 +961,7 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
 
   public CfDef setStorage_size(String storage_size) {
     this.storage_size = storage_size;
+    setStorage_sizeIsSet(true);
     return this;
   }
 
@@ -980,6 +983,7 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
   
   public CfDef setStorage_engine(String storage_engine) {
     this.storage_engine = storage_engine;
+    setStorage_engineIsSet(true);
     return this;
   }
 
