@@ -921,6 +921,12 @@ public class CliClient extends CliUserHelp
             case MAX_CF_SIZE:
                 cfDef.setMax_cf_size(Integer.parseInt(mValue));
                 break;
+            case STORAGE_SIZE:
+                cfDef.setStorage_size(CliUtils.unescapeSQLString(mValue));
+                break;
+            case STORAGE_ENGINE:
+                cfDef.setStorage_engine(CliUtils.unescapeSQLString(mValue));
+                break;
             default:
                 //must match one of the above or we'd throw an exception at the valueOf statement above.
                 assert(false);
