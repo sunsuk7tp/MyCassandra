@@ -344,11 +344,10 @@ public class DatabaseDescriptor
                 throw new ConfigurationException("in_memory_compaction_limit_in_mb must be a positive integer");
             }
             
-            
-            /* data file and commit log directories. they get created later, when they're needed. */
             engineMeta = EngineMeta.getEngineMeta(conf.db);
             if (engineMeta.isBigtable())
             {
+               /* data file and commit log directories. they get created later, when they're needed. */
                if (conf.commitlog_directory != null && conf.data_file_directories != null && conf.saved_caches_directory != null)
                {
                    for (String datadir : conf.data_file_directories)
