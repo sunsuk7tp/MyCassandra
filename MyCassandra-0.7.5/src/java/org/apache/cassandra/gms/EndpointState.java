@@ -53,26 +53,38 @@ public class EndpointState
     // token or not and will set this true if token is found. If there is no token, this is a
     // fat client and will be removed automatically from gossip.
     volatile boolean hasToken_;
+    
+    volatile int storageType_;
 
     public static ICompactSerializer<EndpointState> serializer()
     {
         return serializer_;
     }
-    
+
     EndpointState(HeartBeatState hbState)
     { 
-        hbState_ = hbState; 
-        updateTimestamp_ = System.currentTimeMillis(); 
-        isAlive_ = true; 
+        hbState_ = hbState;
+        updateTimestamp_ = System.currentTimeMillis();
+        isAlive_ = true;
         isAGossiper_ = false;
         hasToken_ = false;
     }
-        
+
+    EndpointState(HeartBeatState hbState, int storageType)
+    {
+        hbState_ = hbState;
+        storageType_ = storageType;
+        updateTimestamp_ = System.currentTimeMillis();
+        isAlive_ = true;
+        isAGossiper_ = false;
+        hasToken_ = false;
+    }
+
     HeartBeatState getHeartBeatState()
     {
         return hbState_;
     }
-    
+
     void setHeartBeatState(HeartBeatState hbState)
     {
         updateTimestamp();
@@ -96,6 +108,7 @@ public class EndpointState
     void addApplicationState(ApplicationState key, VersionedValue value)
     {
         applicationState_.put(key, value);
+        value.setStorageType(storageType_);
     }
 
     /* getters and setters */
@@ -140,6 +153,16 @@ public class EndpointState
     {
         return hasToken_;
     }
+
+    public void setStorageType(int value)
+    {
+        storageType_ = value;
+    }
+
+    public int getStorageType()
+    {
+        return storageType_;
+    }
 }
 
 class EndpointStateSerializer implements ICompactSerializer<EndpointState>
@@ -150,6 +173,7 @@ class EndpointStateSerializer implements ICompactSerializer<EndpointState>
     {
         /* serialize the HeartBeatState */
         HeartBeatState hbState = epState.getHeartBeatState();
+        int storageType = epState.getStorageType();
         HeartBeatState.serializer().serialize(hbState, dos);
 
         /* serialize the map of ApplicationState objects */
@@ -161,6 +185,7 @@ class EndpointStateSerializer implements ICompactSerializer<EndpointState>
             if (value != null)
             {
                 dos.writeInt(entry.getKey().ordinal());
+                dos.writeInt(storageType);
                 VersionedValue.serializer.serialize(value, dos);
             }
         }
@@ -180,8 +205,10 @@ class EndpointStateSerializer implements ICompactSerializer<EndpointState>
             }
 
             int key = dis.readInt();
+            int storageType = dis.readInt();
             VersionedValue value = VersionedValue.serializer.deserialize(dis);
             epState.addApplicationState(Gossiper.STATES[key], value);
+            epState.setStorageType(storageType);
         }
         return epState;
     }

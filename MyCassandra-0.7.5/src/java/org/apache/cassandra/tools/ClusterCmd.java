@@ -20,6 +20,7 @@ package org.apache.cassandra.tools;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.cli.*;
 
@@ -143,7 +144,7 @@ public class ClusterCmd {
 
     public void printEndpoints(String keyspace, String key)
     {
-        List<InetAddress> endpoints = probe.getEndpoints(keyspace, key);
+        Set<InetAddress> endpoints = probe.getEndpoints(keyspace, key);
         System.out.println(String.format("%-17s: %s", "Key", key));
         System.out.println(String.format("%-17s: %s", "Endpoints", endpoints));
     }

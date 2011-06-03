@@ -54,7 +54,8 @@ import org.apache.cassandra.db.filter.*;
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.db.marshal.LocalByPartionerType;
-import org.apache.cassandra.db.engine.*;
+import org.apache.cassandra.db.engine.DBInstance;
+import org.apache.cassandra.db.engine.EngineMeta;
 import org.apache.cassandra.dht.*;
 import org.apache.cassandra.io.sstable.*;
 import org.apache.cassandra.io.util.FileUtils;
@@ -152,8 +153,10 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     private volatile ScheduledFuture<?> saveRowCacheTask;
     private volatile ScheduledFuture<?> saveKeyCacheTask;
     
-    private int maxKeySize = DatabaseDescriptor.defaultRowKeySize;
-    private int maxCFSize = DatabaseDescriptor.defaultColumnFamilySize;
+    private int maxKeySize = EngineMeta.defaultRowKeySize;
+    private int maxCFSize = EngineMeta.defaultColumnFamilySize;
+    private String storageSize = EngineMeta.defaultStorageSize;
+    private String storageEngine = EngineMeta.defaultStorageEngine;
 
     public void reload()
     {
@@ -225,6 +228,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         this.partitioner = partitioner;
         this.maxKeySize = metadata.getMaxKeySize();
         this.maxCFSize = metadata.getMaxCFSize();
+        this.storageSize = metadata.getStorageSize();
+        this.storageEngine = metadata.getStorageEngine();
         fileIndexGenerator.set(generation);
         memtable = new Memtable(this);
         binaryMemtable = new AtomicReference<BinaryMemtable>(new BinaryMemtable(this));
@@ -233,7 +238,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             logger.debug("Starting CFS {}", columnFamily);
         // scan for sstables corresponding to this cf and load them
         ssTables = new SSTableTracker(table.name, columnFamilyName);
-        if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
+        if (DatabaseDescriptor.isBigtable())
         {
             Set<DecoratedKey> savedKeys = readSavedCache(DatabaseDescriptor.getSerializedKeyCachePath(table.name, columnFamilyName));
             List<SSTableReader> sstables = new ArrayList<SSTableReader>();
@@ -281,29 +286,9 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             throw new RuntimeException(e);
         }
 
-        DBInstance dbi = null;
-        switch(DatabaseDescriptor.dataBase)
-        {
-            case DatabaseDescriptor.BIGTABLE:
-                break;
-            case DatabaseDescriptor.REDIS:
-                dbi = new RedisInstance(new String(table.name), columnFamilyName);
-                break;
-            case DatabaseDescriptor.MYSQL:
-            default:
-                dbi = new MySQLInstance(new String(table.name), columnFamilyName);
-                if(columnFamily.equals("Migrations")) dbi.create(maxKeySize, maxCFSize, "BLOB", "MyISAM");
-                else dbi.create(maxKeySize, maxCFSize, DatabaseDescriptor.defaultColumnFamilyType, DatabaseDescriptor.defaultStorageEngineType);
-                dbi.createProcedure(maxKeySize, maxCFSize);
-                break;
-            case DatabaseDescriptor.MONGODB:
-                dbi = new MongoInstance(new String(table.name), columnFamilyName);
-                break;
-            case DatabaseDescriptor.HSMYSQL:
-                dbi = new HSMySQLInstance(new String(table.name), columnFamilyName);
-                break;
-        }
-        if (DatabaseDescriptor.dataBase != DatabaseDescriptor.BIGTABLE)
+        boolean isLong = DatabaseDescriptor.isMySQL() && columnFamily.equals("Migrations") ? true : false;
+        DBInstance dbi = EngineMeta.getDBInstance(DatabaseDescriptor.getStorageType(), new String(table.name), columnFamilyName, maxKeySize, maxCFSize, storageSize, storageEngine, isLong);
+        if (!DatabaseDescriptor.isBigtable())
         {
             setDBInstance(dbi);
         }
@@ -883,7 +868,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     {
         long start = System.nanoTime();
         try {
-            if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
+            if (DatabaseDescriptor.isBigtable())
             {
                 boolean flushRequested = memtable.isThresholdViolated();
                 memtable.put(key, columnFamily);
@@ -1346,9 +1331,12 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
         long start = System.nanoTime();
         try {
-            if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE) {
+            if (DatabaseDescriptor.isBigtable())
+            {
                 return doGetCFBigtable(filter, gcBefore);
-            } else {
+            }
+            else
+            {
                 return doGetCFDB(filter, gcBefore);
             }
         }
@@ -1536,7 +1524,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
         QueryFilter filter = new QueryFilter(null, new QueryPath(columnFamily, superColumn, null), columnFilter);
         
-        return DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE ? 
+        return DatabaseDescriptor.isBigtable() ? 
                    getRangeSliceAtBigtable(filter, startWith, stopAt, range, maxResults)
                    : getRangeSliceAtDB(filter, startWith, stopAt, maxResults);
     }
@@ -2016,7 +2004,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         {
             public void runMayThrow() throws InterruptedException, IOException
             {
-                if (DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
+                if (DatabaseDescriptor.isBigtable())
                 {
                     // putting markCompacted on the commitlogUpdater thread ensures it will run
                     // after any compactions that were in progress when truncate was called, are finished

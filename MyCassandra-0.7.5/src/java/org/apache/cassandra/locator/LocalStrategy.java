@@ -23,6 +23,7 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import org.apache.cassandra.dht.Token;
 import org.apache.cassandra.utils.FBUtilities;
@@ -34,8 +35,11 @@ public class LocalStrategy extends AbstractReplicationStrategy
         super(table, tokenMetadata, snitch, configOptions);
     }
 
-    public List<InetAddress> calculateNaturalEndpoints(Token token, TokenMetadata metadata)
+    public Map<InetAddress, Integer> calculateNaturalEndpoints(Token token, TokenMetadata metadata)
     {
-        return Arrays.asList(FBUtilities.getLocalAddress());
+        Map<InetAddress, Integer> endpoints = new HashMap<InetAddress, Integer>();
+        InetAddress addr = FBUtilities.getLocalAddress();
+        endpoints.put(addr, metadata.getStorageType(addr));
+        return endpoints;
     }
 }

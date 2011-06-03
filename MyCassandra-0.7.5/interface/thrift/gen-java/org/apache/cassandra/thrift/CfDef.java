@@ -73,6 +73,8 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
   private static final TField MEMTABLE_OPERATIONS_IN_MILLIONS_FIELD_DESC = new TField("memtable_operations_in_millions", TType.DOUBLE, (short)23);
   private static final TField MAX_KEY_SIZE = new TField("max_key_size", TType.I32, (short)24);
   private static final TField MAX_CF_SIZE = new TField("max_cf_size", TType.I32, (short)25);
+  private static final TField STORAGE_SIZE = new TField("storage_size", TType.STRING, (short)26);
+  private static final TField STORAGE_ENGINE = new TField("storage_engine", TType.STRING, (short)27);
 
 
   public String keyspace;
@@ -97,6 +99,8 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
   public double memtable_operations_in_millions;
   public int max_key_size;
   public int max_cf_size;
+  public String storage_size;
+  public String storage_engine;
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements TFieldIdEnum {
@@ -121,7 +125,9 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     MEMTABLE_THROUGHPUT_IN_MB((short)22, "memtable_throughput_in_mb"),
     MEMTABLE_OPERATIONS_IN_MILLIONS((short)23, "memtable_operations_in_millions"),
     MAX_KEY_SIZE((short)24, "max_key_size"),
-    MAX_CF_SIZE((short)25, "max_cf_size");
+    MAX_CF_SIZE((short)25, "max_cf_size"),
+    STORAGE_SIZE((short)26, "storage_size"),
+    STORAGE_ENGINE((short)27, "storage_engine");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -180,6 +186,10 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
           return MAX_KEY_SIZE;
         case 25: // MAX_CF_SIZE
           return MAX_CF_SIZE;
+        case 26: // STORAGE_SIZE
+          return STORAGE_SIZE;
+        case 27: // STORAGE_ENGINE
+          return STORAGE_ENGINE;
         default:
           return null;
       }
@@ -234,7 +244,9 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
   private static final int __MEMTABLE_OPERATIONS_IN_MILLIONS_ISSET_ID = 11;
   private static final int __MAX_KEY_SIZE_ID = 12;
   private static final int __MAX_CF_SIZE_ID = 13;
-  private BitSet __isset_bit_vector = new BitSet(14);
+  private static final int __STORAGE_SIZE_ID = 14;
+  private static final int __STORAGE_ENGINE_ID = 15;
+  private BitSet __isset_bit_vector = new BitSet(16);
 
   public static final Map<_Fields, FieldMetaData> metaDataMap;
   static {
@@ -284,6 +296,10 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
             new FieldValueMetaData(TType.I32)));
     tmpMap.put(_Fields.MAX_CF_SIZE, new FieldMetaData("max_cf_size", TFieldRequirementType.OPTIONAL, 
             new FieldValueMetaData(TType.I32)));
+    tmpMap.put(_Fields.STORAGE_SIZE, new FieldMetaData("storage_size", TFieldRequirementType.OPTIONAL,
+            new FieldValueMetaData(TType.STRING)));
+    tmpMap.put(_Fields.STORAGE_ENGINE, new FieldMetaData("storage_engine", TFieldRequirementType.OPTIONAL,
+            new FieldValueMetaData(TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     FieldMetaData.addStructMetaDataMap(CfDef.class, metaDataMap);
   }
@@ -356,6 +372,10 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     this.memtable_flush_after_mins = other.memtable_flush_after_mins;
     this.memtable_throughput_in_mb = other.memtable_throughput_in_mb;
     this.memtable_operations_in_millions = other.memtable_operations_in_millions;
+    this.max_key_size = other.max_key_size;
+    this.max_cf_size = other.max_cf_size;
+    this.storage_size = other.storage_size;
+    this.storage_engine = other.storage_engine;
   }
 
   public CfDef deepCopy() {
@@ -398,6 +418,14 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     this.memtable_throughput_in_mb = 0;
     setMemtable_operations_in_millionsIsSet(false);
     this.memtable_operations_in_millions = 0.0;
+    setMax_key_sizeIsSet(false);
+    this.max_key_size = 64;
+    setMax_cf_sizeIsSet(false);
+    this.max_cf_size = 30 * 1024;
+    setStorage_sizeIsSet(false);
+    this.storage_size = "BINARY";
+    setStorage_engineIsSet(false);
+    this.storage_engine = "INNODB";
   }
 
   public String getKeyspace() {
@@ -755,32 +783,6 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     return this;
   }
 
-  public CfDef setMax_key_size(int max_key_size) {
-    this.max_key_size = max_key_size;
-    return this;
-  }
-
-  public boolean isSetMax_key_size() {
-    return this.max_key_size > 0;
-  }
-
-  public int getMax_key_size() {
-    return this.max_key_size;
-  }
-
-  public CfDef setMax_cf_size(int max_cf_size) {
-    this.max_cf_size = max_cf_size;
-    return this;
-  }
-
-  public boolean isSetMax_cf_size() {
-    return this.max_cf_size > 0;
-  }
-
-  public int getMax_cf_size() {
-    return this.max_cf_size;
-  }
-
   public void unsetMax_compaction_threshold() {
     __isset_bit_vector.clear(__MAX_COMPACTION_THRESHOLD_ISSET_ID);
   }
@@ -908,13 +910,89 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
   public void setMemtable_operations_in_millionsIsSet(boolean value) {
     __isset_bit_vector.set(__MEMTABLE_OPERATIONS_IN_MILLIONS_ISSET_ID, value);
   }
-  
-  public void setMax_key_size(boolean value) {
+
+  public int getMax_key_size() {
+    return this.max_key_size;
+  }
+
+  public CfDef setMax_key_size(int max_key_size) {
+    this.max_key_size = max_key_size;
+    return this;
+  }
+
+  public void unsetMax_key_size() {
+    __isset_bit_vector.clear(__MAX_KEY_SIZE_ID);
+  }
+
+  public boolean isSetMax_key_size() {
+    return __isset_bit_vector.get(__MAX_KEY_SIZE_ID);
+  }
+
+  public void setMax_key_sizeIsSet(boolean value) {
     __isset_bit_vector.set(__MAX_KEY_SIZE_ID, value);
   }
 
-  public void setMax_cf_size(boolean value) {
+  public int getMax_cf_size() {
+    return this.max_cf_size;
+  }
+
+  public CfDef setMax_cf_size(int max_cf_size) {
+    this.max_cf_size = max_cf_size;
+    return this;
+  }
+
+  public void unsetMax_cf_size() {
+    __isset_bit_vector.clear(__MAX_CF_SIZE_ID);
+  }
+
+  public boolean isSetMax_cf_size() {
+    return __isset_bit_vector.get(__MAX_CF_SIZE_ID);
+  }
+
+  public void setMax_cf_sizeIsSet(boolean value) {
     __isset_bit_vector.set(__MAX_CF_SIZE_ID, value);
+  }
+
+  public String getStorage_size() {
+    return this.storage_size;
+  }
+
+  public CfDef setStorage_size(String storage_size) {
+    this.storage_size = storage_size;
+    return this;
+  }
+
+  public void unsetStorage_size() {
+    __isset_bit_vector.clear(__STORAGE_SIZE_ID);
+  }
+
+  public boolean isSetStorage_size() {
+    return __isset_bit_vector.get(__STORAGE_SIZE_ID);
+  }
+
+  public void setStorage_sizeIsSet(boolean value) {
+    __isset_bit_vector.set(__STORAGE_SIZE_ID, value);
+  }
+
+  public String getStorage_engine() {
+    return this.storage_engine;
+  }
+  
+  public CfDef setStorage_engine(String storage_engine) {
+    this.storage_engine = storage_engine;
+    return this;
+  }
+
+  public void unsetStorage_engine() {
+    __isset_bit_vector.clear(__STORAGE_ENGINE_ID);
+  }
+
+  public boolean isSetStorage_engine() {
+    return __isset_bit_vector.get(__STORAGE_ENGINE_ID);
+  }
+
+  public void setStorage_engineIsSet(boolean value) {
+    __isset_bit_vector.set(__STORAGE_ENGINE_ID, value);
   }
 
   public void setFieldValue(_Fields field, Object value) {
@@ -1079,6 +1157,21 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
       }
       break;
 
+    case STORAGE_SIZE:
+      if (value == null) {
+        unsetStorage_size();
+      } else {
+        setStorage_size((String)value);
+      }
+      break;
+
+    case STORAGE_ENGINE:
+        if (value == null) {
+          unsetStorage_engine();
+        } else {
+          setStorage_engine((String)value);
+        }
+        break;
     }
   }
 
@@ -1144,6 +1237,18 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     case MEMTABLE_OPERATIONS_IN_MILLIONS:
       return new Double(getMemtable_operations_in_millions());
 
+    case MAX_KEY_SIZE:
+      return new Integer(getMax_key_size());
+
+    case MAX_CF_SIZE:
+      return new Integer(getMax_cf_size());
+
+    case STORAGE_SIZE:
+      return new String(getStorage_size());
+
+    case STORAGE_ENGINE:
+      return new String(getStorage_engine());
+
     }
     throw new IllegalStateException();
   }
@@ -1195,6 +1300,14 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
       return isSetMemtable_throughput_in_mb();
     case MEMTABLE_OPERATIONS_IN_MILLIONS:
       return isSetMemtable_operations_in_millions();
+    case MAX_KEY_SIZE:
+      return isSetMax_key_size();
+    case MAX_CF_SIZE:
+      return isSetMax_cf_size();
+    case STORAGE_SIZE:
+      return isSetStorage_size();
+    case STORAGE_ENGINE:
+      return isSetStorage_engine();
     }
     throw new IllegalStateException();
   }
@@ -1392,6 +1505,41 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
         return false;
     }
 
+    boolean this_present_max_key_size = true && this.isSetMax_key_size();
+    boolean that_present_max_key_size = true && that.isSetMax_key_size();
+    if (this_present_max_key_size || that_present_max_key_size) {
+      if (!(this_present_max_key_size && that_present_max_key_size))
+        return false;
+      if (this.max_key_size != that.max_key_size)
+        return false;
+    }
+
+    boolean this_present_max_cf_size = true && this.isSetMax_cf_size();
+    boolean that_present_max_cf_size = true && that.isSetMax_cf_size();
+    if (this_present_max_cf_size || that_present_max_cf_size) {
+      if (!(this_present_max_cf_size && that_present_max_cf_size))
+        return false;
+      if (this.max_cf_size != that.max_cf_size)
+        return false;
+    }
+
+    boolean this_present_storage_size = true && this.isSetStorage_size();
+    boolean that_present_storage_size = true && that.isSetStorage_size();
+    if (this_present_storage_size || that_present_storage_size) {
+      if (!(this_present_storage_size && that_present_storage_size))
+        return false;
+      if (this.storage_size != that.storage_size)
+        return false;
+    }
+
+    boolean this_present_storage_engine = true && this.isSetStorage_engine();
+    boolean that_present_storage_engine = true && that.isSetStorage_engine();
+    if (this_present_storage_engine || that_present_storage_engine) {
+      if (!(this_present_storage_engine && that_present_storage_engine))
+        return false;
+      if (this.storage_engine != that.storage_engine)
+        return false;
+    }
     return true;
   }
 
@@ -1498,6 +1646,26 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     builder.append(present_memtable_operations_in_millions);
     if (present_memtable_operations_in_millions)
       builder.append(memtable_operations_in_millions);
+
+    boolean present_max_key_size = true && (isSetMax_key_size());
+    builder.append(present_max_key_size);
+    if (present_max_key_size)
+      builder.append(max_key_size);
+
+    boolean present_max_cf_size = true && (isSetMax_cf_size());
+    builder.append(present_max_cf_size);
+    if (present_max_cf_size)
+      builder.append(max_cf_size);
+
+    boolean present_storage_size = true && (isSetStorage_size());
+    builder.append(present_storage_size);
+    if (present_storage_size)
+      builder.append(storage_size);
+
+    boolean present_storage_engine = true && (isSetStorage_engine());
+    builder.append(present_storage_engine);
+    if (present_storage_engine)
+      builder.append(storage_engine);
 
     return builder.toHashCode();
   }
@@ -1710,6 +1878,46 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
         return lastComparison;
       }
     }
+    lastComparison = Boolean.valueOf(isSetMax_key_size()).compareTo(typedOther.isSetMax_key_size());
+    if (lastComparison != 0) {
+        return lastComparison;
+    }
+    if (isSetMax_key_size()) {
+      lastComparison = TBaseHelper.compareTo(this.max_key_size, typedOther.max_key_size);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetMax_cf_size()).compareTo(typedOther.isSetMax_cf_size());
+    if (lastComparison != 0) {
+        return lastComparison;
+    }
+    if (isSetMax_cf_size()) {
+      lastComparison = TBaseHelper.compareTo(this.max_cf_size, typedOther.max_cf_size);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetStorage_size()).compareTo(typedOther.isSetStorage_size());
+    if (lastComparison != 0) {
+        return lastComparison;
+    }
+    if (isSetStorage_size()) {
+      lastComparison = TBaseHelper.compareTo(this.storage_size, typedOther.storage_size);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
+    lastComparison = Boolean.valueOf(isSetStorage_engine()).compareTo(typedOther.isSetStorage_engine());
+    if (lastComparison != 0) {
+        return lastComparison;
+    }
+    if (isSetStorage_engine()) {
+      lastComparison = TBaseHelper.compareTo(this.storage_engine, typedOther.storage_engine);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     return 0;
   }
 
@@ -1893,7 +2101,7 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
         case 24: // MAX_KEY_SIZE
           if (field.type == TType.I32) {
             this.max_key_size = iprot.readI32();
-            setMax_key_size(true);
+            setMax_key_sizeIsSet(true);
           } else {
             TProtocolUtil.skip(iprot, field.type);
           }
@@ -1901,7 +2109,23 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
         case 25: // MAX_CF_SIZE
             if (field.type == TType.I32) {
               this.max_cf_size = iprot.readI32();
-              setMax_cf_size(true);
+              setMax_cf_sizeIsSet(true);
+            } else {
+              TProtocolUtil.skip(iprot, field.type);
+            }
+          break;
+        case 26: // STORAGE_SIZE
+            if (field.type == TType.STRING) {
+              this.storage_size = iprot.readString();
+              setStorage_sizeIsSet(true);
+            } else {
+              TProtocolUtil.skip(iprot, field.type);
+            }
+          break;
+        case 27: // STORAGE_ENGINE
+            if (field.type == TType.STRING) {
+              this.storage_engine = iprot.readString();
+              setStorage_engineIsSet(true);
             } else {
               TProtocolUtil.skip(iprot, field.type);
             }
@@ -2048,6 +2272,16 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     if (isSetMax_cf_size()) {
         oprot.writeFieldBegin(MAX_CF_SIZE);
         oprot.writeI32(this.max_cf_size);
+        oprot.writeFieldEnd();
+    }
+    if (isSetStorage_size()) {
+        oprot.writeFieldBegin(STORAGE_SIZE);
+        oprot.writeString(this.storage_size);
+        oprot.writeFieldEnd();
+    }
+    if (isSetStorage_engine()) {
+        oprot.writeFieldBegin(STORAGE_ENGINE);
+        oprot.writeString(this.storage_engine);
         oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();
@@ -2216,6 +2450,18 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
         if (!first) sb.append(", ");
         sb.append("max_cf_size:");
         sb.append(this.max_cf_size);
+        first = false;
+    }
+    if (isSetStorage_size()) {
+        if (!first) sb.append(", ");
+        sb.append("storage_size:");
+        sb.append(this.storage_size);
+        first = false;
+    }
+    if (isSetStorage_engine()) {
+        if (!first) sb.append(", ");
+        sb.append("storage_engine:");
+        sb.append(this.storage_engine);
         first = false;
     }
     sb.append(")");

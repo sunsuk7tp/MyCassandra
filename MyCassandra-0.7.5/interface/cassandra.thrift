@@ -368,6 +368,8 @@ struct CfDef {
     23: optional double memtable_operations_in_millions,
     24: optional i32 max_key_size,
     25: optional i32 max_cf_size,
+    26: optional string storage_size,
+    27: optional string storage_engine,
 }
 
 /* describes a keyspace. */

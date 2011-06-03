@@ -106,7 +106,7 @@ public class StorageProxy implements StorageProxyMBean
                 String table = rm.getTable();
                 AbstractReplicationStrategy rs = Table.open(table).getReplicationStrategy();
 
-                List<InetAddress> naturalEndpoints = ss.getNaturalEndpoints(table, rm.key());
+                Set<InetAddress> naturalEndpoints = ss.getNaturalEndpoints(table, rm.key());
                 Collection<InetAddress> writeEndpoints = ss.getTokenMetadata().getWriteEndpoints(StorageService.getPartitioner().getToken(rm.key()), table, naturalEndpoints);
                 Multimap<InetAddress, InetAddress> hintedEndpoints = rs.getHintedEndpoints(writeEndpoints);
                 
@@ -319,8 +319,8 @@ public class StorageProxy implements StorageProxyMBean
             assert !command.isDigestQuery();
             logger.debug("Command/ConsistencyLevel is {}/{}", command, consistency_level);
 
-            List<InetAddress> endpoints = StorageService.instance.getLiveNaturalEndpoints(command.table, command.key);
-            DatabaseDescriptor.getEndpointSnitch().sortByProximity(FBUtilities.getLocalAddress(), endpoints);
+            Map<InetAddress, Integer> endpointMap = StorageService.instance.getLiveMap(command.table, command.key);
+            List<InetAddress> endpoints = DatabaseDescriptor.getEndpointSnitch().sortByStorageType(2, endpointMap);
 
             RowDigestResolver resolver = new RowDigestResolver(command.table, command.key);
             ReadCallback<Row> handler = getReadCallback(resolver, command, consistency_level, endpoints);
@@ -481,8 +481,9 @@ public class StorageProxy implements StorageProxyMBean
             List<AbstractBounds> ranges = getRestrictedRanges(command.range);
             for (AbstractBounds range : ranges)
             {
-                List<InetAddress> liveEndpoints = StorageService.instance.getLiveNaturalEndpoints(command.keyspace, range.right);
-                DatabaseDescriptor.getEndpointSnitch().sortByProximity(FBUtilities.getLocalAddress(), liveEndpoints);
+                Map<InetAddress, Integer> liveMap = StorageService.instance.getLiveMap(command.keyspace, range.right);
+                //DatabaseDescriptor.getEndpointSnitch().sortByProximity(FBUtilities.getLocalAddress(), liveEndpoints);
+                List<InetAddress> liveEndpoints = DatabaseDescriptor.getEndpointSnitch().sortByStorageType(2, liveMap);
 
                 if (consistency_level == ConsistencyLevel.ONE && !liveEndpoints.isEmpty() && liveEndpoints.get(0).equals(FBUtilities.getLocalAddress())) 
                 {
@@ -756,8 +757,9 @@ public class StorageProxy implements StorageProxyMBean
         List<Row> rows = new ArrayList<Row>(index_clause.count);
         for (AbstractBounds range : ranges)
         {
-            List<InetAddress> liveEndpoints = StorageService.instance.getLiveNaturalEndpoints(keyspace, range.right);
-            DatabaseDescriptor.getEndpointSnitch().sortByProximity(FBUtilities.getLocalAddress(), liveEndpoints);
+            Map<InetAddress, Integer> liveMap = StorageService.instance.getLiveMap(keyspace, range.right);
+            //DatabaseDescriptor.getEndpointSnitch().sortByProximity(FBUtilities.getLocalAddress(), liveEndpoints);
+            List<InetAddress> liveEndpoints = DatabaseDescriptor.getEndpointSnitch().sortByStorageType(2, liveMap);
 
             // collect replies and resolve according to consistency level
             RangeSliceResponseResolver resolver = new RangeSliceResponseResolver(keyspace, liveEndpoints);

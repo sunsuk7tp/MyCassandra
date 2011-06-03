@@ -171,7 +171,7 @@ public abstract class AbstractCassandraDaemon implements CassandraDaemon
         }
 
         // replay the log if necessary and check for compaction candidates
-        if(DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
+        if(DatabaseDescriptor.isBigtable())
         {
             CommitLog.recover();
             CompactionManager.instance.checkAllColumnFamilies();

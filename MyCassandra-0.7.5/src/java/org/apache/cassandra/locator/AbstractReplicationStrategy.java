@@ -64,14 +64,14 @@ public abstract class AbstractReplicationStrategy
         this.table = table;
     }
 
-    private final Map<Token, ArrayList<InetAddress>> cachedEndpoints = new NonBlockingHashMap<Token, ArrayList<InetAddress>>();
+    private final Map<Token, Map<InetAddress, Integer>> cachedEndpoints = new NonBlockingHashMap<Token, Map<InetAddress, Integer>>();
 
-    public ArrayList<InetAddress> getCachedEndpoints(Token t)
+    public Map<InetAddress, Integer> getCachedEndpoints(Token t)
     {
         return cachedEndpoints.get(t);
     }
 
-    public void cacheEndpoint(Token t, ArrayList<InetAddress> addr)
+    public void cacheEndpoint(Token t, Map<InetAddress, Integer> addr)
     {
         cachedEndpoints.put(t, addr);
     }
@@ -90,23 +90,24 @@ public abstract class AbstractReplicationStrategy
      * @return a copy of the natural endpoints for the given token
      * @throws IllegalStateException if the number of requested replicas is greater than the number of known endpoints
      */
-    public ArrayList<InetAddress> getNaturalEndpoints(Token searchToken) throws IllegalStateException
+    public Map<InetAddress, Integer> getNaturalEndpoints(Token searchToken) throws IllegalStateException
     {
         Token keyToken = TokenMetadata.firstToken(tokenMetadata.sortedTokens(), searchToken);
-        ArrayList<InetAddress> endpoints = getCachedEndpoints(keyToken);
+        Map<InetAddress, Integer> endpoints = getCachedEndpoints(keyToken);
         if (endpoints == null)
         {
             TokenMetadata tokenMetadataClone = tokenMetadata.cloneOnlyTokenMap();
             keyToken = TokenMetadata.firstToken(tokenMetadataClone.sortedTokens(), searchToken);
-            endpoints = new ArrayList<InetAddress>(calculateNaturalEndpoints(searchToken, tokenMetadataClone));
+            endpoints = new NonBlockingHashMap<InetAddress, Integer>();
+            endpoints.putAll(calculateNaturalEndpoints(searchToken, tokenMetadataClone));
             cacheEndpoint(keyToken, endpoints);
             // calculateNaturalEndpoints should have checked this already, this is a safety
             assert getReplicationFactor() <= endpoints.size() : String.format("endpoints %s generated for RF of %s",
-                                                                              Arrays.toString(endpoints.toArray()),
+                                                                              Arrays.toString(endpoints.keySet().toArray()),
                                                                               getReplicationFactor());
         }
 
-        return new ArrayList<InetAddress>(endpoints);
+        return endpoints;
     }
 
     /**
@@ -118,7 +119,7 @@ public abstract class AbstractReplicationStrategy
      * @return a copy of the natural endpoints for the given token
      * @throws IllegalStateException if the number of requested replicas is greater than the number of known endpoints
      */
-    public abstract List<InetAddress> calculateNaturalEndpoints(Token searchToken, TokenMetadata tokenMetadata) throws IllegalStateException;
+    public abstract Map<InetAddress, Integer> calculateNaturalEndpoints(Token searchToken, TokenMetadata tokenMetadata) throws IllegalStateException;
 
     public IWriteResponseHandler getWriteResponseHandler(Collection<InetAddress> writeEndpoints,
                                                          Multimap<InetAddress, InetAddress> hintedEndpoints,
@@ -182,7 +183,8 @@ public abstract class AbstractReplicationStrategy
 
             InetAddress destination = map.isEmpty()
                                     ? localAddress
-                                    : snitch.getSortedListByProximity(localAddress, map.keySet()).get(0);
+                                    //: snitch.getSortedListByProximity(localAddress, map.keySet()).get(0);
+                                    : snitch.sortByStorageType(2, tokenMetadata.getAddrToStypeMap((ArrayList<InetAddress>) map.keySet())).get(0);
             map.put(destination, ep);
         }
 
@@ -202,7 +204,7 @@ public abstract class AbstractReplicationStrategy
         for (Token token : metadata.sortedTokens())
         {
             Range range = metadata.getPrimaryRangeFor(token);
-            for (InetAddress ep : calculateNaturalEndpoints(token, metadata))
+            for (InetAddress ep : calculateNaturalEndpoints(token, metadata).keySet())
             {
                 map.put(ep, range);
             }
@@ -218,7 +220,7 @@ public abstract class AbstractReplicationStrategy
         for (Token token : metadata.sortedTokens())
         {
             Range range = metadata.getPrimaryRangeFor(token);
-            for (InetAddress ep : calculateNaturalEndpoints(token, metadata))
+            for (InetAddress ep : calculateNaturalEndpoints(token, metadata).keySet())
             {
                 map.put(range, ep);
             }

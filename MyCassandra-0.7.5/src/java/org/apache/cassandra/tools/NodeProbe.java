@@ -433,7 +433,7 @@ public class NodeProbe
         }
     }
 
-    public List<InetAddress> getEndpoints(String keyspace, String key)
+    public Set<InetAddress> getEndpoints(String keyspace, String key)
     {
         return ssProxy.getNaturalEndpoints(keyspace, FBUtilities.hexToBytes(key));
     }

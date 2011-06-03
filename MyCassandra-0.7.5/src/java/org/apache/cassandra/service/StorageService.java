@@ -392,7 +392,7 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
                 {
                     mutationStage.shutdown();
                     mutationStage.awaitTermination(1, TimeUnit.SECONDS);
-                    if(DatabaseDescriptor.dataBase == DatabaseDescriptor.BIGTABLE)
+                    if(DatabaseDescriptor.isBigtable())
                         CommitLog.instance.shutdownBlocking();
                 }
             }
@@ -549,7 +549,7 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
 
         /* All the ranges for the tokens */
         Map<Range, List<String>> map = new HashMap<Range, List<String>>();
-        for (Map.Entry<Range,List<InetAddress>> entry : getRangeToAddressMap(keyspace).entrySet())
+        for (Map.Entry<Range,Set<InetAddress>> entry : getRangeToAddressMap(keyspace).entrySet())
         {
             map.put(entry.getKey(), stringify(entry.getValue()));
         }
@@ -572,7 +572,7 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
         return map;
     }
 
-    public Map<Range, List<InetAddress>> getRangeToAddressMap(String keyspace)
+    public Map<Range, Set<InetAddress>> getRangeToAddressMap(String keyspace)
     {
         List<Range> ranges = getAllRanges(tokenMetadata_.sortedTokens());
         return constructRangeToEndpointMap(keyspace, ranges);
@@ -595,12 +595,12 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
      * @param ranges
      * @return mapping of ranges to the replicas responsible for them.
     */
-    private Map<Range, List<InetAddress>> constructRangeToEndpointMap(String keyspace, List<Range> ranges)
+    private Map<Range, Set<InetAddress>> constructRangeToEndpointMap(String keyspace, List<Range> ranges)
     {
-        Map<Range, List<InetAddress>> rangeToEndpointMap = new HashMap<Range, List<InetAddress>>();
+        Map<Range, Set<InetAddress>> rangeToEndpointMap = new HashMap<Range, Set<InetAddress>>();
         for (Range range : ranges)
         {
-            rangeToEndpointMap.put(range, Table.open(keyspace).getReplicationStrategy().getNaturalEndpoints(range.right));
+            rangeToEndpointMap.put(range, Table.open(keyspace).getReplicationStrategy().getNaturalEndpoints(range.right).keySet());
         }
         return rangeToEndpointMap;
     }
@@ -640,17 +640,18 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
                 String apStateValue = value.value;
                 String[] pieces = apStateValue.split(VersionedValue.DELIMITER_STR, -1);
                 assert (pieces.length > 0);
+                int apStorageType = value.getStorageType();
 
                 String moveName = pieces[0];
 
                 if (moveName.equals(VersionedValue.STATUS_BOOTSTRAPPING))
-                    handleStateBootstrap(endpoint, pieces);
+                    handleStateBootstrap(endpoint, pieces, apStorageType);
                 else if (moveName.equals(VersionedValue.STATUS_NORMAL))
-                    handleStateNormal(endpoint, pieces);
+                    handleStateNormal(endpoint, pieces, apStorageType);
                 else if (moveName.equals(VersionedValue.STATUS_LEAVING))
-                    handleStateLeaving(endpoint, pieces);
+                    handleStateLeaving(endpoint, pieces, apStorageType);
                 else if (moveName.equals(VersionedValue.STATUS_LEFT))
-                    handleStateLeft(endpoint, pieces);
+                    handleStateLeft(endpoint, pieces, apStorageType);
         }
     }
 
@@ -679,7 +680,7 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
      * @param endpoint bootstrapping node
      * @param pieces STATE_BOOTSTRAPPING,bootstrap token as string
      */
-    private void handleStateBootstrap(InetAddress endpoint, String[] pieces)
+    private void handleStateBootstrap(InetAddress endpoint, String[] pieces, int apStorageType)
     {
         assert pieces.length == 2;
         Token token = getPartitioner().getTokenFactory().fromString(pieces[1]);
@@ -702,7 +703,7 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
             tokenMetadata_.removeEndpoint(endpoint);
         }
 
-        tokenMetadata_.addBootstrapToken(token, endpoint);
+        tokenMetadata_.addBootstrapToken(token, endpoint, apStorageType);
         calculatePendingRanges();
     }
 
@@ -713,7 +714,7 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
      * @param endpoint node
      * @param pieces STATE_NORMAL,token[,other_state,token]
      */
-    private void handleStateNormal(InetAddress endpoint, String[] pieces)
+    private void handleStateNormal(InetAddress endpoint, String[] pieces, int apStorageType)
     {
         assert pieces.length >= 2;
         Token token = getPartitioner().getTokenFactory().fromString(pieces[1]);
@@ -729,7 +730,7 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
         if (currentOwner == null)
         {
             logger_.debug("New node " + endpoint + " at token " + token);
-            tokenMetadata_.updateNormalToken(token, endpoint);
+            tokenMetadata_.updateNormalToken(token, endpoint, apStorageType);
             if (!isClientMode)
                 SystemTable.updateToken(endpoint, token);
         }
@@ -768,7 +769,7 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
      * @param endpoint node
      * @param pieces STATE_LEAVING,token
      */
-    private void handleStateLeaving(InetAddress endpoint, String[] pieces)
+    private void handleStateLeaving(InetAddress endpoint, String[] pieces, int apStorageType)
     {
         assert pieces.length == 2;
         String moveValue = pieces[1];
@@ -783,12 +784,12 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
         if (!tokenMetadata_.isMember(endpoint))
         {
             logger_.info("Node " + endpoint + " state jump to leaving");
-            tokenMetadata_.updateNormalToken(token, endpoint);
+            tokenMetadata_.updateNormalToken(token, endpoint, apStorageType);
         }
         else if (!tokenMetadata_.getToken(endpoint).equals(token))
         {
             logger_.warn("Node " + endpoint + " 'leaving' token mismatch. Long network partition?");
-            tokenMetadata_.updateNormalToken(token, endpoint);
+            tokenMetadata_.updateNormalToken(token, endpoint, apStorageType);
         }
 
         // at this point the endpoint is certainly a member with this token, so let's proceed
@@ -804,7 +805,7 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
      * endpoint is the leaving node.
      * @param pieces STATE_LEFT,token
      */
-    private void handleStateLeft(InetAddress endpoint, String[] pieces)
+    private void handleStateLeft(InetAddress endpoint, String[] pieces, int apStorageType)
     {
         assert pieces.length == 2;
         Token token = getPartitioner().getTokenFactory().fromString(pieces[1]);
@@ -925,8 +926,8 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
         // all leaving nodes are gone.
         for (Range range : affectedRanges)
         {
-            Collection<InetAddress> currentEndpoints = strategy.calculateNaturalEndpoints(range.right, tm);
-            Collection<InetAddress> newEndpoints = strategy.calculateNaturalEndpoints(range.right, allLeftMetadata);
+            Collection<InetAddress> currentEndpoints = strategy.calculateNaturalEndpoints(range.right, tm).keySet();
+            Collection<InetAddress> newEndpoints = strategy.calculateNaturalEndpoints(range.right, allLeftMetadata).keySet();
             newEndpoints.removeAll(currentEndpoints);
             pendingRanges.putAll(range, newEndpoints);
         }
@@ -970,8 +971,11 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
         for (Range range : ranges)
         {
             Collection<InetAddress> possibleRanges = rangeAddresses.get(range);
+            Map<InetAddress, Integer> endpointMap = new HashMap<InetAddress, Integer>(possibleRanges.size());
+            for(InetAddress endpoint : possibleRanges)
+                endpointMap.put(endpoint, tokenMetadata_.getStorageType(endpoint));
             IEndpointSnitch snitch = DatabaseDescriptor.getEndpointSnitch();
-            List<InetAddress> sources = snitch.getSortedListByProximity(myAddress, possibleRanges);
+            List<InetAddress> sources = snitch.sortByStorageType(2, endpointMap);
 
             assert (!sources.contains(myAddress));
 
@@ -1085,7 +1089,7 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
 
         // Find (for each range) all nodes that store replicas for these ranges as well
         for (Range range : ranges)
-            currentReplicaEndpoints.put(range, Table.open(table).getReplicationStrategy().calculateNaturalEndpoints(range.right, tokenMetadata_));
+            currentReplicaEndpoints.put(range, (ArrayList<InetAddress>)Table.open(table).getReplicationStrategy().calculateNaturalEndpoints(range.right, tokenMetadata_).keySet());
 
         TokenMetadata temp = tokenMetadata_.cloneAfterAllLeft();
 
@@ -1103,7 +1107,7 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
         // range.
         for (Range range : ranges)
         {
-            Collection<InetAddress> newReplicaEndpoints = Table.open(table).getReplicationStrategy().calculateNaturalEndpoints(range.right, temp);
+            Set<InetAddress> newReplicaEndpoints = Table.open(table).getReplicationStrategy().calculateNaturalEndpoints(range.right, temp).keySet();
             newReplicaEndpoints.removeAll(currentReplicaEndpoints.get(range));
             if (logger_.isDebugEnabled())
                 if (newReplicaEndpoints.isEmpty())
@@ -1476,14 +1480,19 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
      * @param key - key for which we need to find the endpoint return value -
      * the endpoint responsible for this key
      */
-    public List<InetAddress> getNaturalEndpoints(String table, ByteBuffer key)
+    public Set<InetAddress> getNaturalEndpoints(String table, ByteBuffer key)
     {
         return getNaturalEndpoints(table, partitioner.getToken(key));
     }
 
-    public List<InetAddress> getNaturalEndpoints(String table, byte[] key)
+    public Set<InetAddress> getNaturalEndpoints(String table, byte[] key)
     {
         return getNaturalEndpoints(table, ByteBuffer.wrap(key));
+    }
+
+    public Map<InetAddress, Integer> getNaturalMap(String table, ByteBuffer key)
+    {
+        return getNaturalMap(table, partitioner.getToken(key));
     }
 
     /**
@@ -1493,7 +1502,12 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
      * @param token - token for which we need to find the endpoint return value -
      * the endpoint responsible for this token
      */
-    public List<InetAddress> getNaturalEndpoints(String table, Token token)
+    public Set<InetAddress> getNaturalEndpoints(String table, Token token)
+    {
+        return Table.open(table).getReplicationStrategy().getNaturalEndpoints(token).keySet();
+    }
+
+    public Map<InetAddress, Integer> getNaturalMap(String table, Token token)
     {
         return Table.open(table).getReplicationStrategy().getNaturalEndpoints(token);
     }
@@ -1513,12 +1527,31 @@ public class StorageService implements IEndpointStateChangeSubscriber, StorageSe
     public List<InetAddress> getLiveNaturalEndpoints(String table, Token token)
     {
         List<InetAddress> liveEps = new ArrayList<InetAddress>();
-        List<InetAddress> endpoints = Table.open(table).getReplicationStrategy().getNaturalEndpoints(token);
+        Set<InetAddress> endpoints = Table.open(table).getReplicationStrategy().getNaturalEndpoints(token).keySet();
 
         for (InetAddress endpoint : endpoints)
         {
             if (FailureDetector.instance.isAlive(endpoint))
                 liveEps.add(endpoint);
+        }
+
+        return liveEps;
+    }
+
+    public Map<InetAddress, Integer> getLiveMap(String table, ByteBuffer key)
+    {
+        return getLiveMap(table, partitioner.getToken(key));
+    }
+
+    public Map<InetAddress, Integer> getLiveMap(String table, Token token)
+    {
+        Map<InetAddress, Integer> liveEps = new HashMap<InetAddress, Integer>();
+        Map<InetAddress, Integer> map = Table.open(table).getReplicationStrategy().getNaturalEndpoints(token);
+
+        for (InetAddress endpoint : map.keySet())
+        {
+            if (FailureDetector.instance.isAlive(endpoint))
+                liveEps.put(endpoint, map.get(endpoint));
         }
 
         return liveEps;

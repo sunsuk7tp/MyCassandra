@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import org.apache.cassandra.dht.Token;
 
@@ -40,11 +41,11 @@ public class SimpleStrategy extends AbstractReplicationStrategy
         super(table, tokenMetadata, snitch, configOptions);
     }
 
-    public List<InetAddress> calculateNaturalEndpoints(Token token, TokenMetadata metadata)
+    public Map<InetAddress, Integer> calculateNaturalEndpoints(Token token, TokenMetadata metadata)
     {
         int replicas = getReplicationFactor();
         ArrayList<Token> tokens = metadata.sortedTokens();
-        List<InetAddress> endpoints = new ArrayList<InetAddress>(replicas);
+        Map<InetAddress, Integer> endpoints = new HashMap<InetAddress, Integer>(replicas);
 
         if (tokens.isEmpty())
             return endpoints;
@@ -53,7 +54,8 @@ public class SimpleStrategy extends AbstractReplicationStrategy
         Iterator<Token> iter = TokenMetadata.ringIterator(tokens, token, false);
         while (endpoints.size() < replicas && iter.hasNext())
         {
-            endpoints.add(metadata.getEndpoint(iter.next()));
+            InetAddress addr = metadata.getEndpoint(iter.next());
+            endpoints.put(addr, metadata.getStorageType(addr));
         }
 
         if (endpoints.size() < replicas)
