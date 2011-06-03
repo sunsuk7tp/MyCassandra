@@ -153,9 +153,9 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     private volatile ScheduledFuture<?> saveRowCacheTask;
     private volatile ScheduledFuture<?> saveKeyCacheTask;
     
-    private int maxKeySize = EngineMeta.defaultRowKeySize;
-    private int maxCFSize = EngineMeta.defaultColumnFamilySize;
-    private String storageSize = EngineMeta.defaultStorageSize;
+    private int rowkeySize = EngineMeta.defaultRowKeySize;
+    private int columnfamilySize = EngineMeta.defaultColumnFamilySize;
+    private String columnfamilyType = EngineMeta.defaultStorageSize;
     private String storageEngine = EngineMeta.defaultStorageEngine;
 
     public void reload()
@@ -226,9 +226,9 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         this.rowCacheSaveInSeconds = new DefaultInteger(metadata.getRowCacheSavePeriodInSeconds());
         this.keyCacheSaveInSeconds = new DefaultInteger(metadata.getKeyCacheSavePeriodInSeconds());
         this.partitioner = partitioner;
-        this.maxKeySize = metadata.getMaxKeySize();
-        this.maxCFSize = metadata.getMaxCFSize();
-        this.storageSize = metadata.getStorageSize();
+        this.rowkeySize = metadata.getRowkeySize();
+        this.columnfamilySize = metadata.getColumnfamilySize();
+        this.columnfamilyType = metadata.getColumnfamilyType();
         this.storageEngine = metadata.getStorageEngine();
         fileIndexGenerator.set(generation);
         memtable = new Memtable(this);
@@ -287,7 +287,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         }
 
         boolean isLong = DatabaseDescriptor.isMySQL() && columnFamily.equals("Migrations") ? true : false;
-        DBInstance dbi = EngineMeta.getDBInstance(DatabaseDescriptor.getStorageType(), new String(table.name), columnFamilyName, maxKeySize, maxCFSize, storageSize, storageEngine, isLong);
+        DBInstance dbi = EngineMeta.getDBInstance(DatabaseDescriptor.getStorageType(), new String(table.name), columnFamilyName, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, isLong);
         if (!DatabaseDescriptor.isBigtable())
         {
             setDBInstance(dbi);

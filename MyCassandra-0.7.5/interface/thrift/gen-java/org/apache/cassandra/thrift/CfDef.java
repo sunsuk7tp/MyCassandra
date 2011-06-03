@@ -71,9 +71,9 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
   private static final TField MEMTABLE_FLUSH_AFTER_MINS_FIELD_DESC = new TField("memtable_flush_after_mins", TType.I32, (short)21);
   private static final TField MEMTABLE_THROUGHPUT_IN_MB_FIELD_DESC = new TField("memtable_throughput_in_mb", TType.I32, (short)22);
   private static final TField MEMTABLE_OPERATIONS_IN_MILLIONS_FIELD_DESC = new TField("memtable_operations_in_millions", TType.DOUBLE, (short)23);
-  private static final TField MAX_KEY_SIZE = new TField("max_key_size", TType.I32, (short)24);
-  private static final TField MAX_CF_SIZE = new TField("max_cf_size", TType.I32, (short)25);
-  private static final TField STORAGE_SIZE = new TField("storage_size", TType.STRING, (short)26);
+  private static final TField ROWKEY_SIZE = new TField("rowkey_size", TType.I32, (short)24);
+  private static final TField COLUMNFAMILY_SIZE = new TField("columnfamily_size", TType.I32, (short)25);
+  private static final TField COLUMNFAMILY_TYPE = new TField("columnfamily_type", TType.STRING, (short)26);
   private static final TField STORAGE_ENGINE = new TField("storage_engine", TType.STRING, (short)27);
 
 
@@ -97,9 +97,9 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
   public int memtable_flush_after_mins;
   public int memtable_throughput_in_mb;
   public double memtable_operations_in_millions;
-  public int max_key_size;
-  public int max_cf_size;
-  public String storage_size;
+  public int rowkey_size;
+  public int columnfamily_size;
+  public String columnfamily_type;
   public String storage_engine;
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
@@ -124,9 +124,9 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     MEMTABLE_FLUSH_AFTER_MINS((short)21, "memtable_flush_after_mins"),
     MEMTABLE_THROUGHPUT_IN_MB((short)22, "memtable_throughput_in_mb"),
     MEMTABLE_OPERATIONS_IN_MILLIONS((short)23, "memtable_operations_in_millions"),
-    MAX_KEY_SIZE((short)24, "max_key_size"),
-    MAX_CF_SIZE((short)25, "max_cf_size"),
-    STORAGE_SIZE((short)26, "storage_size"),
+    ROWKEY_SIZE((short)24, "rowkey_size"),
+    COLUMNFAMILY_SIZE((short)25, "columnfamily_size"),
+    COLUMNFAMILY_TYPE((short)26, "columnfamily_type"),
     STORAGE_ENGINE((short)27, "storage_engine");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
@@ -182,12 +182,12 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
           return MEMTABLE_THROUGHPUT_IN_MB;
         case 23: // MEMTABLE_OPERATIONS_IN_MILLIONS
           return MEMTABLE_OPERATIONS_IN_MILLIONS;
-        case 24: // MAX_KEY_SIZE
-          return MAX_KEY_SIZE;
-        case 25: // MAX_CF_SIZE
-          return MAX_CF_SIZE;
-        case 26: // STORAGE_SIZE
-          return STORAGE_SIZE;
+        case 24: // ROWKEY_SIZE
+          return ROWKEY_SIZE;
+        case 25: // COLUMNFAMILY_SIZE
+          return COLUMNFAMILY_SIZE;
+        case 26: // COLUMNFAMILY_TYPE
+          return COLUMNFAMILY_TYPE;
         case 27: // STORAGE_ENGINE
           return STORAGE_ENGINE;
         default:
@@ -242,9 +242,9 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
   private static final int __MEMTABLE_FLUSH_AFTER_MINS_ISSET_ID = 9;
   private static final int __MEMTABLE_THROUGHPUT_IN_MB_ISSET_ID = 10;
   private static final int __MEMTABLE_OPERATIONS_IN_MILLIONS_ISSET_ID = 11;
-  private static final int __MAX_KEY_SIZE_ID = 12;
-  private static final int __MAX_CF_SIZE_ID = 13;
-  private static final int __STORAGE_SIZE_ID = 14;
+  private static final int __ROWKEY_SIZE_ID = 12;
+  private static final int __COLUMNFAMILY_SIZE_ID = 13;
+  private static final int __COLUMNFAMILY_TYPE_ID = 14;
   private static final int __STORAGE_ENGINE_ID = 15;
   private BitSet __isset_bit_vector = new BitSet(16);
 
@@ -292,11 +292,11 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
         new FieldValueMetaData(TType.I32)));
     tmpMap.put(_Fields.MEMTABLE_OPERATIONS_IN_MILLIONS, new FieldMetaData("memtable_operations_in_millions", TFieldRequirementType.OPTIONAL, 
         new FieldValueMetaData(TType.DOUBLE)));
-    tmpMap.put(_Fields.MAX_KEY_SIZE, new FieldMetaData("max_key_size", TFieldRequirementType.OPTIONAL, 
+    tmpMap.put(_Fields.ROWKEY_SIZE, new FieldMetaData("rowkey_size", TFieldRequirementType.OPTIONAL, 
             new FieldValueMetaData(TType.I32)));
-    tmpMap.put(_Fields.MAX_CF_SIZE, new FieldMetaData("max_cf_size", TFieldRequirementType.OPTIONAL, 
+    tmpMap.put(_Fields.COLUMNFAMILY_SIZE, new FieldMetaData("columnfamily_size", TFieldRequirementType.OPTIONAL, 
             new FieldValueMetaData(TType.I32)));
-    tmpMap.put(_Fields.STORAGE_SIZE, new FieldMetaData("storage_size", TFieldRequirementType.OPTIONAL,
+    tmpMap.put(_Fields.COLUMNFAMILY_TYPE, new FieldMetaData("columnfamily_type", TFieldRequirementType.OPTIONAL,
             new FieldValueMetaData(TType.STRING)));
     tmpMap.put(_Fields.STORAGE_ENGINE, new FieldMetaData("storage_engine", TFieldRequirementType.OPTIONAL,
             new FieldValueMetaData(TType.STRING)));
@@ -372,9 +372,9 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     this.memtable_flush_after_mins = other.memtable_flush_after_mins;
     this.memtable_throughput_in_mb = other.memtable_throughput_in_mb;
     this.memtable_operations_in_millions = other.memtable_operations_in_millions;
-    this.max_key_size = other.max_key_size;
-    this.max_cf_size = other.max_cf_size;
-    this.storage_size = other.storage_size;
+    this.rowkey_size = other.rowkey_size;
+    this.columnfamily_size = other.columnfamily_size;
+    this.columnfamily_type = other.columnfamily_type;
     this.storage_engine = other.storage_engine;
   }
 
@@ -418,12 +418,12 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     this.memtable_throughput_in_mb = 0;
     setMemtable_operations_in_millionsIsSet(false);
     this.memtable_operations_in_millions = 0.0;
-    setMax_key_sizeIsSet(false);
-    this.max_key_size = 64;
-    setMax_cf_sizeIsSet(false);
-    this.max_cf_size = 30 * 1024;
-    setStorage_sizeIsSet(false);
-    this.storage_size = "VARBINARY";
+    setRowkey_sizeIsSet(false);
+    this.rowkey_size = 64;
+    setColumnfamily_sizeIsSet(false);
+    this.columnfamily_size = 30 * 1024;
+    setColumnfamily_typeIsSet(false);
+    this.columnfamily_type = "VARBINARY";
     setStorage_engineIsSet(false);
     this.storage_engine = "INNODB";
   }
@@ -911,70 +911,70 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     __isset_bit_vector.set(__MEMTABLE_OPERATIONS_IN_MILLIONS_ISSET_ID, value);
   }
 
-  public int getMax_key_size() {
-    return this.max_key_size;
+  public int getRowkey_size() {
+    return this.rowkey_size;
   }
 
-  public CfDef setMax_key_size(int max_key_size) {
-    this.max_key_size = max_key_size;
-    setMax_key_sizeIsSet(true);
+  public CfDef setRowkey_size(int rowkey_size) {
+    this.rowkey_size = rowkey_size;
+    setRowkey_sizeIsSet(true);
     return this;
   }
 
-  public void unsetMax_key_size() {
-    __isset_bit_vector.clear(__MAX_KEY_SIZE_ID);
+  public void unsetRowkey_size() {
+    __isset_bit_vector.clear(__ROWKEY_SIZE_ID);
   }
 
-  public boolean isSetMax_key_size() {
-    return __isset_bit_vector.get(__MAX_KEY_SIZE_ID);
+  public boolean isSetRowkey_size() {
+    return __isset_bit_vector.get(__ROWKEY_SIZE_ID);
   }
 
-  public void setMax_key_sizeIsSet(boolean value) {
-    __isset_bit_vector.set(__MAX_KEY_SIZE_ID, value);
+  public void setRowkey_sizeIsSet(boolean value) {
+    __isset_bit_vector.set(__ROWKEY_SIZE_ID, value);
   }
 
-  public int getMax_cf_size() {
-    return this.max_cf_size;
+  public int getColumnfamily_size() {
+    return this.columnfamily_size;
   }
 
-  public CfDef setMax_cf_size(int max_cf_size) {
-    this.max_cf_size = max_cf_size;
-    setMax_cf_sizeIsSet(true);
+  public CfDef setColumnfamily_size(int columnfamily_size) {
+    this.columnfamily_size = columnfamily_size;
+    setColumnfamily_sizeIsSet(true);
     return this;
   }
 
-  public void unsetMax_cf_size() {
-    __isset_bit_vector.clear(__MAX_CF_SIZE_ID);
+  public void unsetColumnfamily_size() {
+    __isset_bit_vector.clear(__COLUMNFAMILY_SIZE_ID);
   }
 
-  public boolean isSetMax_cf_size() {
-    return __isset_bit_vector.get(__MAX_CF_SIZE_ID);
+  public boolean isSetColumnfamily_size() {
+    return __isset_bit_vector.get(__COLUMNFAMILY_SIZE_ID);
   }
 
-  public void setMax_cf_sizeIsSet(boolean value) {
-    __isset_bit_vector.set(__MAX_CF_SIZE_ID, value);
+  public void setColumnfamily_sizeIsSet(boolean value) {
+    __isset_bit_vector.set(__COLUMNFAMILY_SIZE_ID, value);
   }
 
-  public String getStorage_size() {
-    return this.storage_size;
+  public String getColumnfamily_type() {
+    return this.columnfamily_type;
   }
 
-  public CfDef setStorage_size(String storage_size) {
-    this.storage_size = storage_size;
-    setStorage_sizeIsSet(true);
+  public CfDef setColumnfamily_type(String columnfamily_type) {
+    this.columnfamily_type = columnfamily_type;
+    setColumnfamily_typeIsSet(true);
     return this;
   }
 
-  public void unsetStorage_size() {
-    __isset_bit_vector.clear(__STORAGE_SIZE_ID);
+  public void unsetColumnfamily_type() {
+    __isset_bit_vector.clear(__COLUMNFAMILY_TYPE_ID);
   }
 
-  public boolean isSetStorage_size() {
-    return __isset_bit_vector.get(__STORAGE_SIZE_ID);
+  public boolean isSetColumnfamily_type() {
+    return __isset_bit_vector.get(__COLUMNFAMILY_TYPE_ID);
   }
 
-  public void setStorage_sizeIsSet(boolean value) {
-    __isset_bit_vector.set(__STORAGE_SIZE_ID, value);
+  public void setColumnfamily_typeIsSet(boolean value) {
+    __isset_bit_vector.set(__COLUMNFAMILY_TYPE_ID, value);
   }
 
   public String getStorage_engine() {
@@ -1161,11 +1161,11 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
       }
       break;
 
-    case STORAGE_SIZE:
+    case COLUMNFAMILY_TYPE:
       if (value == null) {
-        unsetStorage_size();
+        unsetColumnfamily_type();
       } else {
-        setStorage_size((String)value);
+        setColumnfamily_type((String)value);
       }
       break;
 
@@ -1241,14 +1241,14 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     case MEMTABLE_OPERATIONS_IN_MILLIONS:
       return new Double(getMemtable_operations_in_millions());
 
-    case MAX_KEY_SIZE:
-      return new Integer(getMax_key_size());
+    case ROWKEY_SIZE:
+      return new Integer(getRowkey_size());
 
-    case MAX_CF_SIZE:
-      return new Integer(getMax_cf_size());
+    case COLUMNFAMILY_SIZE:
+      return new Integer(getColumnfamily_size());
 
-    case STORAGE_SIZE:
-      return new String(getStorage_size());
+    case COLUMNFAMILY_TYPE:
+      return new String(getColumnfamily_type());
 
     case STORAGE_ENGINE:
       return new String(getStorage_engine());
@@ -1304,12 +1304,12 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
       return isSetMemtable_throughput_in_mb();
     case MEMTABLE_OPERATIONS_IN_MILLIONS:
       return isSetMemtable_operations_in_millions();
-    case MAX_KEY_SIZE:
-      return isSetMax_key_size();
-    case MAX_CF_SIZE:
-      return isSetMax_cf_size();
-    case STORAGE_SIZE:
-      return isSetStorage_size();
+    case ROWKEY_SIZE:
+      return isSetRowkey_size();
+    case COLUMNFAMILY_SIZE:
+      return isSetColumnfamily_size();
+    case COLUMNFAMILY_TYPE:
+      return isSetColumnfamily_type();
     case STORAGE_ENGINE:
       return isSetStorage_engine();
     }
@@ -1509,30 +1509,30 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
         return false;
     }
 
-    boolean this_present_max_key_size = true && this.isSetMax_key_size();
-    boolean that_present_max_key_size = true && that.isSetMax_key_size();
-    if (this_present_max_key_size || that_present_max_key_size) {
-      if (!(this_present_max_key_size && that_present_max_key_size))
+    boolean this_present_rowkey_size = true && this.isSetRowkey_size();
+    boolean that_present_rowkey_size = true && that.isSetRowkey_size();
+    if (this_present_rowkey_size || that_present_rowkey_size) {
+      if (!(this_present_rowkey_size && that_present_rowkey_size))
         return false;
-      if (this.max_key_size != that.max_key_size)
-        return false;
-    }
-
-    boolean this_present_max_cf_size = true && this.isSetMax_cf_size();
-    boolean that_present_max_cf_size = true && that.isSetMax_cf_size();
-    if (this_present_max_cf_size || that_present_max_cf_size) {
-      if (!(this_present_max_cf_size && that_present_max_cf_size))
-        return false;
-      if (this.max_cf_size != that.max_cf_size)
+      if (this.rowkey_size != that.rowkey_size)
         return false;
     }
 
-    boolean this_present_storage_size = true && this.isSetStorage_size();
-    boolean that_present_storage_size = true && that.isSetStorage_size();
-    if (this_present_storage_size || that_present_storage_size) {
-      if (!(this_present_storage_size && that_present_storage_size))
+    boolean this_present_columnfamily_size = true && this.isSetColumnfamily_size();
+    boolean that_present_columnfamily_size = true && that.isSetColumnfamily_size();
+    if (this_present_columnfamily_size || that_present_columnfamily_size) {
+      if (!(this_present_columnfamily_size && that_present_columnfamily_size))
         return false;
-      if (this.storage_size != that.storage_size)
+      if (this.columnfamily_size != that.columnfamily_size)
+        return false;
+    }
+
+    boolean this_present_columnfamily_type = true && this.isSetColumnfamily_type();
+    boolean that_present_columnfamily_type = true && that.isSetColumnfamily_type();
+    if (this_present_columnfamily_type || that_present_columnfamily_type) {
+      if (!(this_present_columnfamily_type && that_present_columnfamily_type))
+        return false;
+      if (this.columnfamily_type != that.columnfamily_type)
         return false;
     }
 
@@ -1651,20 +1651,20 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
     if (present_memtable_operations_in_millions)
       builder.append(memtable_operations_in_millions);
 
-    boolean present_max_key_size = true && (isSetMax_key_size());
-    builder.append(present_max_key_size);
-    if (present_max_key_size)
-      builder.append(max_key_size);
+    boolean present_rowkey_size = true && (isSetRowkey_size());
+    builder.append(present_rowkey_size);
+    if (present_rowkey_size)
+      builder.append(rowkey_size);
 
-    boolean present_max_cf_size = true && (isSetMax_cf_size());
-    builder.append(present_max_cf_size);
-    if (present_max_cf_size)
-      builder.append(max_cf_size);
+    boolean present_columnfamily_size = true && (isSetColumnfamily_size());
+    builder.append(present_columnfamily_size);
+    if (present_columnfamily_size)
+      builder.append(columnfamily_size);
 
-    boolean present_storage_size = true && (isSetStorage_size());
-    builder.append(present_storage_size);
-    if (present_storage_size)
-      builder.append(storage_size);
+    boolean present_columnfamily_type = true && (isSetColumnfamily_type());
+    builder.append(present_columnfamily_type);
+    if (present_columnfamily_type)
+      builder.append(columnfamily_type);
 
     boolean present_storage_engine = true && (isSetStorage_engine());
     builder.append(present_storage_engine);
@@ -1882,32 +1882,32 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
         return lastComparison;
       }
     }
-    lastComparison = Boolean.valueOf(isSetMax_key_size()).compareTo(typedOther.isSetMax_key_size());
+    lastComparison = Boolean.valueOf(isSetRowkey_size()).compareTo(typedOther.isSetRowkey_size());
     if (lastComparison != 0) {
         return lastComparison;
     }
-    if (isSetMax_key_size()) {
-      lastComparison = TBaseHelper.compareTo(this.max_key_size, typedOther.max_key_size);
+    if (isSetRowkey_size()) {
+      lastComparison = TBaseHelper.compareTo(this.rowkey_size, typedOther.rowkey_size);
       if (lastComparison != 0) {
         return lastComparison;
       }
     }
-    lastComparison = Boolean.valueOf(isSetMax_cf_size()).compareTo(typedOther.isSetMax_cf_size());
+    lastComparison = Boolean.valueOf(isSetColumnfamily_size()).compareTo(typedOther.isSetColumnfamily_size());
     if (lastComparison != 0) {
         return lastComparison;
     }
-    if (isSetMax_cf_size()) {
-      lastComparison = TBaseHelper.compareTo(this.max_cf_size, typedOther.max_cf_size);
+    if (isSetColumnfamily_size()) {
+      lastComparison = TBaseHelper.compareTo(this.columnfamily_size, typedOther.columnfamily_size);
       if (lastComparison != 0) {
         return lastComparison;
       }
     }
-    lastComparison = Boolean.valueOf(isSetStorage_size()).compareTo(typedOther.isSetStorage_size());
+    lastComparison = Boolean.valueOf(isSetColumnfamily_type()).compareTo(typedOther.isSetColumnfamily_type());
     if (lastComparison != 0) {
         return lastComparison;
     }
-    if (isSetStorage_size()) {
-      lastComparison = TBaseHelper.compareTo(this.storage_size, typedOther.storage_size);
+    if (isSetColumnfamily_type()) {
+      lastComparison = TBaseHelper.compareTo(this.columnfamily_type, typedOther.columnfamily_type);
       if (lastComparison != 0) {
         return lastComparison;
       }
@@ -2102,26 +2102,26 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
-        case 24: // MAX_KEY_SIZE
+        case 24: // ROWKEY_SIZE
           if (field.type == TType.I32) {
-            this.max_key_size = iprot.readI32();
-            setMax_key_sizeIsSet(true);
+            this.rowkey_size = iprot.readI32();
+            setRowkey_sizeIsSet(true);
           } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
-        case 25: // MAX_CF_SIZE
+        case 25: // COLUMNFAMILY_SIZE
             if (field.type == TType.I32) {
-              this.max_cf_size = iprot.readI32();
-              setMax_cf_sizeIsSet(true);
+              this.columnfamily_size = iprot.readI32();
+              setColumnfamily_sizeIsSet(true);
             } else {
               TProtocolUtil.skip(iprot, field.type);
             }
           break;
-        case 26: // STORAGE_SIZE
+        case 26: // COLUMNFAMILY_TYPE
             if (field.type == TType.STRING) {
-              this.storage_size = iprot.readString();
-              setStorage_sizeIsSet(true);
+              this.columnfamily_type = iprot.readString();
+              setColumnfamily_typeIsSet(true);
             } else {
               TProtocolUtil.skip(iprot, field.type);
             }
@@ -2268,19 +2268,19 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
       oprot.writeDouble(this.memtable_operations_in_millions);
       oprot.writeFieldEnd();
     }
-    if (isSetMax_key_size()) {
-        oprot.writeFieldBegin(MAX_KEY_SIZE);
-        oprot.writeI32(this.max_key_size);
+    if (isSetRowkey_size()) {
+        oprot.writeFieldBegin(ROWKEY_SIZE);
+        oprot.writeI32(this.rowkey_size);
         oprot.writeFieldEnd();
     }
-    if (isSetMax_cf_size()) {
-        oprot.writeFieldBegin(MAX_CF_SIZE);
-        oprot.writeI32(this.max_cf_size);
+    if (isSetColumnfamily_size()) {
+        oprot.writeFieldBegin(COLUMNFAMILY_SIZE);
+        oprot.writeI32(this.columnfamily_size);
         oprot.writeFieldEnd();
     }
-    if (isSetStorage_size()) {
-        oprot.writeFieldBegin(STORAGE_SIZE);
-        oprot.writeString(this.storage_size);
+    if (isSetColumnfamily_type()) {
+        oprot.writeFieldBegin(COLUMNFAMILY_TYPE);
+        oprot.writeString(this.columnfamily_type);
         oprot.writeFieldEnd();
     }
     if (isSetStorage_engine()) {
@@ -2444,22 +2444,22 @@ public class CfDef implements TBase<CfDef, CfDef._Fields>, java.io.Serializable,
       sb.append(this.memtable_operations_in_millions);
       first = false;
     }
-    if (isSetMax_key_size()) {
+    if (isSetRowkey_size()) {
         if (!first) sb.append(", ");
-        sb.append("max_key_size:");
-        sb.append(this.max_key_size);
+        sb.append("rowkey_size:");
+        sb.append(this.rowkey_size);
         first = false;
     }
-    if (isSetMax_cf_size()) {
+    if (isSetColumnfamily_size()) {
         if (!first) sb.append(", ");
-        sb.append("max_cf_size:");
-        sb.append(this.max_cf_size);
+        sb.append("columnfamily_size:");
+        sb.append(this.columnfamily_size);
         first = false;
     }
-    if (isSetStorage_size()) {
+    if (isSetColumnfamily_type()) {
         if (!first) sb.append(", ");
-        sb.append("storage_size:");
-        sb.append(this.storage_size);
+        sb.append("columnfamily_type:");
+        sb.append(this.columnfamily_type);
         first = false;
     }
     if (isSetStorage_engine()) {

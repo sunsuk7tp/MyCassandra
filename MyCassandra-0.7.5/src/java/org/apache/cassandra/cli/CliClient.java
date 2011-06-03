@@ -915,14 +915,14 @@ public class CliClient extends CliUserHelp
             case MAX_COMPACTION_THRESHOLD:
                 cfDef.setMax_compaction_threshold(Integer.parseInt(mValue));
                 break;
-            case MAX_KEY_SIZE:
-                cfDef.setMax_key_size(Integer.parseInt(mValue));
+            case ROWKEY_SIZE:
+                cfDef.setRowkey_size(Integer.parseInt(mValue));
                 break;
-            case MAX_CF_SIZE:
-                cfDef.setMax_cf_size(Integer.parseInt(mValue));
+            case COLUMNFAMILY_SIZE:
+                cfDef.setColumnfamily_size(Integer.parseInt(mValue));
                 break;
-            case STORAGE_SIZE:
-                cfDef.setStorage_size(CliUtils.unescapeSQLString(mValue));
+            case COLUMNFAMILY_TYPE:
+                cfDef.setColumnfamily_type(CliUtils.unescapeSQLString(mValue));
                 break;
             case STORAGE_ENGINE:
                 cfDef.setStorage_engine(CliUtils.unescapeSQLString(mValue));

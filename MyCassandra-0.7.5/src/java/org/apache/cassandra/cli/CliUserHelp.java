@@ -49,9 +49,9 @@ public class CliUserHelp {
         DEFAULT_VALIDATION_CLASS,
         MIN_COMPACTION_THRESHOLD,
         MAX_COMPACTION_THRESHOLD,
-        MAX_KEY_SIZE,
-        MAX_CF_SIZE,
-        STORAGE_SIZE,
+        ROWKEY_SIZE,
+        COLUMNFAMILY_SIZE,
+        COLUMNFAMILY_TYPE,
         STORAGE_ENGINE
     }
 
@@ -72,9 +72,9 @@ public class CliUserHelp {
         put(ColumnFamilyArgument.GC_GRACE, "Discard tombstones after this many seconds");
         put(ColumnFamilyArgument.MIN_COMPACTION_THRESHOLD, "Avoid minor compactions of less than this number of sstable files");
         put(ColumnFamilyArgument.MAX_COMPACTION_THRESHOLD, "Compact no more than this number of sstable files at once");
-        put(ColumnFamilyArgument.MAX_KEY_SIZE, "Max Key Size (16-) With MyCassandra-MySQL");
-        put(ColumnFamilyArgument.MAX_CF_SIZE, "Max CF Size (1024-) With MyCassandra-MySQL");
-        put(ColumnFamilyArgument.STORAGE_SIZE, "CF Size (MySQL data type) With MyCassandra-MySQL");
+        put(ColumnFamilyArgument.ROWKEY_SIZE, "Max Key Size (16-) With MyCassandra-MySQL");
+        put(ColumnFamilyArgument.COLUMNFAMILY_SIZE, "Max CF Size (1024-) With MyCassandra-MySQL");
+        put(ColumnFamilyArgument.COLUMNFAMILY_TYPE, "CF type (MySQL data type) With MyCassandra-MySQL");
         put(ColumnFamilyArgument.STORAGE_ENGINE, "Storage Engine With MyCassandra-MySQL");
     }};
     
@@ -194,7 +194,7 @@ public class CliUserHelp {
                 state.out.println("create column family Bar;");
                 state.out.println("create column family Bar with <att1>=<value1>;");
                 state.out.println("create column family Bar with <att1>=<value1> and <att2>=<value2>...;\n");
-                state.out.println("create column family Bar with max_key_size = 32 and max_cf_size = 2048 and storage_size = 'VARBINARY' and storage_engine = 'MyISAM'");
+                state.out.println("create column family Bar with rowkey_size = 32 and columnfamily_size = 2048 and columnfamily_type = 'VARBINARY' and storage_engine = 'MyISAM'");
                 state.out.println("Create a new column family with the specified values for the given set of");
                 state.out.println("attributes. Note that you must be using a keyspace.\n");
                 state.out.println("valid attributes are:");

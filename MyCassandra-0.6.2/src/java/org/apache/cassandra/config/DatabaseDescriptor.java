@@ -742,7 +742,7 @@ public class DatabaseDescriptor
                     {
                     	columnFamilySize = Integer.parseInt(value);
                     }
-                    if ((value = XMLUtils.getAttributeValue(columnFamily, "StorageType")) != null)
+                    if ((value = XMLUtils.getAttributeValue(columnFamily, "ColumnFamilyType")) != null)
                     {
                     	storageSize = value;
                     }

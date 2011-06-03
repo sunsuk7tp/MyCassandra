@@ -480,14 +480,14 @@ public class ThriftValidation
                     throw new InvalidRequestException("Secondary indexes are not supported on supercolumns");
             }
             
-            int maxKeySize = cf_def.max_key_size;
-            int maxCFSize = cf_def.max_cf_size;
-            String storageSize = cf_def.storage_size;
+            int rowkeySize = cf_def.rowkey_size;
+            int columnfamilySize = cf_def.columnfamily_size;
+            String columnfamilyType = cf_def.columnfamily_type;
             String storageEngine = cf_def.storage_engine;
-            if (maxKeySize <= 0 || maxKeySize > 65535)
-                throw new InvalidRequestException("Too small or large max_key_size: " + maxKeySize);
-            if (maxCFSize <= 0 || maxCFSize > 65535)
-                throw new InvalidRequestException("Too small or large max_cf_size: " + maxCFSize);
+            if (rowkeySize <= 0 || rowkeySize > 65535)
+                throw new InvalidRequestException("Too small or large max_key_size: " + rowkeySize);
+            if (columnfamilySize <= 0 || columnfamilySize > 65535)
+                throw new InvalidRequestException("Too small or large max_cf_size: " + columnfamilySize);
             //TODO MyCassandra: validation for MySQL's data type
             //if (!storageSize.contains("BINARY") && !storageSize.contains("BLOB"))
             //    throw new InvalidRequestException("Invalid storage size: " + storageSize);

@@ -371,7 +371,7 @@ keyspaces:
         - name: data
           rowkey_size: 16
           columnfamily_size: 2048
-          storage_size: VARBINARY
+          columnfamily_type: VARBINARY
           storage_engine: InnoDB
           compare_with: BytesType
           keys_cached: 10000

@@ -59,9 +59,9 @@ public final class CFMetaData
     public final static int DEFAULT_MEMTABLE_LIFETIME_IN_MINS = 60 * 24;
     public final static int DEFAULT_MEMTABLE_THROUGHPUT_IN_MB = sizeMemtableThroughput();
     public final static double DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS = sizeMemtableOperations(DEFAULT_MEMTABLE_THROUGHPUT_IN_MB);
-    public final static int DEFAULT_MAX_KEY_SIZE = 64;
-    public final static int DEFAULT_MAX_CF_SIZE = 30 *1024;
-    public final static String DEFAULT_STORAGE_SIZE = "VARBINARY";
+    public final static int DEFAULT_ROWKEY_SIZE = 64;
+    public final static int DEFAULT_COLUMNFAMILY_SIZE = 30 *1024;
+    public final static String DEFAULT_COLUMNFAMILY_TYPE = "VARBINARY";
     public final static String DEFAULT_STORAGE_ENGINE = "INNODB";
 
     private static final int MIN_CF_ID = 1000;
@@ -161,9 +161,9 @@ public final class CFMetaData
     private int memtableFlushAfterMins;               // default 60 
     private int memtableThroughputInMb;               // default based on heap size
     private double memtableOperationsInMillions;      // default based on throughput
-    private int maxKeySize;                           // default 64
-    private int maxCFSize;                            // default 30 * 1024
-    private String storageSize;                       // default VARBINARY
+    private int rowkeySize;                           // default 64
+    private int columnfamilySize;                     // default 30 * 1024
+    private String columnfamilyType;                       // default VARBINARY
     private String storageEngine;                     // default INNODB
     // NOTE: if you find yourself adding members to this class, make sure you keep the convert methods in lockstep.
 
@@ -187,9 +187,9 @@ public final class CFMetaData
             int memtableFlushAfterMins,
             Integer memtableThroughputInMb,
             Double memtableOperationsInMillions,
-            int maxKeySize,
-            int maxCFSize,
-            String storageSize,
+            int rowkeySize,
+            int columnfamilySize,
+            String columnfamilyType,
             String storageEngine,
             Integer cfId,
             Map<ByteBuffer, ColumnDefinition> column_metadata)
@@ -216,15 +216,15 @@ public final class CFMetaData
             cfId,
             column_metadata
         );
-        this.maxKeySize = maxKeySize > 0
-                          ? maxKeySize
-                          : DEFAULT_MAX_KEY_SIZE;
-        this.maxCFSize = maxCFSize > 0
-                         ? maxCFSize
-                         : DEFAULT_MAX_CF_SIZE;
-        this.storageSize = storageSize != null
-                           ? storageSize
-                           : DEFAULT_STORAGE_SIZE;
+        this.rowkeySize = rowkeySize > 0
+                          ? rowkeySize
+                          : DEFAULT_ROWKEY_SIZE;
+        this.columnfamilySize = columnfamilySize > 0
+                         ? columnfamilySize
+                         : DEFAULT_COLUMNFAMILY_SIZE;
+        this.columnfamilyType = columnfamilyType != null
+                           ? columnfamilyType
+                           : DEFAULT_COLUMNFAMILY_TYPE;
         this.storageEngine = storageEngine != null
                              ? storageEngine
                              : DEFAULT_STORAGE_ENGINE;
@@ -282,12 +282,12 @@ public final class CFMetaData
                                             : memtableOperationsInMillions;
         this.cfId = cfId;
         this.column_metadata = new HashMap<ByteBuffer, ColumnDefinition>(column_metadata);
-        if (this.maxKeySize <= 0)
-            this.maxKeySize = DEFAULT_MAX_KEY_SIZE;
-        if (this.maxCFSize <= 0)
-            this.maxCFSize = DEFAULT_MAX_CF_SIZE;
-        if (this.storageSize == null)
-            this.storageSize = DEFAULT_STORAGE_SIZE;
+        if (this.rowkeySize <= 0)
+            this.rowkeySize = DEFAULT_ROWKEY_SIZE;
+        if (this.columnfamilySize <= 0)
+            this.columnfamilySize = DEFAULT_COLUMNFAMILY_SIZE;
+        if (this.columnfamilyType == null)
+            this.columnfamilyType = DEFAULT_COLUMNFAMILY_TYPE;
         if (this.storageEngine == null)
             this.storageEngine = DEFAULT_STORAGE_ENGINE;
     }
@@ -322,9 +322,9 @@ public final class CFMetaData
             int memTime,
             Integer memSize,
             Double memOps,
-            int maxKeySize,
-            int maxCFSize,
-            String storageSize,
+            int rowkeySize,
+            int columnfamilySize,
+            String columnfamilyType,
             String storageEngine,
             //This constructor generates the id!
             Map<ByteBuffer, ColumnDefinition> column_metadata)
@@ -349,15 +349,15 @@ public final class CFMetaData
                 memOps,
                 nextId(),
                 column_metadata);
-        this.maxKeySize = maxKeySize > 0
-                          ? maxKeySize
-                          : DEFAULT_MAX_KEY_SIZE;
-        this.maxCFSize = maxCFSize > 0
-                          ? maxCFSize
-                          : DEFAULT_MAX_CF_SIZE;
-        this.storageSize = storageSize != null
-                           ? storageSize
-                           : DEFAULT_STORAGE_SIZE;
+        this.rowkeySize = rowkeySize > 0
+                          ? rowkeySize
+                          : DEFAULT_ROWKEY_SIZE;
+        this.columnfamilySize = columnfamilySize > 0
+                          ? columnfamilySize
+                          : DEFAULT_COLUMNFAMILY_SIZE;
+        this.columnfamilyType = columnfamilyType != null
+                           ? columnfamilyType
+                           : DEFAULT_COLUMNFAMILY_TYPE;
         this.storageEngine = storageEngine != null
                              ? storageEngine
                              : DEFAULT_STORAGE_ENGINE;
@@ -404,12 +404,12 @@ public final class CFMetaData
              memOps,
              nextId(),
              column_metadata);
-        if (this.maxKeySize <= 0)
-            this.maxKeySize = DEFAULT_MAX_KEY_SIZE;
-        if (this.maxCFSize <= 0)
-            this.maxCFSize = DEFAULT_MAX_CF_SIZE;
-        if (this.storageSize == null)
-            this.storageSize = DEFAULT_STORAGE_SIZE;
+        if (this.rowkeySize <= 0)
+            this.rowkeySize = DEFAULT_ROWKEY_SIZE;
+        if (this.columnfamilySize <= 0)
+            this.columnfamilySize = DEFAULT_COLUMNFAMILY_SIZE;
+        if (this.columnfamilyType == null)
+            this.columnfamilyType = DEFAULT_COLUMNFAMILY_TYPE;
         if (this.storageEngine == null)
             this.storageEngine = DEFAULT_STORAGE_ENGINE;
     }
@@ -522,9 +522,9 @@ public final class CFMetaData
         cf.memtable_flush_after_mins = memtableFlushAfterMins;
         cf.memtable_throughput_in_mb = memtableThroughputInMb;
         cf.memtable_operations_in_millions = memtableOperationsInMillions;
-        cf.max_key_size = maxKeySize;
-        cf.max_cf_size = maxCFSize;
-        cf.storage_size = storageSize;
+        cf.rowkey_size = rowkeySize;
+        cf.columnfamily_size = columnfamilySize;
+        cf.columnfamily_type = columnfamilyType;
         cf.storage_engine = storageEngine;
         cf.column_metadata = SerDeUtils.createArray(column_metadata.size(),
                                                     org.apache.cassandra.avro.ColumnDef.SCHEMA$);
@@ -566,9 +566,9 @@ public final class CFMetaData
         Integer memtable_flush_after_mins = cf.memtable_flush_after_mins == null ? DEFAULT_MEMTABLE_LIFETIME_IN_MINS : cf.memtable_flush_after_mins;
         Integer memtable_throughput_in_mb = cf.memtable_throughput_in_mb == null ? DEFAULT_MEMTABLE_THROUGHPUT_IN_MB : cf.memtable_throughput_in_mb;
         Double memtable_operations_in_millions = cf.memtable_operations_in_millions == null ? DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS : cf.memtable_operations_in_millions;
-        Integer max_key_size = cf.max_key_size == null ? DEFAULT_MAX_KEY_SIZE : cf.max_key_size;
-        Integer max_cf_size = cf.max_cf_size == null ? DEFAULT_MAX_CF_SIZE : cf.max_cf_size;
-        String storage_size = cf.storage_size == null ? DEFAULT_STORAGE_SIZE : cf.storage_size.toString();
+        Integer rowkey_size = cf.rowkey_size == null ? DEFAULT_ROWKEY_SIZE : cf.rowkey_size;
+        Integer columnfamily_size = cf.columnfamily_size == null ? DEFAULT_COLUMNFAMILY_SIZE : cf.columnfamily_size;
+        String columnfamily_type = cf.columnfamily_type == null ? DEFAULT_COLUMNFAMILY_TYPE : cf.columnfamily_type.toString();
         String storage_engine = cf.storage_engine == null ? DEFAULT_STORAGE_ENGINE : cf.storage_engine.toString();
 
         return new CFMetaData(cf.keyspace.toString(),
@@ -589,9 +589,9 @@ public final class CFMetaData
                               memtable_flush_after_mins,
                               memtable_throughput_in_mb,
                               memtable_operations_in_millions,
-                              max_key_size,
-                              max_cf_size,
-                              storage_size,
+                              rowkey_size,
+                              columnfamily_size,
+                              columnfamily_type,
                               storage_engine,
                               cf.id,
                               column_metadata);
@@ -662,19 +662,19 @@ public final class CFMetaData
         return memtableOperationsInMillions;
     }
 
-    public int getMaxKeySize()
+    public int getRowkeySize()
     {
-        return maxKeySize;
+        return rowkeySize;
     }
 
-    public int getMaxCFSize()
+    public int getColumnfamilySize()
     {
-        return maxCFSize;
+        return columnfamilySize;
     }
 
-    public String getStorageSize()
+    public String getColumnfamilyType()
     {
-        return storageSize;
+        return columnfamilyType;
     }
 
     public String getStorageEngine()
@@ -719,9 +719,9 @@ public final class CFMetaData
             .append(memtableFlushAfterMins, rhs.memtableFlushAfterMins)
             .append(memtableThroughputInMb, rhs.memtableThroughputInMb)
             .append(memtableOperationsInMillions, rhs.memtableOperationsInMillions)
-            .append(maxKeySize, rhs.maxKeySize)
-            .append(maxCFSize, rhs.maxCFSize)
-            .append(storageSize, rhs.storageSize)
+            .append(rowkeySize, rhs.rowkeySize)
+            .append(columnfamilySize, rhs.columnfamilySize)
+            .append(columnfamilyType, rhs.columnfamilyType)
             .append(storageEngine, rhs.storageEngine)
             .isEquals();
     }
@@ -749,9 +749,9 @@ public final class CFMetaData
             .append(memtableFlushAfterMins)
             .append(memtableThroughputInMb)
             .append(memtableOperationsInMillions)
-            .append(maxKeySize)
-            .append(maxCFSize)
-            .append(storageSize)
+            .append(rowkeySize)
+            .append(columnfamilySize)
+            .append(columnfamilyType)
             .append(storageEngine)
             .toHashCode();
     }
@@ -787,12 +787,12 @@ public final class CFMetaData
             cf_def.memtable_throughput_in_mb = CFMetaData.DEFAULT_MEMTABLE_THROUGHPUT_IN_MB;
         if (cf_def.memtable_operations_in_millions == null)
             cf_def.memtable_operations_in_millions = CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS;
-        if (cf_def.max_key_size == null)
-            cf_def.max_key_size = CFMetaData.DEFAULT_MAX_KEY_SIZE;
-        if (cf_def.max_cf_size == null)
-            cf_def.max_key_size = CFMetaData.DEFAULT_MAX_CF_SIZE;
-        if (cf_def.storage_size == null)
-            cf_def.storage_size = CFMetaData.DEFAULT_STORAGE_SIZE;
+        if (cf_def.rowkey_size == null)
+            cf_def.rowkey_size = CFMetaData.DEFAULT_ROWKEY_SIZE;
+        if (cf_def.columnfamily_size == null)
+            cf_def.rowkey_size = CFMetaData.DEFAULT_COLUMNFAMILY_SIZE;
+        if (cf_def.columnfamily_type == null)
+            cf_def.columnfamily_type = CFMetaData.DEFAULT_COLUMNFAMILY_TYPE;
         if (cf_def.storage_engine == null)
             cf_def.storage_engine = CFMetaData.DEFAULT_STORAGE_ENGINE;
     }
@@ -814,12 +814,12 @@ public final class CFMetaData
             cf_def.setMemtable_throughput_in_mb(CFMetaData.DEFAULT_MEMTABLE_THROUGHPUT_IN_MB);
         if (!cf_def.isSetMemtable_operations_in_millions())
             cf_def.setMemtable_operations_in_millions(CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS);
-        if (!cf_def.isSetMax_key_size())
-            cf_def.setMax_key_size(CFMetaData.DEFAULT_MAX_KEY_SIZE);
-        if (!cf_def.isSetMax_cf_size())
-            cf_def.setMax_cf_size(CFMetaData.DEFAULT_MAX_CF_SIZE);
-        if (!cf_def.isSetStorage_size())
-            cf_def.setStorage_size(CFMetaData.DEFAULT_STORAGE_SIZE);
+        if (!cf_def.isSetRowkey_size())
+            cf_def.setRowkey_size(CFMetaData.DEFAULT_ROWKEY_SIZE);
+        if (!cf_def.isSetColumnfamily_size())
+            cf_def.setColumnfamily_size(CFMetaData.DEFAULT_COLUMNFAMILY_SIZE);
+        if (!cf_def.isSetColumnfamily_type())
+            cf_def.setColumnfamily_type(CFMetaData.DEFAULT_COLUMNFAMILY_TYPE);
         if (!cf_def.isSetStorage_engine())
             cf_def.setStorage_engine(CFMetaData.DEFAULT_STORAGE_ENGINE);
     }
@@ -863,9 +863,9 @@ public final class CFMetaData
         memtableFlushAfterMins = cf_def.memtable_flush_after_mins;
         memtableThroughputInMb = cf_def.memtable_throughput_in_mb;
         memtableOperationsInMillions = cf_def.memtable_operations_in_millions;
-        maxKeySize = cf_def.max_key_size;
-        maxCFSize = cf_def.max_cf_size;
-        storageSize = cf_def.storage_size == null ? "" : cf_def.storage_size.toString();
+        rowkeySize = cf_def.rowkey_size;
+        columnfamilySize = cf_def.columnfamily_size;
+        columnfamilyType = cf_def.columnfamily_type == null ? "" : cf_def.columnfamily_type.toString();
         storageEngine = cf_def.storage_engine == null ? "" : cf_def.storage_engine.toString();
         
         // adjust secondary indexes. figure out who is coming and going.
@@ -931,9 +931,9 @@ public final class CFMetaData
         def.setMemtable_flush_after_mins(cfm.memtableFlushAfterMins);
         def.setMemtable_throughput_in_mb(cfm.memtableThroughputInMb);
         def.setMemtable_operations_in_millions(cfm.memtableOperationsInMillions);
-        def.setMax_key_size(cfm.maxKeySize);
-        def.setMax_cf_size(cfm.maxCFSize);
-        def.setStorage_size(cfm.storageSize);
+        def.setRowkey_size(cfm.rowkeySize);
+        def.setColumnfamily_size(cfm.columnfamilySize);
+        def.setColumnfamily_type(cfm.columnfamilyType);
         def.setStorage_engine(cfm.storageEngine);
         List<org.apache.cassandra.thrift.ColumnDef> column_meta = new ArrayList< org.apache.cassandra.thrift.ColumnDef>(cfm.column_metadata.size());
         for (ColumnDefinition cd : cfm.column_metadata.values())
@@ -976,9 +976,9 @@ public final class CFMetaData
         def.memtable_flush_after_mins = cfm.memtableFlushAfterMins;
         def.memtable_throughput_in_mb = cfm.memtableThroughputInMb;
         def.memtable_operations_in_millions = cfm.memtableOperationsInMillions;
-        def.max_key_size = cfm.maxKeySize;
-        def.max_cf_size = cfm.maxCFSize;
-        def.storage_size = cfm.storageSize;
+        def.rowkey_size = cfm.rowkeySize;
+        def.columnfamily_size = cfm.columnfamilySize;
+        def.columnfamily_type = cfm.columnfamilyType;
         def.storage_engine = cfm.storageEngine;
         List<org.apache.cassandra.avro.ColumnDef> column_meta = new ArrayList<org.apache.cassandra.avro.ColumnDef>(cfm.column_metadata.size());
         for (ColumnDefinition cd : cfm.column_metadata.values())
@@ -1011,9 +1011,9 @@ public final class CFMetaData
         newDef.memtable_flush_after_mins = def.getMemtable_flush_after_mins();
         newDef.memtable_operations_in_millions = def.getMemtable_operations_in_millions();
         newDef.memtable_throughput_in_mb = def.getMemtable_throughput_in_mb();
-        newDef.max_key_size = def.getMax_key_size();
-        newDef.max_cf_size = def.getMax_cf_size();
-        newDef.storage_size = def.getStorage_size();
+        newDef.rowkey_size = def.getRowkey_size();
+        newDef.columnfamily_size = def.getColumnfamily_size();
+        newDef.columnfamily_type = def.getColumnfamily_type();
         newDef.storage_engine = def.getStorage_engine();
         newDef.min_compaction_threshold = def.getMin_compaction_threshold();
         newDef.read_repair_chance = def.getRead_repair_chance();
@@ -1141,9 +1141,9 @@ public final class CFMetaData
             .append("memtableFlushAfterMins", memtableFlushAfterMins)
             .append("memtableThroughputInMb", memtableThroughputInMb)
             .append("memtableOperationsInMillions", memtableOperationsInMillions)
-            .append("maxKeySize", maxKeySize)
-            .append("maxCFSize", maxCFSize)
-            .append("storageSize", storageSize)
+            .append("rowkeySize", rowkeySize)
+            .append("columnfamilySize", columnfamilySize)
+            .append("columnfamilyType", columnfamilyType)
             .append("storageEngine", storageEngine)
             .append("column_metadata", column_metadata)
             .toString();
