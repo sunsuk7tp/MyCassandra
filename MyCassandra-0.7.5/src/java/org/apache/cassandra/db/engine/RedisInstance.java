@@ -73,7 +73,16 @@ public class RedisInstance extends DBInstance
 
     synchronized public int dropDB()
     {
-        return -1;
+        try
+        {
+            conn.flushdb();
+            return 1;
+        }
+        catch (RedisException e)
+        {
+            errorMsg("db drop error", e);
+            return -1;
+        }
     }
 
     synchronized public int delete(String rowKey)
