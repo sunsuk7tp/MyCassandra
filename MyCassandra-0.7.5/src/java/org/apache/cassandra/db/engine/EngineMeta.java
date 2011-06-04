@@ -52,7 +52,7 @@ public class EngineMeta
         return emeta;
     }
 
-    public static DBInstance getDBInstance(int storageType, String tableName, String cfName, int maxKeySize, int maxCFSize, String storageSize, String storageEngine, boolean isLong)
+    public static DBInstance getDBInstance(int storageType, int cfId, String tableName, String cfName, int maxKeySize, int maxCFSize, String storageSize, String storageEngine, boolean isLong)
     {
         DBInstance dbi = null;
         switch (storageType)
@@ -60,7 +60,7 @@ public class EngineMeta
             case BIGTABLE:
                 break;
             case REDIS:
-                dbi = new RedisInstance(tableName, cfName);
+                dbi = new RedisInstance(tableName, cfName, cfId);
                 break;
             case MYSQL:
             default:

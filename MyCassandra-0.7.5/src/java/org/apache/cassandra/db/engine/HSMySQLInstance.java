@@ -86,11 +86,6 @@ public class HSMySQLInstance extends DBInstance
         return null;
     }
 
-    public synchronized int truncate()
-    {
-        return -1;
-    }
-
     public synchronized int delete(String rowKey)
     {
         try
@@ -106,7 +101,22 @@ public class HSMySQLInstance extends DBInstance
         }
     }
 
-    public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
+    public synchronized int truncate()
+    {
+        return -1;
+    }
+
+    public synchronized int dropTable()
+    {
+        return -1;
+    }
+    
+    public synchronized int dropDB()
+    {
+        return -1;
+    }
+
+    public synchronized int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
     {
         return 0;
     }

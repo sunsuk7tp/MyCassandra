@@ -287,7 +287,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         }
 
         boolean isLong = DatabaseDescriptor.isMySQL() && columnFamily.equals("Migrations") ? true : false;
-        DBInstance dbi = EngineMeta.getDBInstance(DatabaseDescriptor.getStorageType(), new String(table.name), columnFamilyName, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, isLong);
+        DBInstance dbi = EngineMeta.getDBInstance(DatabaseDescriptor.getStorageType(), metadata.cfId, new String(table.name), columnFamilyName, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, isLong);
         if (!DatabaseDescriptor.isBigtable())
         {
             setDBInstance(dbi);
@@ -1119,10 +1119,17 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
     public void removeAllSSTables()
     {
-        ssTables.replace(ssTables.getSSTables(), Collections.<SSTableReader>emptyList());
-        for (ColumnFamilyStore indexedCfs : indexedColumns.values())
+        if (DatabaseDescriptor.isBigtable())
         {
-            indexedCfs.removeAllSSTables();
+            ssTables.replace(ssTables.getSSTables(), Collections.<SSTableReader>emptyList());
+            for (ColumnFamilyStore indexedCfs : indexedColumns.values())
+            {
+                indexedCfs.removeAllSSTables();
+            }
+        }
+        else
+        {
+            getDBInstance().dropDB();
         }
     }
 

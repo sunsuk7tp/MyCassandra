@@ -41,6 +41,8 @@ public abstract class DBInstance implements StorageEngineInterface
     
     public abstract int delete(String rowKey);
     public abstract int truncate();
+    public abstract int dropTable();
+    public abstract int dropDB();
     public abstract int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType);
     public abstract int createProcedure(int rowKeySize, int columnFamilySize);
     public abstract int insert(String rowKey, ColumnFamily cf);

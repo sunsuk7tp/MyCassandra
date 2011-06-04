@@ -22,7 +22,14 @@ public class RedisInstance extends DBInstance
     {
         this.ksName = ksName;
         this.cfName = cfName;
-        conn = new RedisConfigure().connect();
+        conn = new RedisConfigure().connect(0);
+    }
+    
+    public RedisInstance(String ksName, String cfName, int dbIndex)
+    {
+        this.ksName = ksName;
+        this.cfName = cfName;
+        conn = new RedisConfigure().connect(dbIndex);
     }
 
     public int insert(String rowKey, ColumnFamily cf)
@@ -44,7 +51,7 @@ public class RedisInstance extends DBInstance
         }
         catch (RedisException e)
         {
-            errorMsg("db get error", e);
+           errorMsg("db get error", e);
             return null;
         }
     }
@@ -55,6 +62,16 @@ public class RedisInstance extends DBInstance
     }
     
     synchronized public int truncate()
+    {
+        return -1;
+    }
+
+    synchronized public int dropTable()
+    {
+        return -1;
+    }
+
+    synchronized public int dropDB()
     {
         return -1;
     }

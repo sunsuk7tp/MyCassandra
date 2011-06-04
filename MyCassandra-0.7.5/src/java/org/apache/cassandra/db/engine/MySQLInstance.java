@@ -31,7 +31,7 @@ public class MySQLInstance extends DBInstance
     private final String BINARY = "BINARY";
     private final String BLOB = "BLOB";
 
-    private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, getPr, setPr;
+    private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, dropTableSt, dropDBSt, getPr, setPr;
 
     public MySQLInstance(String ksName, String cfName)
     {
@@ -62,6 +62,8 @@ public class MySQLInstance extends DBInstance
         rangeSt = "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + "WHERE " + KEY + " >= ? AND " + KEY + " < ? LIMIT = ?";
         deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
         truncateSt = "TRUNCATE TABLE " + this.cfName;
+        dropTableSt = "DROP TABLE" + this.cfName;
+        dropDBSt = "DROP DATABASE" + this.ksName;
         setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
         getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
     }
@@ -192,6 +194,34 @@ public class MySQLInstance extends DBInstance
         catch (SQLException e)
         {
             errorMsg("db truncation error", e);
+            return -1;
+        }
+    }
+
+    public synchronized int dropTable()
+    {
+        try
+        {
+            Statement stmt = conn.createStatement();
+            return stmt.executeUpdate(dropTableSt);
+        }
+        catch (SQLException e)
+        {
+            errorMsg("db dropTable error", e);
+            return -1;
+        }
+    }
+
+    public synchronized int dropDB()
+    {
+        try
+        {
+            Statement stmt = conn.createStatement();
+            return stmt.executeUpdate(dropDBSt);
+        }
+        catch (SQLException e)
+        {
+            errorMsg("db dropDB error" , e);
             return -1;
         }
     }

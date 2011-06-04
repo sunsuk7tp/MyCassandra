@@ -22,6 +22,7 @@ import com.mongodb.MongoURI;
 public class MongoInstance extends DBInstance
 {
 
+    DB conn;
     DBCollection coll;
     public static final String PREFIX = "_";
 
@@ -33,7 +34,7 @@ public class MongoInstance extends DBInstance
         this.ksName = PREFIX + ksName;
         this.cfName = cfName;
 
-        DB conn = new MongoConfigure().connect(this.ksName);
+        conn = new MongoConfigure().connect(this.ksName);
         coll = conn.getCollection(this.cfName);
         coll.createIndex(new BasicDBObject(KEY,1).append("unique", true));
     }
@@ -62,9 +63,20 @@ public class MongoInstance extends DBInstance
         return null;
     }
 
-    public synchronized int truncate()
+    public int truncate()
+    {
+        return dropTable();
+    }
+
+    public synchronized int dropTable()
     {
         coll.drop();
+        return 1;
+    }
+
+    public synchronized int dropDB()
+    {
+        conn.dropDatabase();
         return 1;
     }
     
