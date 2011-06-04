@@ -155,7 +155,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     
     private int rowkeySize = EngineMeta.defaultRowKeySize;
     private int columnfamilySize = EngineMeta.defaultColumnFamilySize;
-    private String columnfamilyType = EngineMeta.defaultStorageSize;
+    private String columnfamilyType = EngineMeta.defaultColumnFamilyType;
     private String storageEngine = EngineMeta.defaultStorageEngine;
 
     public void reload()
@@ -286,7 +286,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             throw new RuntimeException(e);
         }
 
-        boolean isLong = DatabaseDescriptor.isMySQL() && columnFamily.equals("Migrations") ? true : false;
+        boolean isLong = DatabaseDescriptor.isSchemaUsed() && columnFamily.equals("Migrations") ? true : false;
         DBInstance dbi = EngineMeta.getDBInstance(DatabaseDescriptor.getStorageType(), new String(table.name), columnFamilyName, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, isLong);
         if (!DatabaseDescriptor.isBigtable())
         {

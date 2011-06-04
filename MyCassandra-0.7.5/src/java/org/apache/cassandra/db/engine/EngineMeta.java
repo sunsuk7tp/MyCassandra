@@ -2,23 +2,28 @@ package org.apache.cassandra.db.engine;
 
 public class EngineMeta
 {
+    // A write-optimize SE is a smaller number, and a read-optimized SE is a bigger number.
     public static final int BIGTABLE = 1;
     public static final int REDIS = 2;
     public static final int MYSQL = 3;
     public static final int HSMYSQL = 4;
     public static final int MONGODB = 5;
+    // label name specified in cassandra.yaml 
     public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "HSMySQL", "MongoDB"};
+    
+    // schema used se number
+    public static final int[] schemaUsedTypes = {MYSQL};
 
-    // for mysql params
+    // for mysql's column family data type params
     public static final String BINARY = "VARBINARY";
     public static final String BLOB = "LONGBLOB";
     // mysql default setting
     public static final int defaultRowKeySize = 64;
     public static final int defaultColumnFamilySize = 30 * 1024;
-    public static final String defaultStorageSize = BINARY;
+    public static final String defaultColumnFamilyType = BINARY;
     public static final String defaultStorageEngine = "InnoDB";
-
-    private int storageType = MYSQL;
+    // se number
+    private int storageType;
 
     public void setStorageType(int storageType)
     {
@@ -35,9 +40,12 @@ public class EngineMeta
         return storageType == BIGTABLE ? true : false;
     }
 
-    public boolean isMySQL()
+    // schema used storage engine (MySQL, PostgreSQL, ...)
+    public boolean isSchemaUsed()
     {
-        return storageType == MYSQL ? true : false;
+        for (int schemaUsedType : schemaUsedTypes)
+            if (storageType == schemaUsedType) return true;
+        return false;
     }
 
     public static EngineMeta getEngineMeta(String label)
@@ -52,6 +60,7 @@ public class EngineMeta
         return emeta;
     }
 
+    // init setup and return the instance specified in storageType
     public static DBInstance getDBInstance(int storageType, String tableName, String cfName, int maxKeySize, int maxCFSize, String storageSize, String storageEngine, boolean isLong)
     {
         DBInstance dbi = null;

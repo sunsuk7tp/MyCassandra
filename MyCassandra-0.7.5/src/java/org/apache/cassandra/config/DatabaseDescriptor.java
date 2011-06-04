@@ -41,7 +41,7 @@ import org.apache.cassandra.db.Table;
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.migration.Migration;
 import org.apache.cassandra.db.engine.EngineMeta;
-import org.apache.cassandra.db.engine.MySQLInstance;
+import org.apache.cassandra.db.engine.DBInstance;
 import org.apache.cassandra.dht.IPartitioner;
 import org.apache.cassandra.io.sstable.Descriptor;
 import org.apache.cassandra.io.util.FileUtils;
@@ -581,17 +581,14 @@ public class DatabaseDescriptor
                 AbstractType subcolumnComparator = null;
                 AbstractType default_validator = getComparator(cf.default_validation_class);
 
-                int rowKeySize = (cf.rowkey_size > 0 ? cf.rowkey_size : EngineMeta.defaultRowKeySize);
-                int columnFamilySize = (cf.columnfamily_size > 0 ? cf.columnfamily_size : EngineMeta.defaultColumnFamilySize);
-                String storageSize =(cf.columnfamily_type != null ? cf.columnfamily_type : EngineMeta.defaultStorageSize);
+                int rowkeySize = (cf.rowkey_size > 0 ? cf.rowkey_size : EngineMeta.defaultRowKeySize);
+                int columnfamilySize = (cf.columnfamily_size > 0 ? cf.columnfamily_size : EngineMeta.defaultColumnFamilySize);
+                String columnfamilyType = (cf.columnfamily_type != null ? cf.columnfamily_type : EngineMeta.defaultColumnFamilyType);
                 String storageEngine = (cf.storage_engine != null ? cf.storage_engine : EngineMeta.defaultStorageEngine);
-                if(engineMeta.isMySQL())
-                {
-                    MySQLInstance mdbi = new MySQLInstance(keyspace.name, cf.name);
-                    mdbi.create(rowKeySize, columnFamilySize, storageSize, storageEngine);
-                    mdbi.createProcedure(rowKeySize, columnFamilySize);
+                if(engineMeta.isSchemaUsed()) {
+                    DBInstance dbi = engineMeta.getDBInstance(engineMeta.getStorageType(), keyspace.name, cf.name, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, false);
                 }
-
+                
                 ColumnFamilyType cfType = cf.column_type == null ? ColumnFamilyType.Standard : cf.column_type;
                 if (cfType == ColumnFamilyType.Super)
                 {
@@ -659,7 +656,7 @@ public class DatabaseDescriptor
                     metadata.put(columnName, new ColumnDefinition(columnName, rcd.validator_class, rcd.index_type, rcd.index_name));
                 }
                 
-                if (engineMeta.isMySQL())
+                if (engineMeta.isSchemaUsed())
                 {
                      cfDefs[j++] = new CFMetaData(keyspace.name, 
                                                  cf.name, 
@@ -679,9 +676,9 @@ public class DatabaseDescriptor
                                                  cf.memtable_flush_after_mins,
                                                  cf.memtable_throughput_in_mb,
                                                  cf.memtable_operations_in_millions,
-                                                 rowKeySize,
-                                                 columnFamilySize,
-                                                 storageSize,
+                                                 rowkeySize,
+                                                 columnfamilySize,
+                                                 columnfamilyType,
                                                  storageEngine,
                                                  metadata);
                 }
@@ -1193,9 +1190,9 @@ public class DatabaseDescriptor
         return engineMeta.isBigtable();
     }
 
-    public static boolean isMySQL()
+    public static boolean isSchemaUsed()
     {
-        return engineMeta.isMySQL();
+        return engineMeta.isSchemaUsed();
     }
 
     public static String getDBHost()
