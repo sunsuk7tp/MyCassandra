@@ -20,11 +20,18 @@ data_file_directories:
 disk_access_mode: mmap
 seeds:
     - 127.0.0.2
+hosts:
+    - 127.0.0.3
 endpoint_snitch: org.apache.cassandra.locator.SimpleSnitch
 dynamic_snitch: true
 request_scheduler: org.apache.cassandra.scheduler.RoundRobinScheduler
 request_scheduler_id: keyspace
 incremental_backups: true
+db: Bigtable
+db_host:
+db_port:
+db_user:
+db_pass:
 keyspaces:
     - name: Keyspace1
       replica_placement_strategy: org.apache.cassandra.locator.SimpleStrategy
