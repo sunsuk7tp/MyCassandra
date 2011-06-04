@@ -79,6 +79,7 @@ public class VersionedValue implements Comparable<VersionedValue>
     {
         this.value = value;
         version = VersionGenerator.getNextVersion();
+        stype = 0;
     }
 
     public int compareTo(VersionedValue value)
