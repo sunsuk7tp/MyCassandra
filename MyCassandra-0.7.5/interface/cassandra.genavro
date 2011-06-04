@@ -155,10 +155,10 @@ protocol Cassandra {
         union { int, null } memtable_flush_after_mins = 60;
         union { null, int } memtable_throughput_in_mb = null;
         union { null, double} memtable_operations_in_millions = null;
-        union { int, null } rowkey_size;
-        union { int, null } columnfamily_size;
-        union { string, null } columnfamily_type;
-        union { string, null } storage_engine;
+        union { null, int } rowkey_size;
+        union { null, int } columnfamily_size;
+        union { null, string } columnfamily_type;
+        union { null, string } storage_engine;
         union { int, null } id;
         union { array<ColumnDef>, null } column_metadata;
     }
