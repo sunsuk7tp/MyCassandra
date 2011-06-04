@@ -94,7 +94,7 @@ public class MoveTest extends CleanupHelper
             {
                 int replicationFactor = strategy.getReplicationFactor();
 
-                HashSet<InetAddress> actual = new HashSet<InetAddress>(tmd.getWriteEndpoints(token, table, strategy.calculateNaturalEndpoints(token, tmd)));
+                HashSet<InetAddress> actual = new HashSet<InetAddress>(tmd.getWriteEndpoints(token, table, map2Collection(strategy.calculateNaturalEndpoints(token, tmd))));
                 HashSet<InetAddress> expected = new HashSet<InetAddress>();
 
                 for (int i = 0; i < replicationFactor; i++)
@@ -211,7 +211,7 @@ public class MoveTest extends CleanupHelper
 
             for (int i = 0; i < keyTokens.size(); i++)
             {
-                endpoints = tmd.getWriteEndpoints(keyTokens.get(i), table, strategy.getNaturalEndpoints(keyTokens.get(i)));
+                endpoints = tmd.getWriteEndpoints(keyTokens.get(i), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(i))));
                 assertTrue(expectedEndpoints.get(table).get(keyTokens.get(i)).size() == endpoints.size());
                 assertTrue(expectedEndpoints.get(table).get(keyTokens.get(i)).containsAll(endpoints));
             }
@@ -222,7 +222,7 @@ public class MoveTest extends CleanupHelper
             // tokens 5, 15 and 25 should go three nodes
             for (int i=0; i<3; ++i)
             {
-                endpoints = tmd.getWriteEndpoints(keyTokens.get(i), table, strategy.getNaturalEndpoints(keyTokens.get(i)));
+                endpoints = tmd.getWriteEndpoints(keyTokens.get(i), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(i))));
                 assertTrue(endpoints.size() == 3);
                 assertTrue(endpoints.contains(hosts.get(i+1)));
                 assertTrue(endpoints.contains(hosts.get(i+2)));
@@ -230,7 +230,7 @@ public class MoveTest extends CleanupHelper
             }
 
             // token 35 should go to nodes 4, 5, 6, 7 and boot1
-            endpoints = tmd.getWriteEndpoints(keyTokens.get(3), table, strategy.getNaturalEndpoints(keyTokens.get(3)));
+            endpoints = tmd.getWriteEndpoints(keyTokens.get(3), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(3))));
             assertTrue(endpoints.size() == 5);
             assertTrue(endpoints.contains(hosts.get(4)));
             assertTrue(endpoints.contains(hosts.get(5)));
@@ -239,7 +239,7 @@ public class MoveTest extends CleanupHelper
             assertTrue(endpoints.contains(boot1));
 
             // token 45 should go to nodes 5, 6, 7, 0, boot1 and boot2
-            endpoints = tmd.getWriteEndpoints(keyTokens.get(4), table, strategy.getNaturalEndpoints(keyTokens.get(4)));
+            endpoints = tmd.getWriteEndpoints(keyTokens.get(4), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(4))));
             assertTrue(endpoints.size() == 6);
             assertTrue(endpoints.contains(hosts.get(5)));
             assertTrue(endpoints.contains(hosts.get(6)));
@@ -249,7 +249,7 @@ public class MoveTest extends CleanupHelper
             assertTrue(endpoints.contains(boot2));
 
             // token 55 should go to nodes 6, 7, 8, 0, 1, boot1 and boot2
-            endpoints = tmd.getWriteEndpoints(keyTokens.get(5), table, strategy.getNaturalEndpoints(keyTokens.get(5)));
+            endpoints = tmd.getWriteEndpoints(keyTokens.get(5), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(5))));
             assertTrue(endpoints.size() == 7);
             assertTrue(endpoints.contains(hosts.get(6)));
             assertTrue(endpoints.contains(hosts.get(7)));
@@ -260,7 +260,7 @@ public class MoveTest extends CleanupHelper
             assertTrue(endpoints.contains(boot2));
 
             // token 65 should go to nodes 7, 8, 9, 0, 1 and boot2
-            endpoints = tmd.getWriteEndpoints(keyTokens.get(6), table, strategy.getNaturalEndpoints(keyTokens.get(6)));
+            endpoints = tmd.getWriteEndpoints(keyTokens.get(6), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(6))));
             assertTrue(endpoints.size() == 6);
             assertTrue(endpoints.contains(hosts.get(7)));
             assertTrue(endpoints.contains(hosts.get(8)));
@@ -270,7 +270,7 @@ public class MoveTest extends CleanupHelper
             assertTrue(endpoints.contains(boot2));
 
             // token 75 should to go nodes 8, 9, 0, 1, 2 and boot2
-            endpoints = tmd.getWriteEndpoints(keyTokens.get(7), table, strategy.getNaturalEndpoints(keyTokens.get(7)));
+            endpoints = tmd.getWriteEndpoints(keyTokens.get(7), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(7))));
             assertTrue(endpoints.size() == 6);
             assertTrue(endpoints.contains(hosts.get(8)));
             assertTrue(endpoints.contains(hosts.get(9)));
@@ -280,7 +280,7 @@ public class MoveTest extends CleanupHelper
             assertTrue(endpoints.contains(boot2));
 
             // token 85 should go to nodes 9, 0, 1 and 2
-            endpoints = tmd.getWriteEndpoints(keyTokens.get(8), table, strategy.getNaturalEndpoints(keyTokens.get(8)));
+            endpoints = tmd.getWriteEndpoints(keyTokens.get(8), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(8))));
             assertTrue(endpoints.size() == 4);
             assertTrue(endpoints.contains(hosts.get(9)));
             assertTrue(endpoints.contains(hosts.get(0)));
@@ -288,7 +288,7 @@ public class MoveTest extends CleanupHelper
             assertTrue(endpoints.contains(hosts.get(2)));
 
             // token 95 should go to nodes 0, 1 and 2
-            endpoints = tmd.getWriteEndpoints(keyTokens.get(9), table, strategy.getNaturalEndpoints(keyTokens.get(9)));
+            endpoints = tmd.getWriteEndpoints(keyTokens.get(9), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(9))));
             assertTrue(endpoints.size() == 3);
             assertTrue(endpoints.contains(hosts.get(0)));
             assertTrue(endpoints.contains(hosts.get(1)));
@@ -329,7 +329,7 @@ public class MoveTest extends CleanupHelper
 
             for (int i = 0; i < keyTokens.size(); i++)
             {
-                endpoints = tmd.getWriteEndpoints(keyTokens.get(i), table, strategy.getNaturalEndpoints(keyTokens.get(i)));
+                endpoints = tmd.getWriteEndpoints(keyTokens.get(i), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(i))));
                 assertTrue(expectedEndpoints.get(table).get(keyTokens.get(i)).size() == endpoints.size());
                 assertTrue(expectedEndpoints.get(table).get(keyTokens.get(i)).containsAll(endpoints));
             }
@@ -340,7 +340,7 @@ public class MoveTest extends CleanupHelper
             // tokens 5, 15 and 25 should go three nodes
             for (int i=0; i<3; ++i)
             {
-                endpoints = tmd.getWriteEndpoints(keyTokens.get(i), table, strategy.getNaturalEndpoints(keyTokens.get(i)));
+                endpoints = tmd.getWriteEndpoints(keyTokens.get(i), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(i))));
                 assertTrue(endpoints.size() == 3);
                 assertTrue(endpoints.contains(hosts.get(i+1)));
                 assertTrue(endpoints.contains(hosts.get(i+2)));
@@ -348,21 +348,21 @@ public class MoveTest extends CleanupHelper
             }
 
             // token 35 goes to nodes 4, 5 and boot1
-            endpoints = tmd.getWriteEndpoints(keyTokens.get(3), table, strategy.getNaturalEndpoints(keyTokens.get(3)));
+            endpoints = tmd.getWriteEndpoints(keyTokens.get(3), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(3))));
             assertTrue(endpoints.size() == 3);
             assertTrue(endpoints.contains(hosts.get(4)));
             assertTrue(endpoints.contains(hosts.get(5)));
             assertTrue(endpoints.contains(boot1));
 
             // token 45 goes to nodes 5, boot1 and node7
-            endpoints = tmd.getWriteEndpoints(keyTokens.get(4), table, strategy.getNaturalEndpoints(keyTokens.get(4)));
+            endpoints = tmd.getWriteEndpoints(keyTokens.get(4), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(4))));
             assertTrue(endpoints.size() == 3);
             assertTrue(endpoints.contains(hosts.get(5)));
             assertTrue(endpoints.contains(boot1));
             assertTrue(endpoints.contains(hosts.get(7)));
 
             // token 55 goes to boot1, 7, boot2, 8 and 0
-            endpoints = tmd.getWriteEndpoints(keyTokens.get(5), table, strategy.getNaturalEndpoints(keyTokens.get(5)));
+            endpoints = tmd.getWriteEndpoints(keyTokens.get(5), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(5))));
             assertTrue(endpoints.size() == 5);
             assertTrue(endpoints.contains(boot1));
             assertTrue(endpoints.contains(hosts.get(7)));
@@ -371,7 +371,7 @@ public class MoveTest extends CleanupHelper
             assertTrue(endpoints.contains(hosts.get(0)));
 
             // token 65 goes to nodes 7, boot2, 8, 0 and 1
-            endpoints = tmd.getWriteEndpoints(keyTokens.get(6), table, strategy.getNaturalEndpoints(keyTokens.get(6)));
+            endpoints = tmd.getWriteEndpoints(keyTokens.get(6), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(6))));
             assertTrue(endpoints.size() == 5);
             assertTrue(endpoints.contains(hosts.get(7)));
             assertTrue(endpoints.contains(boot2));
@@ -380,7 +380,7 @@ public class MoveTest extends CleanupHelper
             assertTrue(endpoints.contains(hosts.get(1)));
 
             // token 75 goes to nodes boot2, 8, 0, 1 and 2
-            endpoints = tmd.getWriteEndpoints(keyTokens.get(7), table, strategy.getNaturalEndpoints(keyTokens.get(7)));
+            endpoints = tmd.getWriteEndpoints(keyTokens.get(7), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(7))));
             assertTrue(endpoints.size() == 5);
             assertTrue(endpoints.contains(boot2));
             assertTrue(endpoints.contains(hosts.get(8)));
@@ -389,14 +389,14 @@ public class MoveTest extends CleanupHelper
             assertTrue(endpoints.contains(hosts.get(2)));
 
             // token 85 goes to nodes 0, 1 and 2
-            endpoints = tmd.getWriteEndpoints(keyTokens.get(8), table, strategy.getNaturalEndpoints(keyTokens.get(8)));
+            endpoints = tmd.getWriteEndpoints(keyTokens.get(8), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(8))));
             assertTrue(endpoints.size() == 3);
             assertTrue(endpoints.contains(hosts.get(0)));
             assertTrue(endpoints.contains(hosts.get(1)));
             assertTrue(endpoints.contains(hosts.get(2)));
 
             // token 95 goes to nodes 0, 1 and 2
-            endpoints = tmd.getWriteEndpoints(keyTokens.get(9), table, strategy.getNaturalEndpoints(keyTokens.get(9)));
+            endpoints = tmd.getWriteEndpoints(keyTokens.get(9), table, map2Collection(strategy.getNaturalEndpoints(keyTokens.get(9))));
             assertTrue(endpoints.size() == 3);
             assertTrue(endpoints.contains(hosts.get(0)));
             assertTrue(endpoints.contains(hosts.get(1)));
@@ -621,4 +621,12 @@ public class MoveTest extends CleanupHelper
                 null);
     }
 
+    private Collection<InetAddress> map2Collection(Map<InetAddress, Integer> map)
+    {
+        Collection<InetAddress> col = new ArrayList<InetAddress>(map.size());
+        Iterator it = map.keySet().iterator();
+        while (it.hasNext())
+            col.add((InetAddress)it.next());
+        return col;
+    }
 }

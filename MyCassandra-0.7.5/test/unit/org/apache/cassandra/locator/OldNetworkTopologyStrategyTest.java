@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -152,11 +153,11 @@ public class OldNetworkTopologyStrategyTest extends SchemaLoader
     {
         for (Token keyToken : keyTokens)
         {
-            List<InetAddress> endpoints = strategy.getNaturalEndpoints(keyToken);
-            for (int j = 0; j < endpoints.size(); j++)
+            Object[] endpoints = strategy.getNaturalEndpoints(keyToken).keySet().toArray();
+            for (int j = 0; j < endpoints.length; j++)
             {
                 ArrayList<InetAddress> hostsExpected = expectedResults.get(keyToken.toString());
-                assertEquals(endpoints.get(j), hostsExpected.get(j));
+                assertEquals((InetAddress)endpoints[j], hostsExpected.get(j));
             }
         }
     }

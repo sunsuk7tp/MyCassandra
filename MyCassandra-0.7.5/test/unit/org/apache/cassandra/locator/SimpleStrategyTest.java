@@ -22,10 +22,7 @@ package org.apache.cassandra.locator;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import org.junit.Test;
 
@@ -94,12 +91,12 @@ public class SimpleStrategyTest extends CleanupHelper
 
             for (int i = 0; i < keyTokens.length; i++)
             {
-                List<InetAddress> endpoints = strategy.getNaturalEndpoints(keyTokens[i]);
+                Set<InetAddress> endpoints = strategy.getNaturalEndpoints(keyTokens[i]).keySet();
                 assertEquals(strategy.getReplicationFactor(), endpoints.size());
                 List<InetAddress> correctEndpoints = new ArrayList<InetAddress>();
                 for (int j = 0; j < endpoints.size(); j++)
                     correctEndpoints.add(hosts.get((i + j + 1) % hosts.size()));
-                assertEquals(new HashSet<InetAddress>(correctEndpoints), new HashSet<InetAddress>(endpoints));
+                assertEquals(new HashSet<InetAddress>(correctEndpoints), endpoints);
             }
         }
     }
@@ -145,7 +142,7 @@ public class SimpleStrategyTest extends CleanupHelper
 
             for (int i = 0; i < keyTokens.length; i++)
             {
-                Collection<InetAddress> endpoints = tmd.getWriteEndpoints(keyTokens[i], table, strategy.getNaturalEndpoints(keyTokens[i]));
+                Collection<InetAddress> endpoints = tmd.getWriteEndpoints(keyTokens[i], table, map2Collection(strategy.getNaturalEndpoints(keyTokens[i])));
                 assertTrue(endpoints.size() >= replicationFactor);
 
                 for (int j = 0; j < replicationFactor; j++)
@@ -183,5 +180,14 @@ public class SimpleStrategyTest extends CleanupHelper
                 tmd,
                 new SimpleSnitch(),
                 null);
+    }
+    
+    private Collection<InetAddress> map2Collection(Map<InetAddress, Integer> map)
+    {
+        Collection<InetAddress> col = new ArrayList<InetAddress>(map.size());
+        Iterator it = map.keySet().iterator();
+        while (it.hasNext())
+            col.add((InetAddress)it.next());
+        return col;
     }
 }

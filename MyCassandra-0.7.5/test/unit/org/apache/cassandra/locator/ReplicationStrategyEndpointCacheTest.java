@@ -21,6 +21,7 @@ package org.apache.cassandra.locator;
 
 import java.net.InetAddress;
 import java.util.*;
+import java.util.Set;
 
 import org.apache.cassandra.db.Table;
 
@@ -80,32 +81,32 @@ public class ReplicationStrategyEndpointCacheTest extends SchemaLoader
     public void runCacheRespectsTokenChangesTest(Class stratClass, Map<String, String> configOptions) throws Exception
     {
         setup(stratClass, configOptions);
-        ArrayList<InetAddress> initial;
-        ArrayList<InetAddress> endpoints;
+        Set<InetAddress> initial;
+        Set<InetAddress> endpoints;
 
-        endpoints = strategy.getNaturalEndpoints(searchToken);
+        endpoints = strategy.getNaturalEndpoints(searchToken).keySet();
         assert endpoints.size() == 5 : StringUtils.join(endpoints, ",");
 
         // test token addition, in DC2 before existing token
-        initial = strategy.getNaturalEndpoints(searchToken);
+        initial = strategy.getNaturalEndpoints(searchToken).keySet();
         tmd.updateNormalToken(new BigIntegerToken(String.valueOf(35)), InetAddress.getByName("127.0.0.5"));
-        endpoints = strategy.getNaturalEndpoints(searchToken);
+        endpoints = strategy.getNaturalEndpoints(searchToken).keySet();
         assert endpoints.size() == 5 : StringUtils.join(endpoints, ",");
         assert !endpoints.equals(initial);
 
         // test token removal, newly created token
-        initial = strategy.getNaturalEndpoints(searchToken);
+        initial = strategy.getNaturalEndpoints(searchToken).keySet();
         tmd.removeEndpoint(InetAddress.getByName("127.0.0.5"));
-        endpoints = strategy.getNaturalEndpoints(searchToken);
+        endpoints = strategy.getNaturalEndpoints(searchToken).keySet();
         assert endpoints.size() == 5 : StringUtils.join(endpoints, ",");
         assert !endpoints.contains(InetAddress.getByName("127.0.0.5"));
         assert !endpoints.equals(initial);
 
         // test token change
-        initial = strategy.getNaturalEndpoints(searchToken);
+        initial = strategy.getNaturalEndpoints(searchToken).keySet();
         //move .8 after search token but before other DC3
         tmd.updateNormalToken(new BigIntegerToken(String.valueOf(25)), InetAddress.getByName("127.0.0.8"));
-        endpoints = strategy.getNaturalEndpoints(searchToken);
+        endpoints = strategy.getNaturalEndpoints(searchToken).keySet();
         assert endpoints.size() == 5 : StringUtils.join(endpoints, ",");
         assert !endpoints.equals(initial);
     }
@@ -119,7 +120,7 @@ public class ReplicationStrategyEndpointCacheTest extends SchemaLoader
             super(table, tokenMetadata, snitch, configOptions);
         }
 
-        public List<InetAddress> calculateNaturalEndpoints(Token token, TokenMetadata metadata)
+        public Map<InetAddress, Integer> calculateNaturalEndpoints(Token token, TokenMetadata metadata)
         {
             assert !called : "calculateNaturalEndpoints was already called, result should have been cached";
             called = true;
@@ -136,7 +137,7 @@ public class ReplicationStrategyEndpointCacheTest extends SchemaLoader
             super(table, tokenMetadata, snitch, configOptions);
         }
 
-        public List<InetAddress> calculateNaturalEndpoints(Token token, TokenMetadata metadata)
+        public Map<InetAddress, Integer> calculateNaturalEndpoints(Token token, TokenMetadata metadata)
         {
             assert !called : "calculateNaturalEndpoints was already called, result should have been cached";
             called = true;
@@ -153,7 +154,7 @@ public class ReplicationStrategyEndpointCacheTest extends SchemaLoader
             super(table, tokenMetadata, snitch, configOptions);
         }
 
-        public List<InetAddress> calculateNaturalEndpoints(Token token, TokenMetadata metadata)
+        public Map<InetAddress, Integer> calculateNaturalEndpoints(Token token, TokenMetadata metadata)
         {
             assert !called : "calculateNaturalEndpoints was already called, result should have been cached";
             called = true;

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Test;
@@ -57,9 +58,9 @@ public class NetworkTopologyStrategyTest
         assert strategy.getReplicationFactor("DC2") == 2;
         assert strategy.getReplicationFactor("DC3") == 1;
         // Query for the natural hosts
-        ArrayList<InetAddress> endpoints = strategy.getNaturalEndpoints(new StringToken("123"));
+        Set<InetAddress> endpoints = strategy.getNaturalEndpoints(new StringToken("123")).keySet();
         assert 6 == endpoints.size();
-        assert 6 == new HashSet<InetAddress>(endpoints).size(); // ensure uniqueness
+        //assert 6 == new HashSet<InetAddress>(endpoints).size(); // ensure uniqueness
     }
 
     @Test
@@ -80,9 +81,9 @@ public class NetworkTopologyStrategyTest
         assert strategy.getReplicationFactor("DC2") == 3;
         assert strategy.getReplicationFactor("DC3") == 0;
         // Query for the natural hosts
-        ArrayList<InetAddress> endpoints = strategy.getNaturalEndpoints(new StringToken("123"));
+        Set<InetAddress> endpoints = strategy.getNaturalEndpoints(new StringToken("123")).keySet();
         assert 6 == endpoints.size();
-        assert 6 == new HashSet<InetAddress>(endpoints).size(); // ensure uniqueness
+        //assert 6 == new HashSet<InetAddress>(endpoints).size(); // ensure uniqueness
     }
 
     public void createDummyTokens(TokenMetadata metadata, boolean populateDC3) throws UnknownHostException
