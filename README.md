@@ -44,13 +44,16 @@ If you use MySQL storage engine, you must specify several schema parameters.
 
 - columnfamily_size/ColumnFamilySize: columnFamily object size (byte)
 
-- columnfamily_type/ColumnFamilyType: columnfamily type (MySQL data type). With 'VARBINARY', the max columnFamily size is 65535 bytes, and with 'LONGBLOB', 4 GB. It depends on data type constraints of MySQL (VARBINARY or LONGBLOB or the others). 
+- columnfamily_type/ColumnFamilyType: columnfamily type (MySQL data type). 
+
+With 'VARBINARY', the max columnFamily size is 65535 bytes, and with 'LONGBLOB', 4 GB. It depends on data type constraints of MySQL (VARBINARY or LONGBLOB or the others). 
 
 - storage_engine/StorageEngine: 'InnoDB', 'MyISAM', etc. MySQL storage engine itself. 
+
 ### @0.7
-      keyspaces:
-          - name: mykeyspace
-          :
+    keyspaces:
+        - name: mykeyspace
+        :
           column_families:
               - name: mycf1
                 rowkey_size: 16
@@ -86,22 +89,24 @@ If you use MySQL storage engine, you must specify several schema parameters.
 ## 3) mysql setup.
 - You make mysql user, cassandra_user.
 
--- The cassandra_user needs to hava all privileges.
+- The cassandra_user needs to hava all privileges.
 
--- For quickly starting, you should specify 'root'.
- GRANT cassandra_user
+- For quickly starting, you should specify 'root'.
+
+    GRANT cassandra_user
 
 - You make database by the keyspaces.
+
     mysql> CREATE DATABASE system; # 'system' is the Cassandra's internal keyspace.
     mysql> CREATE DATABASE <keyspace_name>; # <keyspace_name> is the keyspace name defined by storage-conf.xml
 
 - In the above example, you must make database as this,
+
     mysql> CREATE DATABASE table;
 
 ## 4) run.
 - You can run MyCassandra as Cassandra.
 
-    $ cd <MyCassandra_Home>
     $ ./bin/cassandra
 
 ## 5) schema load. (0.7~)
