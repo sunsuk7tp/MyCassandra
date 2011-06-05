@@ -879,10 +879,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             }
             else
             {
-                String keyName = key.getTxtKey();
-                DBInstance dbi = getDBInstance();
-                if (dbi.put(keyName, columnFamily) < 0)
-                    throw new IOException("can't insert or update " + keyName + " in a storage.");
+                if (getDBInstance().put(key, columnFamily) < 0)
+                    throw new IOException("can't insert or update " + key.toString() + " in a storage.");
                 return null;
             }
         }
@@ -1356,7 +1354,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
     private ColumnFamily doGetCFDB(QueryFilter filter, int gcBefore)
     {
-        ColumnFamily rescf = getDBInstance().get(filter.key.getTxtKey());
+        ColumnFamily rescf = getDBInstance().get(filter.key);
         return rescf != null ? filterColumnFamily(rescf, filter, gcBefore) : null;
     }
 

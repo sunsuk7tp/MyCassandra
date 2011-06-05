@@ -19,8 +19,9 @@ public abstract class DBInstance implements StorageEngineInterface
     private static final Logger logger = LoggerFactory.getLogger(DBInstance.class);
     String ksName, cfName;
 
-    public int put(String rowKey, ColumnFamily cf)
+    public int put(DecoratedKey key, ColumnFamily cf)
     {
+        String rowKey = key.getTxtKey();
         if (cf.isMarkedForDelete())
         {
             return delete(rowKey);
@@ -41,11 +42,16 @@ public abstract class DBInstance implements StorageEngineInterface
         }
     }
 
-    public ColumnFamily get(String rowKey)
+    public ColumnFamily get(DecoratedKey key)
+    {
+        return get(key.getTxtKey());
+    }
+
+    public ColumnFamily get(String key)
     {
         try
         {
-            return bytes2ColumnFamily(select(rowKey));
+            return bytes2ColumnFamily(select(key));
         }
         catch (IOException e)
         {
@@ -55,9 +61,9 @@ public abstract class DBInstance implements StorageEngineInterface
     }
 
     public abstract Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults);
-    
-    public abstract int delete(String rowKey);
     public abstract int truncate();
+
+    public abstract int delete(String rowKey);
     public abstract int dropTable();
     public abstract int dropDB();
     public abstract int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType);

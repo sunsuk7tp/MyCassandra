@@ -10,8 +10,21 @@ import org.apache.cassandra.db.DecoratedKey;
 
 public interface StorageEngineInterface
 {
-    public int put(String rowKey, ColumnFamily cf); /* put cf in a row specified rowKey. This method include insert, update and delete to a rowKey*/
-    public ColumnFamily get(String rowKey); /* get a column family specified rowKey */
-    public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults); /* range query: from startWith to stopAt limit maxResults*/
-    public int truncate(); /* column family (table) truncation*/
+    /* 
+     * put cf in a row specified rowKey. 
+     * This method include insert, update and delete to a rowKey
+     * */
+    public int put(DecoratedKey key, ColumnFamily cf);
+    /* 
+     * get a column family specified rowKey
+     * */
+    public ColumnFamily get(DecoratedKey key);
+    /* 
+     * range query: from startWith to stopAt limit maxResults
+     * */
+    public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults); 
+    /* 
+     * range query: from startWith to stopAt limit maxResults
+     * */
+    public int truncate();
 }
