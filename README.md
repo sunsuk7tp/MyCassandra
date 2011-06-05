@@ -1,10 +1,11 @@
 # MyCassandra
 
-MyCassandra is the project branched from Cassandra by Shunsuke Nakamura.
+MyCassandra is the 'modular' NoSQL. 
+MyCassandra is the project branched from Cassandra.
 
-With MyCassandra, you can exchange the Storage Engine from the original storage like BigTable (commitlog, memtable, sstable) to MySQL, Redis and others.
-
-This means that you can select the Storage Engine for according to the I/O pattern of applications.
+With MyCassandra, you can exchange Cassandra's storage like BigTable (commitlog, memtable, sstable) with MySQL, Redis and others.
+The data storage component is called Storage Engine like MySQL. 
+This means that you can select the Storage Engine for according to the I/O pattern of applications and the persistence.
 
 # MyCassandra Storage Engine
 In default, you can select that.
