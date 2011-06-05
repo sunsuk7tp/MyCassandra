@@ -1,12 +1,12 @@
 # MyCassandra
 
 MyCassandra is the 'modular' NoSQL.  
-MyCassandra is the project branched from Cassandra. 
-MyCassandra-0.X.Y is based on Cassandra-0.X.Y. 
+MyCassandra is the project branched from Cassandra.  
+MyCassandra-0.X.Y is based on Cassandra-0.X.Y.  
 
-With MyCassandra, you can exchange Cassandra's storage like Bigtable (commitlog, memtable, sstable) with MySQL, Redis and others.
-The data storage component is called Storage Engine like MySQL. 
-This means that you can select the Storage Engine for according to the I/O pattern of applications and the persistence. 
+With MyCassandra, you can exchange Cassandra's storage like Bigtable (commitlog, memtable, sstable) with MySQL, Redis and others.  
+The data storage component is called Storage Engine like MySQL.  
+This means that you can select the Storage Engine for according to the I/O pattern of applications and the persistence.  
 
 # Use example of MyCassandra
 
@@ -54,7 +54,8 @@ If you use MySQL storage engine, you must specify several schema parameters.
 
 - columnfamily_type/ColumnFamilyType: columnfamily type (MySQL data type). 
 
-With 'VARBINARY', the max columnFamily size is 65535 bytes, and with 'LONGBLOB', 4 GB. It depends on data type constraints of MySQL (VARBINARY or LONGBLOB or the others). 
+With 'VARBINARY', the max columnFamily size is 65535 bytes, and with 'LONGBLOB', 4 GB.   
+It depends on data type constraints of MySQL (VARBINARY or LONGBLOB or the others).   
 
 - storage_engine/StorageEngine: 'InnoDB', 'MyISAM', etc. MySQL storage engine itself. 
 
