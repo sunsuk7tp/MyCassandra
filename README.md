@@ -96,25 +96,24 @@ It depends on data type constraints of MySQL (VARBINARY or LONGBLOB or the other
 - MySQL automally make table according to the above prameters.
 
 ## 3) mysql setup.
-1. You make mysql user, 'cassandra_user'.   
-2. The cassandra_user needs to hava all privileges.   
-3. For quickly starting, you should specify 'root'.   
-4. You make database by the keyspaces.   
-5. In the above example, you must make 'mykeyspace' database.   
-
-
     mysql> GRANT cassandra_user;
     mysql> CREATE DATABASE system; # 'system' is the Cassandra's internal keyspace.
     mysql> CREATE DATABASE <keyspace_name>; # <keyspace_name> is the keyspace name defined by storage-conf.xml
     mysql> CREATE DATABASE mykeyspace;
+
+
+1. You make mysql user, 'cassandra_user'.   
+2. The cassandra_user needs to hava all privileges.   
+3. For quickly starting, you should specify 'root'.   
+4. You make database by the keyspaces.  
+5. In the above example, you must make 'mykeyspace' database. (0.6 only)
+
 ## 4) run.
-- You can run MyCassandra as Cassandra.
-
-
     $ ./bin/cassandra
 
-## 5) schema load. (0.7~)
+- You can run MyCassandra as Cassandra.
 
+## 5) schema load. (0.7~)
     $ ./bin/schmatool localhost 8080 import
 
 ## 6) dynamicaly create keyspace/columnfamily (0.7~)
