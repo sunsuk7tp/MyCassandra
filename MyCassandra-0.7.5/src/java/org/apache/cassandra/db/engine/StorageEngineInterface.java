@@ -10,9 +10,8 @@ import org.apache.cassandra.db.DecoratedKey;
 
 public interface StorageEngineInterface
 {
-    public int put(String rowKey, ColumnFamily cf, boolean isDelete); /* put cf in a row specified rowKey. if isDelete is true, overwrite*/
+    public int put(String rowKey, ColumnFamily cf); /* put cf in a row specified rowKey. This method include insert, update and delete to a rowKey*/
     public ColumnFamily get(String rowKey); /* get a column family specified rowKey */
     public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults); /* range query: from startWith to stopAt limit maxResults*/
-    public int delete(String rowKey); /* delete a row specified rowKey */
     public int truncate(); /* column family (table) truncation*/
 }

@@ -3,6 +3,7 @@ package org.apache.cassandra.db.engine;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Set;
 import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +19,26 @@ public abstract class DBInstance implements StorageEngineInterface
     private static final Logger logger = LoggerFactory.getLogger(DBInstance.class);
     String ksName, cfName;
 
-    public int put(String rowKey, ColumnFamily cf, boolean isDelete)
+    public int put(String rowKey, ColumnFamily cf)
     {
-        ColumnFamily oldcf = isDelete ? null : get(rowKey);
-        return oldcf != null ? update(rowKey, cf, oldcf) : insert(rowKey, cf);
+        if (cf.isMarkedForDelete())
+        {
+            return delete(rowKey);
+        }
+        else
+        {
+            Set<ByteBuffer> cNames = cf.getRemovedColumnNames();
+            if (cNames != null && !cNames.isEmpty())
+            {
+                ColumnFamily newcf = get(rowKey);
+                for (Object cName : cNames.toArray())
+                {
+                    newcf.remove((ByteBuffer) cName);
+                }
+                return insert(rowKey, newcf);
+            }
+            else return update(rowKey, cf, get(rowKey));
+        }
     }
 
     public ColumnFamily get(String rowKey)

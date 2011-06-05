@@ -881,24 +881,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             {
                 String keyName = key.getTxtKey();
                 DBInstance dbi = getDBInstance();
-                if (columnFamily.isMarkedForDelete())
-                {
-                    dbi.delete(keyName);
-                }
-                else
-                {
-                    Set<ByteBuffer> cNames = columnFamily.getRemovedColumnNames();
-                    if (cNames != null && !cNames.isEmpty())
-                    {
-                        ColumnFamily cf = dbi.get(keyName);
-                        for (Object cName : cNames.toArray())
-                            cf.remove((ByteBuffer) cName);
-                        if (dbi.put(keyName, cf, true) < 0)
-                            throw new IOException("can't delete " + keyName + " in a storage.");
-                    }
-                    else if (dbi.put(keyName, columnFamily, false) < 0)
-                        throw new IOException("can't insert or update " + keyName + " in a storage.");
-                }
+                if (dbi.put(keyName, columnFamily) < 0)
+                    throw new IOException("can't insert or update " + keyName + " in a storage.");
                 return null;
             }
         }
