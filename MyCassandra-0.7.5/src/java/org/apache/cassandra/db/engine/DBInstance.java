@@ -62,12 +62,10 @@ public abstract class DBInstance implements StorageEngine
 
     public abstract Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults);
     public abstract int truncate();
-
-    public abstract int delete(String rowKey);
     public abstract int dropTable();
     public abstract int dropDB();
-    public abstract int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType);
-    public abstract int createProcedure(int rowKeySize, int columnFamilySize);
+
+    public abstract int delete(String rowKey);
     public abstract int insert(String rowKey, ColumnFamily cf);
     public abstract int update(String rowKey, ColumnFamily newcf, ColumnFamily cf);
     public abstract byte[] select(String rowKey);

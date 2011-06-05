@@ -12,7 +12,7 @@ import org.apache.cassandra.db.DecoratedKey;
 import org.jredis.JRedis;
 import org.jredis.RedisException;
 
-public class RedisInstance extends DBInstance
+public class RedisInstance extends DBSchemalessInstance
 {
     JRedis conn;
     
@@ -97,16 +97,6 @@ public class RedisInstance extends DBInstance
             errorMsg("db deletion error", e);
             return -1;
         }
-    }
-
-    public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
-    {
-        return 0;
-    }
-
-    public int createProcedure(int rowKeySize, int columnFamilySize)
-    {
-        return 0;
     }
 
     private synchronized int doInsert(String rowKey, byte[] cfValue)

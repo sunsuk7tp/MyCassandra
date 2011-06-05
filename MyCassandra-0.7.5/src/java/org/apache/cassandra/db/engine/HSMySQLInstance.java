@@ -14,7 +14,7 @@ import org.handlersocket.*;
 import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.DecoratedKey;
 
-public class HSMySQLInstance extends DBInstance
+public class HSMySQLInstance extends DBSchemafulInstance
 {
     HandlerSocket hs;
     private final String PREFIX = "";

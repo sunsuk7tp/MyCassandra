@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.DecoratedKey;
 
-public class MySQLInstance extends DBInstance
+public class MySQLInstance extends DBSchemafulInstance
 {
 
     Connection conn;

@@ -19,7 +19,7 @@ import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoURI;
 
-public class MongoInstance extends DBInstance
+public class MongoInstance extends DBSchemalessInstance
 {
 
     DB conn;
@@ -86,16 +86,6 @@ public class MongoInstance extends DBInstance
         doc.put(KEY, rowKey);
         coll.remove(doc);
         return 1;
-    }
-
-    public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
-    {
-        return 0;
-    }
-
-    public int createProcedure(int rowKeySize, int columnFanukySize)
-    {
-        return 0;
     }
 
     private synchronized int doUpdate(String rowKey, byte[] cfValue)

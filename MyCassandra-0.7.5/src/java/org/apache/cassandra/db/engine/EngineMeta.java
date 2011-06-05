@@ -63,28 +63,29 @@ public class EngineMeta
     // init setup and return the instance specified in storageType
     public static StorageEngine getEngine(int storageType, String tableName, String cfName, int maxKeySize, int maxCFSize, String storageSize, String storageEngine, boolean isLong)
     {
-        DBInstance dbi = null;
+        StorageEngine engine = null;
         switch (storageType)
         {
             case BIGTABLE:
                 break;
             case REDIS:
-                dbi = new RedisInstance(tableName, cfName);
+                engine = new RedisInstance(tableName, cfName);
                 break;
             case MYSQL:
             default:
-                dbi = new MySQLInstance(tableName, cfName);
+                DBSchemafulInstance dbi = new MySQLInstance(tableName, cfName);
                 if(isLong) dbi.create(maxKeySize, maxCFSize, BLOB, "MyISAM");
                 else dbi.create(maxKeySize, maxCFSize, storageSize, storageEngine);
                 dbi.createProcedure(maxKeySize, maxCFSize);
+                engine = dbi;
                 break;
             case MONGODB:
-                dbi = new MongoInstance(tableName, cfName);
+                engine = new MongoInstance(tableName, cfName);
                 break;
             case HSMYSQL:
-                dbi = new HSMySQLInstance(tableName, cfName);
+                engine = new HSMySQLInstance(tableName, cfName);
                 break;
         }
-        return dbi;
+        return engine;
     }
 }
