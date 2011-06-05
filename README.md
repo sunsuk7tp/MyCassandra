@@ -41,20 +41,15 @@ For example, if you want to use MySQL,
 
 ## 2) You define the database schema at storage-conf.xml.
 
-Example, if you want to make "mykeyspace" keyspace and "mycf1","mycf2","mycf3" column families in that.
+Example, if you want to make "mykeyspace" keyspace and "mycf1","mycf2","mycf3" column families in that.   
+If you use MySQL storage engine, you must specify several schema parameters.   
 
-If you use MySQL storage engine, you must specify several schema parameters.
-
-- rowkey_size/RowKeySize: key size (byte)
-
-- columnfamily_size/ColumnFamilySize: columnFamily object size (byte)
-
-- columnfamily_type/ColumnFamilyType: columnfamily type (MySQL data type). 
-
-With 'VARBINARY', the max columnFamily size is 65535 bytes, and with 'LONGBLOB', 4 GB.   
-It depends on data type constraints of MySQL (VARBINARY or LONGBLOB or the others).   
-
-- storage_engine/StorageEngine: 'InnoDB', 'MyISAM', etc. MySQL storage engine itself. 
+- rowkey_size/RowKeySize: key size (byte)    
+- columnfamily_size/ColumnFamilySize: columnFamily object size (byte)   
+- columnfamily_type/ColumnFamilyType: columnfamily type (MySQL data type).  
+    - With 'VARBINARY', the max columnFamily size is 65535 bytes, and with 'LONGBLOB', 4 GB.   
+    - It depends on data type constraints of MySQL (VARBINARY or LONGBLOB or the others).   
+- storage_engine/StorageEngine: 'InnoDB', 'MyISAM', etc. MySQL storage engine itself.  
 
 ### @0.7
     keyspaces:
