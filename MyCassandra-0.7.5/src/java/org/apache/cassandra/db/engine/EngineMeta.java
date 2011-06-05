@@ -61,7 +61,7 @@ public class EngineMeta
     }
 
     // init setup and return the instance specified in storageType
-    public static DBInstance getDBInstance(int storageType, String tableName, String cfName, int maxKeySize, int maxCFSize, String storageSize, String storageEngine, boolean isLong)
+    public static StorageEngine getEngine(int storageType, String tableName, String cfName, int maxKeySize, int maxCFSize, String storageSize, String storageEngine, boolean isLong)
     {
         DBInstance dbi = null;
         switch (storageType)

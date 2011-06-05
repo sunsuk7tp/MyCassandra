@@ -41,7 +41,7 @@ import org.apache.cassandra.db.Table;
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.migration.Migration;
 import org.apache.cassandra.db.engine.EngineMeta;
-import org.apache.cassandra.db.engine.DBInstance;
+import org.apache.cassandra.db.engine.StorageEngine;
 import org.apache.cassandra.dht.IPartitioner;
 import org.apache.cassandra.io.sstable.Descriptor;
 import org.apache.cassandra.io.util.FileUtils;
@@ -586,7 +586,7 @@ public class DatabaseDescriptor
                 String columnfamilyType = (cf.columnfamily_type != null ? cf.columnfamily_type : EngineMeta.defaultColumnFamilyType);
                 String storageEngine = (cf.storage_engine != null ? cf.storage_engine : EngineMeta.defaultStorageEngine);
                 if(engineMeta.isSchemaUsed()) {
-                    DBInstance dbi = engineMeta.getDBInstance(engineMeta.getStorageType(), keyspace.name, cf.name, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, false);
+                    engineMeta.getEngine(engineMeta.getStorageType(), keyspace.name, cf.name, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, false);
                 }
                 
                 ColumnFamilyType cfType = cf.column_type == null ? ColumnFamilyType.Standard : cf.column_type;

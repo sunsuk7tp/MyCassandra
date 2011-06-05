@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.DecoratedKey;
 
-public interface StorageEngineInterface
+public interface StorageEngine
 {
     /* 
      * put cf in a row specified rowKey. 

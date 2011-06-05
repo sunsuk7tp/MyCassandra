@@ -14,7 +14,7 @@ import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.ColumnFamilySerializer;
 import org.apache.cassandra.db.DecoratedKey;
 
-public abstract class DBInstance implements StorageEngineInterface
+public abstract class DBInstance implements StorageEngine
 {
     private static final Logger logger = LoggerFactory.getLogger(DBInstance.class);
     String ksName, cfName;
