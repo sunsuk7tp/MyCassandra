@@ -148,6 +148,8 @@ OTHER DEALINGS IN THE SOFTWARE.
 # Contact
 If you have something, please contact me!!
 
+- Google Group: [http://groups.google.com/group/my-cassandra/](http://groups.google.com/group/my-cassandra/ "http://groups.google.com/group/my-cassandra/")
+
 - E-mail: sunsuk7tp at gmail.com
 
 - Twitter: [@sunsuk7tp](http://twitter.com/sunsuk7tp "@sunsuk7tp"), [@_MyCassandra](http://twitter.com/_MyCassandra "@_MyCassandra"), [@MyCassandraJP](http://twitter.com/MyCassandraJP "@MyCassandraJP"),
