@@ -20,11 +20,19 @@ public interface StorageEngineInterface
      * */
     public ColumnFamily get(DecoratedKey key);
     /* 
-     * range query: from startWith to stopAt limit maxResults
+     * range query: from startWith to stopAt limit maxResults.
      * */
     public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults); 
     /* 
-     * range query: from startWith to stopAt limit maxResults
+     * truncate table.
      * */
     public int truncate();
+    /*
+    * drop table.
+    * */
+    public int dropTable();
+    /*
+     * drop database.
+    * */
+    public int dropDB();
 }

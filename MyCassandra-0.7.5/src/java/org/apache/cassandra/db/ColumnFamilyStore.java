@@ -54,6 +54,7 @@ import org.apache.cassandra.db.filter.*;
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.db.marshal.LocalByPartionerType;
+import org.apache.cassandra.db.engine.StorageEngineInterface;
 import org.apache.cassandra.db.engine.DBInstance;
 import org.apache.cassandra.db.engine.EngineMeta;
 import org.apache.cassandra.dht.*;
@@ -140,8 +141,9 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     private volatile DefaultInteger memsize;
     private volatile DefaultDouble memops;
     
-    private static HashMap<String, DBInstance> dbis = new HashMap<String, DBInstance>();
+    private static HashMap<String, StorageEngineInterface> dbis = new HashMap<String, StorageEngineInterface>();
     //private static DBInstance dbi;
+    private static StorageEngineInterface sei;
     
     private volatile DefaultInteger rowCacheSaveInSeconds;
     private volatile DefaultInteger keyCacheSaveInSeconds;
@@ -287,7 +289,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         }
 
         boolean isLong = DatabaseDescriptor.isSchemaUsed() && columnFamily.equals("Migrations") ? true : false;
-        DBInstance dbi = EngineMeta.getDBInstance(DatabaseDescriptor.getStorageType(), new String(table.name), columnFamilyName, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, isLong);
+        StorageEngineInterface dbi = EngineMeta.getDBInstance(DatabaseDescriptor.getStorageType(), new String(table.name), columnFamilyName, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, isLong);
         if (!DatabaseDescriptor.isBigtable())
         {
             setDBInstance(dbi);
@@ -482,12 +484,12 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         return count > 0 ? (int) (sum / count) : 0;
     }
 
-    public void setDBInstance(DBInstance dbi)
+    public void setDBInstance(StorageEngineInterface dbi)
     {
         dbis.put(columnFamily, dbi);
     }
 
-    public DBInstance getDBInstance()
+    public StorageEngineInterface getDBInstance()
     {
         return dbis.get(columnFamily);
     }
