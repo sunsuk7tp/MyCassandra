@@ -2,6 +2,7 @@
 
 MyCassandra is the 'modular' NoSQL. 
 MyCassandra is the project branched from Cassandra.
+MyCassandra-0.X.Y is based on Cassandra-0.X.Y.
 
 With MyCassandra, you can exchange Cassandra's storage like Bigtable (commitlog, memtable, sstable) with MySQL, Redis and others.
 The data storage component is called Storage Engine like MySQL. 
