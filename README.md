@@ -1,22 +1,26 @@
 # MyCassandra
 
-MyCassandra is the 'modular' NoSQL. 
-MyCassandra is the project branched from Cassandra.
+MyCassandra is the 'modular' NoSQL.  
+MyCassandra is the project branched from Cassandra.  
+MyCassandra-0.X.Y is based on Cassandra-0.X.Y.  
 
-With MyCassandra, you can exchange Cassandra's storage like Bigtable (commitlog, memtable, sstable) with MySQL, Redis and others.
-The data storage component is called Storage Engine like MySQL. 
-This means that you can select the Storage Engine for according to the I/O pattern of applications and the persistence.
+With MyCassandra, you can exchange Cassandra's storage like Bigtable (commitlog, memtable, sstable) with MySQL, Redis and others.  
+The data storage component is called Storage Engine like MySQL.  
+This means that you can select the Storage Engine for according to the I/O pattern of applications and the persistence.  
+
+# Use example of MyCassandra
+
+- decentralized any NoSQL cluster (MySQL, Redis, MongoDB, ...)
+
+- read and write optimized NoSQL which combine different storage engines
 
 # MyCassandra Storage Engine
 In default, you can select that.
 
-- Bigtable (the original Cassandra)
-
-- MySQL
-
-- Redis
-
-- MongoDB
+- Bigtable (the original Cassandra)   
+- MySQL   
+- Redis   
+- MongoDB   
 
 For example, if you want to use MySQL, 
 ## 1) add several statements at conf/cassandra.yaml (0.7~) or conf/storage-conf.xml (0.6~)
@@ -37,19 +41,15 @@ For example, if you want to use MySQL,
 
 ## 2) You define the database schema at storage-conf.xml.
 
-Example, if you want to make "mykeyspace" keyspace and "mycf1","mycf2","mycf3" column families in that.
+Example, if you want to make "mykeyspace" keyspace and "mycf1","mycf2","mycf3" column families in that.   
+If you use MySQL storage engine, you must specify several schema parameters.   
 
-If you use MySQL storage engine, you must specify several schema parameters.
-
-- rowkey_size/RowKeySize: key size (byte)
-
-- columnfamily_size/ColumnFamilySize: columnFamily object size (byte)
-
-- columnfamily_type/ColumnFamilyType: columnfamily type (MySQL data type). 
-
-With 'VARBINARY', the max columnFamily size is 65535 bytes, and with 'LONGBLOB', 4 GB. It depends on data type constraints of MySQL (VARBINARY or LONGBLOB or the others). 
-
-- storage_engine/StorageEngine: 'InnoDB', 'MyISAM', etc. MySQL storage engine itself. 
+- rowkey_size/RowKeySize: key size (byte)    
+- columnfamily_size/ColumnFamilySize: columnFamily object size (byte)   
+- columnfamily_type/ColumnFamilyType: columnfamily type (MySQL data type).  
+    - With 'VARBINARY', the max columnFamily size is 65535 bytes, and with 'LONGBLOB', 4 GB.   
+    - It depends on data type constraints of MySQL (VARBINARY or LONGBLOB or the others).   
+- storage_engine/StorageEngine: 'InnoDB', 'MyISAM', etc. MySQL storage engine itself.  
 
 ### @0.7
     keyspaces:
@@ -88,30 +88,25 @@ With 'VARBINARY', the max columnFamily size is 65535 bytes, and with 'LONGBLOB',
 - MySQL automally make table according to the above prameters.
 
 ## 3) mysql setup.
-- You make mysql user, cassandra_user.
-
-- The cassandra_user needs to hava all privileges.
-
-- For quickly starting, you should specify 'root'.
-
-    GRANT cassandra_user
-
-- You make database by the keyspaces.
-
+    $ mysql -u root
+    mysql> GRANT ALL PRIVILEGES ON *.* TO cassandra_user IDENTIFIED BY 'cA33anDra';
     mysql> CREATE DATABASE system; # 'system' is the Cassandra's internal keyspace.
     mysql> CREATE DATABASE <keyspace_name>; # <keyspace_name> is the keyspace name defined by storage-conf.xml
+    mysql> CREATE DATABASE mykeyspace;
 
-- In the above example, you must make database as this,
 
-    mysql> CREATE DATABASE table;
+1. You make mysql user, 'cassandra_user'.   
+2. The cassandra_user needs to hava all privileges.   
+3. For quickly starting, you should specify 'root'.   
+4. You make database by the keyspaces.  
+5. In the above example, you must make 'mykeyspace' database. (0.6 only)
 
 ## 4) run.
-- You can run MyCassandra as Cassandra.
-
     $ ./bin/cassandra
 
-## 5) schema load. (0.7~)
+- You can run MyCassandra as Cassandra.
 
+## 5) schema load. (0.7~)
     $ ./bin/schmatool localhost 8080 import
 
 ## 6) dynamicaly create keyspace/columnfamily (0.7~)
