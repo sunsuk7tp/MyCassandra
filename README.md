@@ -8,6 +8,12 @@ With MyCassandra, you can exchange Cassandra's storage like Bigtable (commitlog,
 The data storage component is called Storage Engine like MySQL. 
 This means that you can select the Storage Engine for according to the I/O pattern of applications and the persistence.
 
+# Use example of MyCassandra
+
+- decentralized any NoSQL cluster (MySQL, Redis, MongoDB, ...)
+
+- read and write optimized NoSQL which combine different storage engines
+
 # MyCassandra Storage Engine
 In default, you can select that.
 
