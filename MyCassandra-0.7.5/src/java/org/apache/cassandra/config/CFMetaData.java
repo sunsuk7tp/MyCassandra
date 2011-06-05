@@ -524,8 +524,8 @@ public final class CFMetaData
         cf.memtable_operations_in_millions = memtableOperationsInMillions;
         cf.rowkey_size = rowkeySize;
         cf.columnfamily_size = columnfamilySize;
-        cf.columnfamily_type = columnfamilyType;
-        cf.storage_engine = storageEngine;
+        cf.columnfamily_type = new Utf8(columnfamilyType);
+        cf.storage_engine = new Utf8(storageEngine);
         cf.column_metadata = SerDeUtils.createArray(column_metadata.size(),
                                                     org.apache.cassandra.avro.ColumnDef.SCHEMA$);
         for (ColumnDefinition cd : column_metadata.values())
