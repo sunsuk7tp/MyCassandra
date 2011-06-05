@@ -66,6 +66,7 @@ public class VersionedValue implements Comparable<VersionedValue>
     {
         this.value = value;
         this.version = version;
+        stype = 0;
     }
 
     public VersionedValue(String value, int version, int stype)
