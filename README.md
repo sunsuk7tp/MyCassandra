@@ -17,13 +17,10 @@ This means that you can select the Storage Engine for according to the I/O patte
 # MyCassandra Storage Engine
 In default, you can select that.
 
-- Bigtable (the original Cassandra)
-
-- MySQL
-
-- Redis
-
-- MongoDB
+- Bigtable (the original Cassandra)   
+- MySQL   
+- Redis   
+- MongoDB   
 
 For example, if you want to use MySQL, 
 ## 1) add several statements at conf/cassandra.yaml (0.7~) or conf/storage-conf.xml (0.6~)
@@ -96,7 +93,8 @@ It depends on data type constraints of MySQL (VARBINARY or LONGBLOB or the other
 - MySQL automally make table according to the above prameters.
 
 ## 3) mysql setup.
-    mysql> GRANT cassandra_user;
+    $ mysql -u root
+    mysql> GRANT ALL PRIVILEGES ON *.* TO cassandra_user IDENTIFIED BY 'cA33anDra';
     mysql> CREATE DATABASE system; # 'system' is the Cassandra's internal keyspace.
     mysql> CREATE DATABASE <keyspace_name>; # <keyspace_name> is the keyspace name defined by storage-conf.xml
     mysql> CREATE DATABASE mykeyspace;
