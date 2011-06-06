@@ -32,30 +32,29 @@ auto_bootstrap: false
 # Set storage engine type (Bigtable, MySQL, Redis, MongoDB, ...) and
 # db host, port, username and pass
 
-db: MySQL
-db_host: localhost
-db_port: 3306
-db_user: root
-db_pass:  
 
-# db: Bigtable
-# db_host: 
-# db_port: 
-# db_user:
-# db_pass:
+engines:
+    - name: MySQL
+      host: localhost
+      port: 3306
+      user: root
+      pass: 
+    - name: Bigtable
+      host: 
+      user:
+      pass:
+    - name: Redis
+      host: localhost
+      port: 6379
+      user: 
+      pass:
+    - name: MongoDB
+      host: localhost
+      port: 27017
+      user: 
+      pass:
 
-# db: Redis
-# db_host: localhost
-# db_port: 6379
-# db_user: 
-# db_pass:
-
-# db: MongoDB
-# db_host: loca;host
-# db_port: 27017
-# db)user: 
-# db_pass:
-
+defaultengine: MySQL
 # See http://wiki.apache.org/cassandra/HintedHandoff
 hinted_handoff_enabled: true
 # this defines the maximum amount of time a dead host will have hints

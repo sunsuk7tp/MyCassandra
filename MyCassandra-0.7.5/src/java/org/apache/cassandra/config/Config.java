@@ -36,11 +36,8 @@ public class Config
     public Boolean hinted_handoff_enabled = true;
     public Integer max_hint_window_in_ms = Integer.MAX_VALUE;
     
-    public String db;
-    public String db_host;
-    public String db_port;
-    public String db_user;
-    public String db_pass;
+    public List<EngineInfo> engines;
+    public String defaultengine;
     
     public String[] seeds;
     public String[] hosts;

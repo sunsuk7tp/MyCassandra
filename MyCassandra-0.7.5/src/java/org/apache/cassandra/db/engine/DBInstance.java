@@ -8,6 +8,8 @@ import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.cassandra.config.DatabaseDescriptor;
+import org.apache.cassandra.config.EngineInfo;
 import org.apache.cassandra.io.util.DataInputBuffer;
 import org.apache.cassandra.io.util.DataOutputBuffer;
 import org.apache.cassandra.db.ColumnFamily;
@@ -17,7 +19,14 @@ import org.apache.cassandra.db.DecoratedKey;
 public abstract class DBInstance implements StorageEngine
 {
     private static final Logger logger = LoggerFactory.getLogger(DBInstance.class);
-    String ksName, cfName;
+    String ksName;
+    String cfName;
+
+    // default configuration
+    String host = "localhost";
+    int port;
+    String user;
+    String pass;
 
     public int put(DecoratedKey key, ColumnFamily cf)
     {
@@ -82,6 +91,19 @@ public abstract class DBInstance implements StorageEngine
     public ColumnFamily bytes2ColumnFamily(byte[] b) throws IOException
     {
         return b != null ? new ColumnFamilySerializer().deserialize(new DataInputBuffer(b, 0, b.length)) : null;
+    }
+
+    public void setConfiguration()
+    {
+        EngineInfo einfo = DatabaseDescriptor.getEngineInfo();
+        if (einfo.host != null)
+            host = einfo.host;
+        if (einfo.port > 0)
+            port = einfo.port;
+        if (einfo.user != null)
+            user = einfo.user;
+        if (einfo.pass != null)
+            pass = einfo.pass;
     }
 
     public void errorMsg(String msg, Exception e)

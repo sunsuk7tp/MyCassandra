@@ -17,6 +17,8 @@ import org.apache.cassandra.db.DecoratedKey;
 public class HSMySQLInstance extends DBSchemafulInstance
 {
     HandlerSocket hs;
+    int port = 3306;
+
     private final String PREFIX = "";
     private final String ID = "1";
     private final String KEY = "rkey";
@@ -28,9 +30,11 @@ public class HSMySQLInstance extends DBSchemafulInstance
     {
         this.ksName = ksName;
         this.cfName = PREFIX + cfName;
+        setConfiguration();
         try
         {
-            hs = new HSMySQLConfigure().connect();
+            hs = new HandlerSocket();
+            hs.open(host, port);
             hs.command().openIndex(ID, this.ksName, this.cfName, "PRIMARY", KEY + "," + VALUE);
             hs.execute();
         }

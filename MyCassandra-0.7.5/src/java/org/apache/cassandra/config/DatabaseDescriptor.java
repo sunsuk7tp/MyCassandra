@@ -343,8 +343,13 @@ public class DatabaseDescriptor
             {
                 throw new ConfigurationException("in_memory_compaction_limit_in_mb must be a positive integer");
             }
-            
-            engineMeta = EngineMeta.getEngineMeta(conf.db);
+
+            for (EngineInfo einfo : conf.engines)
+            {
+                int storageType = engineMeta.getEngineMeta(einfo.name).getStorageType();
+                engineMeta.enginesInfo.put(storageType, einfo);
+            }
+            engineMeta = EngineMeta.getEngineMeta(conf.defaultengine);
             if (engineMeta.isBigtable())
             {
                /* data file and commit log directories. they get created later, when they're needed. */
@@ -1195,24 +1200,14 @@ public class DatabaseDescriptor
         return engineMeta.isSchemaUsed();
     }
 
-    public static String getDBHost()
+    public static EngineInfo getEngineInfo()
     {
-        return conf.db_host;
+        return getEngineInfo(getStorageType());
     }
-
-    public static String getDBPort()
+    
+    public static EngineInfo getEngineInfo(int storageType)
     {
-        return conf.db_port;
-    }
-
-    public static String getDBUser()
-    {
-        return conf.db_user;
-    }
-
-    public static String getDBPass()
-    {
-        return conf.db_pass;
+        return engineMeta.enginesInfo.get(storageType);
     }
 
     public static boolean hintedHandoffEnabled()

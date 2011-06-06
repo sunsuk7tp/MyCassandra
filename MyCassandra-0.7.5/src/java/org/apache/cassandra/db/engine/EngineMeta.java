@@ -1,5 +1,10 @@
 package org.apache.cassandra.db.engine;
 
+import org.apache.cassandra.config.EngineInfo;
+
+import java.util.Map;
+import java.util.HashMap;
+
 public class EngineMeta
 {
     // A write-optimize SE is a smaller number, and a read-optimized SE is a bigger number.
@@ -10,6 +15,7 @@ public class EngineMeta
     public static final int MONGODB = 5;
     // label name specified in cassandra.yaml 
     public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "HSMySQL", "MongoDB"};
+    public static final Map<Integer, EngineInfo> enginesInfo = new HashMap<Integer, EngineInfo>(storageLabels.length);
     
     // schema used se number
     public static final int[] schemaUsedTypes = {MYSQL};

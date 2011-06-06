@@ -13,14 +13,15 @@ import org.apache.cassandra.db.DecoratedKey;
 public class MySQLInstance extends DBSchemafulInstance
 {
 
+    // override. default configuration
+    int port = 3306;
+    String user = "root";
+
     Connection conn;
     PreparedStatement pstInsert, pstUpdate, pstDelete;
 
     int debug = 0;
 
-    int multiMax = 100;
-    int multiCount = 0;
-    String bsql;
     private final String PREFIX = "_";
     private final String KEY = "rkey";
     private final String VALUE = "cf";
@@ -33,14 +34,17 @@ public class MySQLInstance extends DBSchemafulInstance
 
     private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, dropTableSt, dropDBSt, getPr, setPr;
 
+    String bsql;
+ 
     public MySQLInstance(String ksName, String cfName)
     {
         this.ksName = ksName;
         this.cfName = PREFIX + cfName;
 
+        setConfiguration();
         setStatementDefinition();
         createDB();
-        conn = new MySQLConfigure().connect(this.ksName);
+        conn = new MySQLConfigure().connect(this.ksName, host, port, user, pass);
 
         try
         {
@@ -230,7 +234,7 @@ public class MySQLInstance extends DBSchemafulInstance
     {
         try
         {
-          Statement stmt = new MySQLConfigure().connect("").createStatement();
+          Statement stmt = new MySQLConfigure().connect("", host, port, user, pass).createStatement();
           ResultSet rs = stmt.executeQuery("SHOW DATABASES");
           while (rs.next())
               if (rs.getString(1).equals(ksName))

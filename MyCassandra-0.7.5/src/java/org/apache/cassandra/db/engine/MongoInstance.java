@@ -24,8 +24,12 @@ public class MongoInstance extends DBSchemalessInstance
 
     DB conn;
     DBCollection coll;
-    public static final String PREFIX = "_";
+    //override. default configuration
+    int port = 6379;
+    String user = null;
+    String pass = null;
 
+    public static final String PREFIX = "_";
     public static final String KEY = "k";
     public static final String VALUE = "v";
 
@@ -34,7 +38,7 @@ public class MongoInstance extends DBSchemalessInstance
         this.ksName = PREFIX + ksName;
         this.cfName = cfName;
 
-        conn = new MongoConfigure().connect(this.ksName);
+        conn = new MongoConfigure().connect(this.ksName, host, port, user, pass);
         coll = conn.getCollection(this.cfName);
         coll.createIndex(new BasicDBObject(KEY,1).append("unique", true));
     }

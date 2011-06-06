@@ -11,25 +11,31 @@ import org.apache.cassandra.db.DecoratedKey;
 
 import org.jredis.JRedis;
 import org.jredis.RedisException;
+import org.jredis.ri.alphazero.JRedisClient;
 
 public class RedisInstance extends DBSchemalessInstance
 {
     JRedis conn;
     
+    //override. default configuration
+    int port = 6379;
+
     final String KEYSEPARATOR = ":";
+
+    public RedisInstance(String ksName, String cfName, int dbIndex)
+    {
+        this.ksName = ksName;
+        this.cfName = cfName;
+        setConfiguration();
+        conn = new JRedisClient(host, port, pass, dbIndex);
+    }
 
     public RedisInstance(String ksName, String cfName)
     {
         this.ksName = ksName;
         this.cfName = cfName;
-        conn = new RedisConfigure().connect(0);
-    }
-    
-    public RedisInstance(String ksName, String cfName, int dbIndex)
-    {
-        this.ksName = ksName;
-        this.cfName = cfName;
-        conn = new RedisConfigure().connect(dbIndex);
+        setConfiguration();
+        conn = new JRedisClient(host, port, pass, 0);
     }
 
     public int insert(String rowKey, ColumnFamily cf)

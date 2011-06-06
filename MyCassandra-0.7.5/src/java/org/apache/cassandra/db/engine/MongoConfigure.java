@@ -12,24 +12,20 @@ import com.mongodb.MongoURI;
 
 public class MongoConfigure
 {
-    public DB connect(String dbInstance)
+    public DB connect(String dbName, String host, int port, String user, String pass)
     {
-        String dbHost = DatabaseDescriptor.getDBHost();
-        int dbPort = new Integer(DatabaseDescriptor.getDBPort());
-        String dbUser = DatabaseDescriptor.getDBUser();
-        String dbPass = DatabaseDescriptor.getDBPass();
         try
         {
-            Mongo mongo = new Mongo(dbHost, dbPort);
-            DB db = mongo.getDB(dbInstance);
-            if (dbUser != null && dbPass != null)
-                if (!db.authenticate(dbUser, dbPass.toCharArray()))
+            Mongo mongo = new Mongo(host, port);
+            DB db = mongo.getDB(dbName);
+            if (user != null && pass != null)
+                if (!db.authenticate(user, pass.toCharArray()))
                     throw new Exception("authentication error!!");
-            return mongo.getDB(dbInstance);
+            return db;
         }
         catch (Exception e)
         {
-            System.err.println("can't connect MongoDB");
+            System.err.println("can't connect MongoDB [host: " + host + " port:" + port + " user:" + user + "]");
             System.exit(1);
         }
         return null;
