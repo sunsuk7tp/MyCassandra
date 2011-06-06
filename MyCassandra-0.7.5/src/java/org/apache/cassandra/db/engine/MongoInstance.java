@@ -25,7 +25,7 @@ public class MongoInstance extends DBSchemalessInstance
     DB conn;
     DBCollection coll;
     //override. default configuration
-    int port = 6379;
+    int port = 27017;
     String user = null;
     String pass = null;
 
