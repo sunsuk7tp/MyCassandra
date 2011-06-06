@@ -24,7 +24,7 @@ In default, you can select that.
 
 For example, if you want to use MySQL, 
 ## 1) add several statements at conf/cassandra.yaml (0.7~) or conf/storage-conf.xml (0.6~)
-
+### @0.7
     engines: 
         - name: MySQL
           host: localhost
@@ -35,8 +35,7 @@ For example, if you want to use MySQL,
     
     defaultengines: MySQL # <--- This engine is used in MyCassandra
     
-    --------------------------------
-    
+### @0.6    
     <DataBase>MySQL</DataBase>
     <SQL>
         <SQLHost>localhost</SQLHost> # mysql host
