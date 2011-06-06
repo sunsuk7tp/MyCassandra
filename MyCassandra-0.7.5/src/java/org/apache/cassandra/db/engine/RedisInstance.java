@@ -39,8 +39,7 @@ public class RedisInstance extends DBSchemalessInstance
 
     public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)
     {
-        cf.addAll(newcf);
-        return doInsert(makeRowKey(rowKey), cf.toBytes());
+        return doInsert(makeRowKey(rowKey), mergeColumnFamily(cf, newcf));
     }
 
     public byte[] select(String rowKey)

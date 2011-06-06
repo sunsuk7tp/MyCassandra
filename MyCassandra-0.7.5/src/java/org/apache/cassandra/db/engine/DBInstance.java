@@ -38,7 +38,10 @@ public abstract class DBInstance implements StorageEngine
                 }
                 return insert(rowKey, newcf);
             }
-            else return update(rowKey, cf, get(rowKey));
+            else {
+                ColumnFamily oldcf = get(rowKey);
+                return oldcf != null ? update(rowKey, cf, oldcf) : insert(rowKey, cf);
+            }
         }
     }
 
