@@ -29,18 +29,18 @@ public abstract class DBInstance implements StorageEngine
         else
         {
             Set<ByteBuffer> cNames = cf.getRemovedColumnNames();
+            ColumnFamily cfOld = get(rowKey);
             if (cNames != null && !cNames.isEmpty())
             {
-                ColumnFamily newcf = get(rowKey);
                 for (Object cName : cNames.toArray())
                 {
-                    newcf.remove((ByteBuffer) cName);
+                    cfOld.remove((ByteBuffer) cName);
                 }
-                return insert(rowKey, newcf);
+                return insert(rowKey, cfOld);
             }
-            else {
-                ColumnFamily oldcf = get(rowKey);
-                return oldcf != null ? update(rowKey, cf, oldcf) : insert(rowKey, cf);
+            else
+            {
+                return cfOld != null ? update(rowKey, cfOld, cf) : insert(rowKey, cf);
             }
         }
     }
