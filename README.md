@@ -25,12 +25,18 @@ In default, you can select that.
 For example, if you want to use MySQL, 
 ## 1) add several statements at conf/cassandra.yaml (0.7~) or conf/storage-conf.xml (0.6~)
 
-    db: MySQL
-    db_host: localhost
-    db_port: 3306
-    db_user: root
-    db_pass: rootpass 
-
+    engines: 
+        - name: MySQL
+          host: localhost
+          port: 3306
+          user: root
+          pass: rootpass 
+            :
+    
+    defaultengines: MySQL # <--- This engine is used in MyCassandra
+    
+    --------------------------------
+    
     <DataBase>MySQL</DataBase>
     <SQL>
         <SQLHost>localhost</SQLHost> # mysql host
