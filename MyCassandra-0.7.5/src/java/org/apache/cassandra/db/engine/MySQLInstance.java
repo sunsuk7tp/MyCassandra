@@ -4,7 +4,6 @@ import java.sql.*;
 import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
-
 import java.nio.ByteBuffer;
 
 import org.apache.cassandra.db.ColumnFamily;

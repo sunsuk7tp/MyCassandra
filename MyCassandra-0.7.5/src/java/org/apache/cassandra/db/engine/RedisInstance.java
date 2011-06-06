@@ -1,7 +1,6 @@
 package org.apache.cassandra.db.engine;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Map;
 import java.util.HashMap;
 import java.nio.ByteBuffer;
