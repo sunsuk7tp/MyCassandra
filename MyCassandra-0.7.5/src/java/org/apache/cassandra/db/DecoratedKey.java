@@ -26,6 +26,7 @@ import org.apache.cassandra.dht.IPartitioner;
 import org.apache.cassandra.dht.Token;
 import org.apache.cassandra.service.StorageService;
 import org.apache.cassandra.utils.ByteBufferUtil;
+import org.apache.cassandra.dht.Token;
 
 /**
  * Represents a decorated key, handy for certain operations
@@ -98,6 +99,11 @@ public class DecoratedKey<T extends Token> implements Comparable<DecoratedKey>
         }
         //XX The 'key' includes the command name and remove it.
         return (new String(b)).replaceAll("\\s|\\W|get_slice|get", "");
+    }
+
+    public byte[] getByteToken()
+    {
+        return new Token(token).toBytes();
     }
 
     @Override

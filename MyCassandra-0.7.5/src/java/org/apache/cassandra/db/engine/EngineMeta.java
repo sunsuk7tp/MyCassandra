@@ -11,14 +11,15 @@ public class EngineMeta
     public static final int BIGTABLE = 1;
     public static final int REDIS = 2;
     public static final int MYSQL = 3;
-    public static final int HSMYSQL = 4;
-    public static final int MONGODB = 5;
+    public static final int RANGEMYSQL = 4;
+    public static final int HSMYSQL = 5;
+    public static final int MONGODB = 6;
     // label name specified in cassandra.yaml 
-    public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "HSMySQL", "MongoDB"};
+    public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "RANGEMYSQL", "HSMySQL", "MongoDB"};
     public static final Map<Integer, EngineInfo> enginesInfo = new HashMap<Integer, EngineInfo>(storageLabels.length);
     
     // schema used se number
-    public static final int[] schemaUsedTypes = {MYSQL};
+    public static final int[] schemaUsedTypes = {MYSQL, RANGEMYSQL};
 
     // for mysql's column family data type params
     public static final String BINARY = "VARBINARY";
@@ -84,6 +85,13 @@ public class EngineMeta
                 else dbi.create(maxKeySize, maxCFSize, storageSize, storageEngine);
                 dbi.createProcedure(maxKeySize, maxCFSize);
                 engine = dbi;
+                break;
+            case RANGEMYSQL:
+                RangeMySQLInstance rdbi = new RangeMySQLInstance(tableName, cfName);
+                if(isLong) rdbi.create(maxKeySize, maxCFSize, BLOB, "MyISAM");
+                else rdbi.create(maxKeySize, maxCFSize, storageSize, storageEngine);
+                rdbi.createProcedure(maxKeySize, maxCFSize);
+                engine = rdbi;
                 break;
             case MONGODB:
                 engine = new MongoInstance(tableName, cfName);
