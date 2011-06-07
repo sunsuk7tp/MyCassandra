@@ -103,7 +103,7 @@ public class DecoratedKey<T extends Token> implements Comparable<DecoratedKey>
 
     public byte[] getByteToken()
     {
-        return ByteBuffer.token.wrap(token).toArray();
+        return token.toBytes();
     }
 
     @Override
