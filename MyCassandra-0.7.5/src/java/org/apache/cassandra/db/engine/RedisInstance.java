@@ -40,6 +40,7 @@ public class RedisInstance extends DBSchemalessInstance
 
     public boolean auth()
     {
+        if(pass == null) pass = "redis"; // dummy pass
         String status = conn.auth(pass);
         return status.equals("OK") ? true : false;
     }
