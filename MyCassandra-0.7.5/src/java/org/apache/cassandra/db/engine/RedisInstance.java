@@ -1,6 +1,7 @@
 package org.apache.cassandra.db.engine;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.HashMap;
 import java.nio.ByteBuffer;
@@ -8,13 +9,11 @@ import java.nio.ByteBuffer;
 import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.DecoratedKey;
 
-import org.jredis.JRedis;
-import org.jredis.RedisException;
-import org.jredis.ri.alphazero.JRedisClient;
+import redis.clients.jedis.BinaryJedis;
 
 public class RedisInstance extends DBSchemalessInstance
 {
-    JRedis conn;
+    BinaryJedis conn;
     
     //override. default configuration
     int port = 6379;
@@ -26,7 +25,8 @@ public class RedisInstance extends DBSchemalessInstance
         this.ksName = ksName;
         this.cfName = cfName;
         setConfiguration();
-        conn = new JRedisClient(host, port, pass, dbIndex);
+        conn = new BinaryJedis(host, port);
+        if(!auth()) System.exit(1);
     }
 
     public RedisInstance(String ksName, String cfName)
@@ -34,7 +34,15 @@ public class RedisInstance extends DBSchemalessInstance
         this.ksName = ksName;
         this.cfName = cfName;
         setConfiguration();
-        conn = new JRedisClient(host, port, pass, 0);
+        conn = new BinaryJedis(host, port);
+        if(!auth()) System.exit(1);
+    }
+
+    public boolean auth()
+    {
+        if(pass == null) pass = "redis"; // dummy pass
+        String status = conn.auth(pass);
+        return status.equals("OK") ? true : false;
     }
 
     public int insert(String rowKey, ColumnFamily cf)
@@ -49,15 +57,7 @@ public class RedisInstance extends DBSchemalessInstance
 
     public byte[] select(String rowKey)
     {
-        try
-        {
             return conn.get(makeRowKey(rowKey));
-        }
-        catch (RedisException e)
-        {
-           errorMsg("db get error", e);
-            return null;
-        }
     }
 
     public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults)
@@ -77,48 +77,33 @@ public class RedisInstance extends DBSchemalessInstance
 
     synchronized public int dropDB()
     {
-        try
-        {
-            conn.flushdb();
-            return 1;
-        }
-        catch (RedisException e)
-        {
-            errorMsg("db drop error", e);
-            return -1;
-        }
+        conn.flushDB();
+        return 1;
     }
 
     synchronized public int delete(String rowKey)
     {
-        try
-        {
-            conn.del(makeRowKey(rowKey));
-            return 1;
-        }
-        catch (RedisException e)
-        {
-            errorMsg("db deletion error", e);
-            return -1;
-        }
+        conn.del(makeRowKey(rowKey));
+        return 1;
     }
 
-    private synchronized int doInsert(String rowKey, byte[] cfValue)
+    private synchronized int doInsert(byte[] rowKey, byte[] cfValue)
+    {
+        conn.set(rowKey, cfValue);
+        return 1;
+    }
+
+    public byte[] makeRowKey(String rowKey)
     {
         try
         {
-            conn.set(rowKey, cfValue);
-            return 1;
+            byte[] key = (ksName + KEYSEPARATOR + cfName + KEYSEPARATOR + rowKey).getBytes("UTF-8");
+            return key;
         }
-        catch (RedisException e)
+        catch (UnsupportedEncodingException e)
         {
-            errorMsg("db insertion/update error", e);
-            return -1;
+            errorMsg("makeRowKey encoding error", e);
+            return null;
         }
-    }
-
-    public String makeRowKey(String rowKey)
-    {
-        return ksName + KEYSEPARATOR + cfName + KEYSEPARATOR + rowKey;
     }
 }
