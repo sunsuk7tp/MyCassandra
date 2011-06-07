@@ -4,7 +4,6 @@ import java.sql.*;
 import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
 import java.nio.ByteBuffer;
 
 import org.apache.cassandra.db.ColumnFamily;
@@ -73,7 +72,7 @@ public class RangeMySQLInstance extends RangeDBInstance
 
     private String getCreateSt(String statement)
     {
-        String createStHeader = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL, `" + TOKEN + "` CHAR(128) NOT NULL, `" + VALUE + "` ";
+        String createStHeader = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL, `" + TOKEN + "` BINARY(128) NOT NULL, `" + VALUE + "` ";
         String createStFooter = ", PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         return createStHeader + statement + createStFooter;
     }
