@@ -72,12 +72,12 @@ public class RangeMySQLInstance extends RangeDBInstance
 
     private String getCreateSt(String statement)
     {
-        String createStHeader = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL, `" + TOKEN + "` BINARY(128) NOT NULL, `" + VALUE + "` ";
+        String createStHeader = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL, `" + TOKEN + "` INT NOT NULL, `" + VALUE + "` ";
         String createStFooter = ", PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         return createStHeader + statement + createStFooter;
     }
 
-    public int insert(String rowKey, byte[] token, ColumnFamily cf)
+    public int insert(String rowKey, int token, ColumnFamily cf)
     {
         try
         {
@@ -131,8 +131,8 @@ public class RangeMySQLInstance extends RangeDBInstance
         try
         {
             PreparedStatement pstRange = conn.prepareStatement(rangeSt);
-            pstRange.setObject(1, startWith.token.toBytes());
-            pstRange.setObject(2, stopAt.token.toBytes());
+            pstRange.setInt(1, startWith.getTokenInteger());
+            pstRange.setInt(2, stopAt.getTokenInteger());
             pstRange.setInt(3, maxResults);
             ResultSet rs = pstRange.executeQuery();
             if (rs != null)
@@ -306,10 +306,10 @@ public class RangeMySQLInstance extends RangeDBInstance
         }
     }
 
-    private synchronized int doInsert(String rowKey, byte[] token, byte[] cfValue) throws SQLException
+    private synchronized int doInsert(String rowKey, int token, byte[] cfValue) throws SQLException
     {
         pstInsert.setString(1, rowKey);
-        pstInsert.setBytes(2, token);
+        pstInsert.setInt(2, token);
         pstInsert.setBytes(3, cfValue);
         pstInsert.setBytes(4, cfValue);
         return pstInsert.executeUpdate();
