@@ -78,7 +78,7 @@ public class RangeMySQLInstance extends RangeDBInstance
         return createStHeader + statement + createStFooter;
     }
 
-    public int insert(String rowKey, String token, ColumnFamily cf)
+    public int insert(String rowKey, byte[] token, ColumnFamily cf)
     {
         try
         {
@@ -132,8 +132,8 @@ public class RangeMySQLInstance extends RangeDBInstance
         try
         {
             PreparedStatement pstRange = conn.prepareStatement(rangeSt);
-            pstRange.setString(1, startWith.getTokenString());
-            pstRange.setString(2, stopAt.getTokenString());
+            pstRange.setBytes(1, startWith.getTokenBytes());
+            pstRange.setBytes(2, stopAt.getTokenBytes());
             pstRange.setInt(3, maxResults);
             ResultSet rs = pstRange.executeQuery();
             if (rs != null)
@@ -306,10 +306,10 @@ public class RangeMySQLInstance extends RangeDBInstance
         }
     }
 
-    private synchronized int doInsert(String rowKey, String token, byte[] cfValue) throws SQLException
+    private synchronized int doInsert(String rowKey, byte[] token, byte[] cfValue) throws SQLException
     {
         pstInsert.setString(1, rowKey);
-        pstInsert.setString(2, token);
+        pstInsert.setBytes(2, token);
         pstInsert.setBytes(3, cfValue);
         pstInsert.setBytes(4, cfValue);
         return pstInsert.executeUpdate();
