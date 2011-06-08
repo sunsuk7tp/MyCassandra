@@ -162,8 +162,8 @@ public class MySQLInstance extends DBSchemafulInstance
         try
         {
             PreparedStatement pstRange = conn.prepareStatement(rangeSt);
-            pstRange.setString(1, startWith.getTokenBytes().toString());
-            pstRange.setString(2, stopAt.getTokenBytes().toString());
+            pstRange.setString(1, new String(startWith.getTokenBytes()));
+            pstRange.setString(2, new String(stopAt.getTokenBytes()));
             pstRange.setInt(3, maxResults);
             ResultSet rs = pstRange.executeQuery();
             if (rs != null)
