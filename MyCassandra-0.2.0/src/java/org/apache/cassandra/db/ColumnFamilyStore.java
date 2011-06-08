@@ -140,11 +140,10 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     private volatile DefaultInteger memtime;
     private volatile DefaultInteger memsize;
     private volatile DefaultDouble memops;
-    
+
+    // ColumnFamily and StorageEngine map
     private static HashMap<String, StorageEngine> dbis = new HashMap<String, StorageEngine>();
-    //private static DBInstance dbi;
-    private static StorageEngine sei;
-    
+
     private volatile DefaultInteger rowCacheSaveInSeconds;
     private volatile DefaultInteger keyCacheSaveInSeconds;
 
@@ -240,7 +239,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             logger.debug("Starting CFS {}", columnFamily);
         // scan for sstables corresponding to this cf and load them
         ssTables = new SSTableTracker(table.name, columnFamilyName);
-        if (DatabaseDescriptor.isBigtable())
+        if (DatabaseDescriptor.isBigtable(table.name))
         {
             Set<DecoratedKey> savedKeys = readSavedCache(DatabaseDescriptor.getSerializedKeyCachePath(table.name, columnFamilyName));
             List<SSTableReader> sstables = new ArrayList<SSTableReader>();
@@ -288,9 +287,9 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             throw new RuntimeException(e);
         }
 
-        boolean isLong = DatabaseDescriptor.isSchemaUsed() && columnFamily.equals("Migrations") ? true : false;
-        StorageEngine dbi = EngineMeta.getEngine(DatabaseDescriptor.getStorageType(), new String(table.name), columnFamilyName, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, isLong);
-        if (!DatabaseDescriptor.isBigtable())
+        boolean isLong = DatabaseDescriptor.isSchemaUsed(table.name) && columnFamily.equals("Migrations") ? true : false;
+        StorageEngine dbi = EngineMeta.getEngine(DatabaseDescriptor.getStorageType(table.name), new String(table.name), columnFamilyName, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, isLong);
+        if (!DatabaseDescriptor.isBigtable(table.name))
         {
             setDBInstance(dbi);
         }
@@ -870,7 +869,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     {
         long start = System.nanoTime();
         try {
-            if (DatabaseDescriptor.isBigtable())
+            if (DatabaseDescriptor.isBigtable(table.name))
             {
                 boolean flushRequested = memtable.isThresholdViolated();
                 memtable.put(key, columnFamily);
@@ -1103,7 +1102,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
     public void removeAllSSTables()
     {
-        if (DatabaseDescriptor.isBigtable())
+        if (DatabaseDescriptor.isBigtable(table.name))
         {
             ssTables.replace(ssTables.getSSTables(), Collections.<SSTableReader>emptyList());
             for (ColumnFamilyStore indexedCfs : indexedColumns.values())
@@ -1322,7 +1321,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
         long start = System.nanoTime();
         try {
-            if (DatabaseDescriptor.isBigtable())
+            if (DatabaseDescriptor.isBigtable(table.name))
             {
                 return doGetCFBigtable(filter, gcBefore);
             }
@@ -1515,7 +1514,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
         QueryFilter filter = new QueryFilter(null, new QueryPath(columnFamily, superColumn, null), columnFilter);
         
-        return DatabaseDescriptor.isBigtable() ? 
+        return DatabaseDescriptor.isBigtable(table.name) ? 
                    getRangeSliceAtBigtable(filter, startWith, stopAt, range, maxResults)
                    : getRangeSliceAtDB(filter, startWith, stopAt, maxResults);
     }
@@ -1995,7 +1994,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         {
             public void runMayThrow() throws InterruptedException, IOException
             {
-                if (DatabaseDescriptor.isBigtable())
+                if (DatabaseDescriptor.isBigtable(table.name))
                 {
                     // putting markCompacted on the commitlogUpdater thread ensures it will run
                     // after any compactions that were in progress when truncate was called, are finished

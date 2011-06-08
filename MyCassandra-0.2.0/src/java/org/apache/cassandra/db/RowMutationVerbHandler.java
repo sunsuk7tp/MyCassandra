@@ -73,7 +73,7 @@ public class RowMutationVerbHandler implements IVerbHandler
             if (forwardBytes != null)
                 forwardToLocalNodes(message, forwardBytes);
 
-            if(DatabaseDescriptor.isBigtable())
+            if(DatabaseDescriptor.isBigtable(rm.getTable()))
             {
                 Table.open(rm.getTable()).apply(rm, bytes, true);
             }

@@ -567,6 +567,11 @@ public class DatabaseDescriptor
                 throw new ConfigurationException("Missing replication_factor directory for keyspace " + keyspace.name);
             }
             
+            if (keyspace.storage_engine != null)
+            {
+                engineMeta.setStorageKSMap(keyspace.name, keyspace.storage_engine);
+            }
+            
             int size2 = keyspace.column_families.length;
             CFMetaData[] cfDefs = new CFMetaData[size2];
             int j = 0;
@@ -590,7 +595,7 @@ public class DatabaseDescriptor
                 int columnfamilySize = (cf.columnfamily_size > 0 ? cf.columnfamily_size : EngineMeta.defaultColumnFamilySize);
                 String columnfamilyType = (cf.columnfamily_type != null ? cf.columnfamily_type : EngineMeta.defaultColumnFamilyType);
                 String storageEngine = (cf.storage_engine != null ? cf.storage_engine : EngineMeta.defaultStorageEngine);
-                if(engineMeta.isSchemaUsed()) {
+                if(engineMeta.isSchemaUsed(keyspace.name)) {
                     engineMeta.getEngine(engineMeta.getStorageType(), keyspace.name, cf.name, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, false);
                 }
                 
@@ -661,7 +666,7 @@ public class DatabaseDescriptor
                     metadata.put(columnName, new ColumnDefinition(columnName, rcd.validator_class, rcd.index_type, rcd.index_name));
                 }
                 
-                if (engineMeta.isSchemaUsed())
+                if (engineMeta.isSchemaUsed(keyspace.name))
                 {
                      cfDefs[j++] = new CFMetaData(keyspace.name, 
                                                  cf.name, 
@@ -1187,17 +1192,32 @@ public class DatabaseDescriptor
 
     public static int getStorageType()
     {
-        return engineMeta.getStorageType();
+        return getStorageType(null);
+    }
+
+    public static int getStorageType(String ksName)
+    {
+        return engineMeta.getStorageType(ksName);
     }
 
     public static boolean isBigtable()
     {
-        return engineMeta.isBigtable();
+        return isBigtable(null);
+    }
+
+    public static boolean isBigtable(String ksName)
+    {
+        return engineMeta.isBigtable(ksName);
     }
 
     public static boolean isSchemaUsed()
     {
-        return engineMeta.isSchemaUsed();
+        return isSchemaUsed(null);
+    }
+
+    public static boolean isSchemaUsed(String ksName)
+    {
+        return engineMeta.isSchemaUsed(ksName);
     }
 
     public static EngineInfo getEngineInfo()
