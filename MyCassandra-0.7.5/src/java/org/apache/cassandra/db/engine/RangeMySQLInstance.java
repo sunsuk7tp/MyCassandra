@@ -55,14 +55,27 @@ public class RangeMySQLInstance extends RangeDBInstance
         }
     }
 
-    //overide
+    public int insert(String rowKey, byte[] token, ColumnFamily cf)
+	{
+	    try
+	    {
+	        return doInsert(rowKey, token, cf.toBytes());
+	    }
+	    catch (SQLException e)
+	    {
+	        errorMsg("db insertion error", e);
+	        return -1;
+	    }
+	}
+
+	//overide
     private void setStatementDefinition()
     {
         /* define CRUD statements */
         insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + TOKEN + ", " + VALUE +") VALUES (?,?,?) ON DUPLICATE KEY UPDATE " + VALUE + " = ?"; 
         setSt = !this.ksName.equals(SYSTEM) ? "CALL " + SETPR + this.cfName + "(?,?)" : "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
         getSt = !this.ksName.equals(SYSTEM) ? "CALL " + GETPR + this.cfName + "(?)" : "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
-        rangeSt = "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + "WHERE " + TOKEN + " >= ? AND " + TOKEN + " < ? LIMIT = ?";
+        rangeSt = "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + " WHERE " + TOKEN + " >= ? AND " + TOKEN + " < ? LIMIT ?";
         deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
         truncateSt = "TRUNCATE TABLE " + this.cfName;
         dropTableSt = "DROP TABLE" + this.cfName;
@@ -76,19 +89,6 @@ public class RangeMySQLInstance extends RangeDBInstance
         String createStHeader = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL, `" + TOKEN + "` VARCHAR(" + tokenLength + ") NOT NULL, `" + VALUE + "` ";
         String createStFooter = ", PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         return createStHeader + statement + createStFooter;
-    }
-
-    public int insert(String rowKey, byte[] token, ColumnFamily cf)
-    {
-        try
-        {
-            return doInsert(rowKey, token, cf.toBytes());
-        }
-        catch (SQLException e)
-        {
-            errorMsg("db insertion error", e);
-            return -1;
-        }
     }
 
     public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)
