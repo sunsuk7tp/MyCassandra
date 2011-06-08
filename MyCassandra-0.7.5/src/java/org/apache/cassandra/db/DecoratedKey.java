@@ -101,9 +101,9 @@ public class DecoratedKey<T extends Token> implements Comparable<DecoratedKey>
         return (new String(b)).replaceAll("\\s|\\W|get_slice|get", "");
     }
 
-    public byte[] getByteToken()
+    public Integer getTokenInteger()
     {
-        return token.toBytes();
+        return new Integer(token.toString());
     }
 
     @Override
