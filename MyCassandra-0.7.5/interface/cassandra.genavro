@@ -171,6 +171,7 @@ protocol Cassandra {
         union{ map<string>, null } strategy_options;
         int replication_factor;
         array<CfDef> cf_defs;
+        union {null, string} storage_engine;
     }
     
     record StreamingMutation {

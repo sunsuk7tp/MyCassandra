@@ -379,6 +379,7 @@ struct KsDef {
     3: optional map<string,string> strategy_options,
     4: required i32 replication_factor,
     5: required list<CfDef> cf_defs,
+    6: optional string storage_engine,
 }
 
 service Cassandra {
