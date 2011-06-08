@@ -1,38 +1,54 @@
 package org.apache.cassandra.db.engine;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Map;
 import java.nio.ByteBuffer;
 
-import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.DecoratedKey;
+import org.apache.cassandra.db.ColumnFamily;
 
+/**
+ * Storage Engine operations for MyCassandra.
+ * MyCassandra calls Keyspace Database or Db and ColumnFamily Table after MySQL.
+ */
 public interface StorageEngine
 {
-    /* 
-     * put cf in a row specified rowKey. 
-     * This method include insert, update and delete to a rowKey
-     * */
+    /** 
+     * Puts cf in a row specified by a key. 
+     * Includes INSERT, UPDATE and DELETE operations to a row.
+     * With DELETE, cf.isMarkedForDelte() is true or cf.getRemovedColumnNames() is not null.
+     * 
+     * @param key a row key
+     * @param cf a ColumnFamily value
+     */
     public int put(DecoratedKey key, ColumnFamily cf);
-    /* 
-     * get a column family specified rowKey
-     * */
+
+    /** 
+     * Gets a column family specified by a key
+     * 
+     * @param key a row key
+     */
     public ColumnFamily get(DecoratedKey key);
-    /* 
-     * range query: from startWith to stopAt limit maxResults.
-     * */
+
+    /** 
+     * Range query from startWith to stopAt limit maxResults.
+     * 
+     * @param startWith range start key
+     * @param stopAt range end key (This key is not included)
+     */
     public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults); 
-    /* 
-     * truncate table.
-     * */
+
+    /** 
+     * Truncate table.
+     */
     public int truncate();
-    /*
-    * drop table.
-    * */
+
+    /**
+     * Drop tables.
+     */
     public int dropTable();
-    /*
-     * drop database.
-    * */
+
+    /**
+     * Drop database.
+     */
     public int dropDB();
 }
