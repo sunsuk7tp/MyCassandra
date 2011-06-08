@@ -25,7 +25,7 @@ import org.apache.cassandra.db.ColumnFamily;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
+import com.mongodb.WriteResult;
 import com.mongodb.DBObject;
 
 public class MongoInstance extends DBSchemalessInstance
@@ -49,7 +49,7 @@ public class MongoInstance extends DBSchemalessInstance
 
         conn = new MongoConfigure().connect(this.ksName, host, port, user, pass);
         coll = conn.getCollection(this.cfName);
-        coll.createIndex(new BasicDBObject(KEY,1).append("unique", true));
+        coll.createIndex(new BasicDBObject(KEY, 1).append("unique", true));
     }
 
     public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)
@@ -67,12 +67,12 @@ public class MongoInstance extends DBSchemalessInstance
         BasicDBObject query = new BasicDBObject();
         query.put(KEY, rowKey);
 
-        DBCursor cur = coll.find(query);
-        return cur.hasNext() ? (byte[])cur.next().get(VALUE) : null;
+        return (byte[])coll.findOne(query).get(VALUE);
     }
 
     public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults)
     {
+       
         return null;
     }
 
@@ -97,8 +97,7 @@ public class MongoInstance extends DBSchemalessInstance
     {
         DBObject doc = new BasicDBObject();
         doc.put(KEY, rowKey);
-        coll.remove(doc);
-        return 1;
+        return resResult(coll.remove(doc));
     }
 
     private synchronized int doUpdate(String rowKey, byte[] cfValue)
@@ -107,8 +106,7 @@ public class MongoInstance extends DBSchemalessInstance
         DBObject newdoc = new BasicDBObject();
         olddoc.put(KEY, rowKey);
         newdoc.put(VALUE, cfValue);
-        coll.update(olddoc, newdoc);
-        return 1;
+        return resResult(coll.update(olddoc, newdoc));
     }
 
     private synchronized int doInsert(String rowKey, byte[] cfValue)
@@ -116,7 +114,16 @@ public class MongoInstance extends DBSchemalessInstance
         DBObject doc = new BasicDBObject();
         doc.put(KEY, rowKey);
         doc.put(VALUE, cfValue);
-        coll.insert(doc);
-        return 1;
+        return resResult(coll.insert(doc));
+    }
+
+    private int resResult(WriteResult res)
+    {
+        if (res.getError() != null)
+        {
+            errorMsg(res.getError(), null);
+            return -1;
+        }
+        return -1;
     }
 }
