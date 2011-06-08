@@ -14,6 +14,7 @@ public class RangeMySQLInstance extends RangeDBInstance
     // override. default configuration
     int port = 3306;
     String user = "root";
+    int tokenLength = 40;
 
     Connection conn;
     PreparedStatement pstInsert, pstUpdate, pstDelete;
@@ -72,7 +73,7 @@ public class RangeMySQLInstance extends RangeDBInstance
 
     private String getCreateSt(String statement)
     {
-        String createStHeader = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL, `" + TOKEN + "` VARCHAR(36) NOT NULL, `" + VALUE + "` ";
+        String createStHeader = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL, `" + TOKEN + "` VARCHAR(" + tokenLength + ") NOT NULL, `" + VALUE + "` ";
         String createStFooter = ", PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         return createStHeader + statement + createStFooter;
     }
@@ -284,14 +285,13 @@ public class RangeMySQLInstance extends RangeDBInstance
     {
         try {
             Statement stmt = conn.createStatement();
-            
+
             ResultSet rs = stmt.executeQuery("SHOW PROCEDURE STATUS");
             while (rs.next())
                 if (rs.getString(1).equals(ksName) && ( rs.getString(2).equals(GETPR + cfName) || rs.getString(2).equals(SETPR + cfName)))
                     return 0;
             PreparedStatement gst = conn.prepareStatement(getPr);
             PreparedStatement sst = conn.prepareStatement(setPr);
-            
 
             gst.setInt(1, rowKeySize);
             sst.setInt(1, columnFamilySize);

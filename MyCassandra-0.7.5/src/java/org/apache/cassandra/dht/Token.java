@@ -68,18 +68,6 @@ public abstract class Token<T> implements Comparable<Token<T>>, Serializable
         return token.hashCode();
     }
 
-    public byte[] toBytes()
-    {
-        IPartitioner p = StorageService.getPartitioner();
-        return p.getTokenFactory().toByteArray(this).array();
-    }
-
-    public Token toToken(byte[] bytes)
-    {
-        IPartitioner p = StorageService.getPartitioner();
-        return p.getTokenFactory().fromByteArray(ByteBuffer.wrap(bytes));
-    }
-
     public static abstract class TokenFactory<T>
     {
         public abstract ByteBuffer toByteArray(Token<T> token);
