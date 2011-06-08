@@ -1,12 +1,28 @@
 # MyCassandra
 
-MyCassandra is the 'modular' NoSQL.  
+![MyCassandra Logo](http://cdn.f.st-hatena.com/images/fotolife/s/sunsuk7tp/20110102/20110102225851.png)
+
+MyCassandra is a **modular** NoSQL.  
 MyCassandra is the project branched from Cassandra.  
-MyCassandra-0.X.Y is based on Cassandra-0.X.Y.  
 
 With MyCassandra, you can exchange Cassandra's storage like Bigtable (commitlog, memtable, sstable) with MySQL, Redis and others.  
 The data storage component is called Storage Engine like MySQL.  
 This means that you can select the Storage Engine for according to the I/O pattern of applications and the persistence.  
+
+# Release Note
+- [2011.06.??] MyCassandra-0.2.1
+    - It will support the following functions:
+        - secondary index
+        - select a storage engine by a keyspace
+- [2011.06.10] MyCassandra-0.2.0    
+    - It is based on Cassandra-0.7.5.    
+    - It supports the following functions:
+        - the basic CRUD method for MySQL, Redis and MongoDB
+        - range query for only MySQL
+        - dynamic add or update keyspace/columnfamily
+- [2011.06.10] MyCassandra-0.1.0    
+    - It is based on Cassanadra-0.6.2.    
+    - It is a experimental version.    
 
 # Use example of MyCassandra
 
@@ -23,8 +39,9 @@ In default, you can select that.
 - MongoDB   
 
 For example, if you want to use MySQL, 
-## 1) add several statements at conf/cassandra.yaml (0.7~) or conf/storage-conf.xml (0.6~)
-### @0.7
+## 1) add several statements at {$config_file}
+{$config_file} is cassandra.yaml (MyCassandra-0.2) or conf/storage-conf.xml (MyCassandra-0.1).    
+### @ MyCassandra-0.2
     engines: 
         - name: MySQL
           host: localhost
@@ -35,7 +52,7 @@ For example, if you want to use MySQL,
     
     defaultengines: MySQL # <--- This engine is used in MyCassandra
     
-### @0.6    
+### @ MyCassandra-0.1    
     <DataBase>MySQL</DataBase>
     <SQL>
         <SQLHost>localhost</SQLHost> # mysql host
@@ -44,7 +61,7 @@ For example, if you want to use MySQL,
         <SQLPass>cA33anDra</SQLPass> # user password
     </SQL>
 
-## 2) You define the database schema at storage-conf.xml.
+## 2) You define the database schema at {$config_file}.
 
 Example, if you want to make "mykeyspace" keyspace and "mycf1","mycf2","mycf3" column families in that.   
 If you use MySQL storage engine, you must specify several schema parameters.   
@@ -56,7 +73,7 @@ If you use MySQL storage engine, you must specify several schema parameters.
     - It depends on data type constraints of MySQL (VARBINARY or LONGBLOB or the others).   
 - storage_engine/StorageEngine: 'InnoDB', 'MyISAM', etc. MySQL storage engine itself.  
 
-### @0.7
+### @ MyCassandra-0.2
     keyspaces:
         - name: mykeyspace
         :
@@ -79,7 +96,7 @@ If you use MySQL storage engine, you must specify several schema parameters.
                 columnfamily_type: LONGBLOB
                 storage_engine: MyISAM
 
-### @0.6
+### @ MyCassandra-0.1
     <Keyspaces>
       <Keyspace Name="mykeyspace">
         <ColumnFamily Name="mycf1" RowKeySize="16" ColumnFamilySize="2048" ColumnFamilyType="VARBINARY" StorageEngine="InnoDB" />
@@ -104,17 +121,17 @@ If you use MySQL storage engine, you must specify several schema parameters.
 2. The cassandra_user needs to hava all privileges.   
 3. For quickly starting, you should specify 'root'.   
 4. You make database by the keyspaces.  
-5. In the above example, you must make 'mykeyspace' database. (0.6 only)
+5. In the above example, you must make 'mykeyspace' database. (MyCassandra-0.1 only)
 
 ## 4) run.
     $ ./bin/cassandra
 
 - You can run MyCassandra as Cassandra.
 
-## 5) schema load. (0.7~)
+## 5) schema load. (MyCassandra-0.2)
     $ ./bin/schmatool localhost 8080 import
 
-## 6) dynamicaly create keyspace/columnfamily (0.7~)
+## 6) dynamicaly create keyspace/columnfamily (MyCassandra-0.2)
     $ ./bin/cassandra-cli
     > connect localhost/9160;
     > create keyspace myksp;

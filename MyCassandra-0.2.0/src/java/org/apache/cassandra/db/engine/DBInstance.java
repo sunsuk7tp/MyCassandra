@@ -1,3 +1,19 @@
+/*                                                                                                                                                                                 
+ * Copyright 2011 Shunsuke Nakamura, and contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.cassandra.db.engine;
 
 import java.io.IOException;
@@ -15,9 +31,9 @@ import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.ColumnFamilySerializer;
 import org.apache.cassandra.db.DecoratedKey;
 
-public abstract class RangeDBInstance implements StorageEngine
+public abstract class DBInstance implements StorageEngine
 {
-    private static final Logger logger = LoggerFactory.getLogger(RangeDBInstance.class);
+    private static final Logger logger = LoggerFactory.getLogger(DBInstance.class);
     String ksName;
     String cfName;
 
@@ -38,18 +54,17 @@ public abstract class RangeDBInstance implements StorageEngine
         {
             Set<ByteBuffer> cNames = cf.getRemovedColumnNames();
             ColumnFamily cfOld = get(rowKey);
-            byte[] token = key.getTokenBytes();
             if (cNames != null && !cNames.isEmpty())
             {
                 for (Object cName : cNames.toArray())
                 {
                     cfOld.remove((ByteBuffer) cName);
                 }
-                return insert(rowKey, token, cfOld);
+                return insert(rowKey, cfOld);
             }
             else
             {
-                return cfOld != null ? update(rowKey, cfOld, cf) : insert(rowKey, token, cf);
+                return cfOld != null ? update(rowKey, cfOld, cf) : insert(rowKey, cf);
             }
         }
     }
@@ -78,7 +93,7 @@ public abstract class RangeDBInstance implements StorageEngine
     public abstract int dropDB();
 
     public abstract int delete(String rowKey);
-    public abstract int insert(String rowKey, byte[] token, ColumnFamily cf);
+    public abstract int insert(String rowKey, ColumnFamily cf);
     public abstract int update(String rowKey, ColumnFamily newcf, ColumnFamily cf);
     public abstract byte[] select(String rowKey);
 

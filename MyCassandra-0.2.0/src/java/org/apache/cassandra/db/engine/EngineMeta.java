@@ -1,3 +1,19 @@
+/*                                                                                                                                                                                 
+ * Copyright 2011 Shunsuke Nakamura, and contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.cassandra.db.engine;
 
 import org.apache.cassandra.config.EngineInfo;
@@ -14,6 +30,7 @@ public class EngineMeta
     public static final int RANGEMYSQL = 4;
     public static final int HSMYSQL = 5;
     public static final int MONGODB = 6;
+
     // label name specified in cassandra.yaml 
     public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "RANGEMySQL", "HSMySQL", "MongoDB"};
     public static final Map<Integer, EngineInfo> enginesInfo = new HashMap<Integer, EngineInfo>(storageLabels.length);
@@ -24,11 +41,14 @@ public class EngineMeta
     // for mysql's column family data type params
     public static final String BINARY = "VARBINARY";
     public static final String BLOB = "LONGBLOB";
-    // mysql default setting
+
+    // schema default setting
     public static final int defaultRowKeySize = 64;
     public static final int defaultColumnFamilySize = 30 * 1024;
     public static final String defaultColumnFamilyType = BINARY;
     public static final String defaultStorageEngine = "InnoDB";
+    public static final String SYSTEM_STORAGE_ENGINE = "MyISAM";
+
     // se number
     private int storageType;
 
@@ -68,7 +88,7 @@ public class EngineMeta
     }
 
     // init setup and return the instance specified in storageType
-    public static StorageEngine getEngine(int storageType, String tableName, String cfName, int maxKeySize, int maxCFSize, String storageSize, String storageEngine, boolean isLong)
+    public static StorageEngine getEngine(int storageType, String tableName, String cfName, int maxKeySize, int maxCFSize, String storageSize, String storageEngine, boolean isSystem)
     {
         StorageEngine engine = null;
         switch (storageType)
@@ -81,14 +101,14 @@ public class EngineMeta
             case MYSQL:
             default:
                 DBSchemafulInstance dbi = new MySQLInstance(tableName, cfName);
-                if(isLong) dbi.create(maxKeySize, maxCFSize, BLOB, "MyISAM");
+                if(isSystem) dbi.create(maxKeySize, maxCFSize, BLOB, SYSTEM_STORAGE_ENGINE);
                 else dbi.create(maxKeySize, maxCFSize, storageSize, storageEngine);
                 dbi.createProcedure(maxKeySize, maxCFSize);
                 engine = dbi;
                 break;
             case RANGEMYSQL:
                 RangeMySQLInstance rdbi = new RangeMySQLInstance(tableName, cfName);
-                if(isLong) rdbi.create(maxKeySize, maxCFSize, BLOB, "MyISAM");
+                if(isSystem) rdbi.create(maxKeySize, maxCFSize, BLOB, SYSTEM_STORAGE_ENGINE);
                 else rdbi.create(maxKeySize, maxCFSize, storageSize, storageEngine);
                 rdbi.createProcedure(maxKeySize, maxCFSize);
                 engine = rdbi;

@@ -1,3 +1,19 @@
+/*                                                                                                                                                                                 
+ * Copyright 2011 Shunsuke Nakamura, and contributors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.apache.cassandra.db.engine;
 
 import java.sql.*;
@@ -9,12 +25,12 @@ import java.nio.ByteBuffer;
 import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.DecoratedKey;
 
-public class RangeMySQLInstance extends RangeDBInstance
+public class MySQLInstance extends DBSchemafulInstance
 {
+
     // override. default configuration
     int port = 3306;
     String user = "root";
-    int tokenLength = 40;
 
     Connection conn;
     PreparedStatement pstInsert, pstUpdate, pstDelete;
@@ -23,7 +39,6 @@ public class RangeMySQLInstance extends RangeDBInstance
 
     private final String PREFIX = "_";
     private final String KEY = "rkey";
-    private final String TOKEN = "token";
     private final String VALUE = "cf";
     private final String SYSTEM = "system";
     private final String SETPR = "set_row";
@@ -34,7 +49,9 @@ public class RangeMySQLInstance extends RangeDBInstance
 
     private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, dropTableSt, dropDBSt, getPr, setPr;
 
-    public RangeMySQLInstance(String ksName, String cfName)
+    String bsql;
+ 
+    public MySQLInstance(String ksName, String cfName)
     {
         this.ksName = ksName;
         this.cfName = PREFIX + cfName;
@@ -55,27 +72,13 @@ public class RangeMySQLInstance extends RangeDBInstance
         }
     }
 
-    public int insert(String rowKey, byte[] token, ColumnFamily cf)
-	{
-	    try
-	    {
-	        return doInsert(rowKey, token, cf.toBytes());
-	    }
-	    catch (SQLException e)
-	    {
-	        errorMsg("db insertion error", e);
-	        return -1;
-	    }
-	}
-
-	//overide
     private void setStatementDefinition()
     {
         /* define CRUD statements */
-        insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + TOKEN + ", " + VALUE +") VALUES (?,?,?) ON DUPLICATE KEY UPDATE " + VALUE + " = ?"; 
+        insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + VALUE + " = ?"; 
         setSt = !this.ksName.equals(SYSTEM) ? "CALL " + SETPR + this.cfName + "(?,?)" : "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
         getSt = !this.ksName.equals(SYSTEM) ? "CALL " + GETPR + this.cfName + "(?)" : "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
-        rangeSt = "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + " WHERE " + TOKEN + " >= ? AND " + TOKEN + " < ? LIMIT ?";
+        rangeSt = "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + "WHERE " + KEY + " >= ? AND " + KEY + " < ? LIMIT = ?";
         deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
         truncateSt = "TRUNCATE TABLE " + this.cfName;
         dropTableSt = "DROP TABLE" + this.cfName;
@@ -86,9 +89,36 @@ public class RangeMySQLInstance extends RangeDBInstance
 
     private String getCreateSt(String statement)
     {
-        String createStHeader = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL, `" + TOKEN + "` VARCHAR(" + tokenLength + ") NOT NULL, `" + VALUE + "` ";
+        String createStHeader = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` ";
         String createStFooter = ", PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         return createStHeader + statement + createStFooter;
+    }
+
+    private int NonAutoCommit()
+    {
+        try
+        {
+            conn.setAutoCommit(false);
+            return 1;
+        }
+        catch (SQLException e)
+        {
+            errorMsg("set not auto commit error", e);
+            return -1;
+        }
+    }
+
+    public int insert(String rowKey, ColumnFamily cf)
+    {
+        try
+        {
+            return doInsert(rowKey, cf.toBytes());
+        }
+        catch (SQLException e)
+        {
+            errorMsg("db insertion error", e);
+            return -1;
+        }
     }
 
     public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)
@@ -132,8 +162,8 @@ public class RangeMySQLInstance extends RangeDBInstance
         try
         {
             PreparedStatement pstRange = conn.prepareStatement(rangeSt);
-            pstRange.setBytes(1, startWith.getTokenBytes());
-            pstRange.setBytes(2, stopAt.getTokenBytes());
+            pstRange.setObject(1, startWith);
+            pstRange.setObject(2, stopAt);
             pstRange.setInt(3, maxResults);
             ResultSet rs = pstRange.executeQuery();
             if (rs != null)
@@ -285,13 +315,14 @@ public class RangeMySQLInstance extends RangeDBInstance
     {
         try {
             Statement stmt = conn.createStatement();
-
+            
             ResultSet rs = stmt.executeQuery("SHOW PROCEDURE STATUS");
             while (rs.next())
                 if (rs.getString(1).equals(ksName) && ( rs.getString(2).equals(GETPR + cfName) || rs.getString(2).equals(SETPR + cfName)))
                     return 0;
             PreparedStatement gst = conn.prepareStatement(getPr);
             PreparedStatement sst = conn.prepareStatement(setPr);
+            
 
             gst.setInt(1, rowKeySize);
             sst.setInt(1, columnFamilySize);
@@ -305,13 +336,27 @@ public class RangeMySQLInstance extends RangeDBInstance
             return -1;
         }
     }
-
-    private synchronized int doInsert(String rowKey, byte[] token, byte[] cfValue) throws SQLException
+    /*
+    int doMultipleInsert(String rowKey, byte[] cfValue) throws SQLException {
+        if (multiCount < multiMax) {
+            pstMultiInsert.setString(2*multiCount+1, rowKey);
+            pstMultiInsert.setBytes(2*multiCount+2, cfValue);
+            multiCount++;
+        }
+        if (multiCount == multiMax) {
+            multiCount = 0;
+            pstMultiInsert.addBatch();
+            //pstMultiInsert = conn.prepareStatement(bsql);
+            return 1;
+        }
+        return 1;
+    }
+    */
+    private synchronized int doInsert(String rowKey, byte[] cfValue) throws SQLException
     {
         pstInsert.setString(1, rowKey);
-        pstInsert.setBytes(2, token);
+        pstInsert.setBytes(2, cfValue);
         pstInsert.setBytes(3, cfValue);
-        pstInsert.setBytes(4, cfValue);
         return pstInsert.executeUpdate();
     }
 
