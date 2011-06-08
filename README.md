@@ -2,12 +2,16 @@
 
 MyCassandra is the 'modular' NoSQL.  
 MyCassandra is the project branched from Cassandra.  
-MyCassandra-0.1.X is based on Cassandra-0.6.2.
-MyCassandra-0.2.X is based on Cassandra-0.7.5. 
 
 With MyCassandra, you can exchange Cassandra's storage like Bigtable (commitlog, memtable, sstable) with MySQL, Redis and others.  
 The data storage component is called Storage Engine like MySQL.  
 This means that you can select the Storage Engine for according to the I/O pattern of applications and the persistence.  
+
+# Release Note
+- [2011.06.10] MyCassandra-0.2.0    
+    - It is based on Cassandra-0.7.5.    
+- [2011.06.10] MyCassandra-0.1.0    
+    - It is based on Cassanadra-0.6.2.    
 
 # Use example of MyCassandra
 
@@ -24,8 +28,9 @@ In default, you can select that.
 - MongoDB   
 
 For example, if you want to use MySQL, 
-## 1) add several statements at conf/cassandra.yaml (MyCassandra-0.2) or conf/storage-conf.xml (MyCassandra-0.1)
-### @0.7
+## 1) add several statements at {$config_file}
+{$config_file} is cassandra.yaml (MyCassandra-0.2) or conf/storage-conf.xml (MyCassandra-0.1).    
+### @ MyCassandra-0.2
     engines: 
         - name: MySQL
           host: localhost
@@ -36,7 +41,7 @@ For example, if you want to use MySQL,
     
     defaultengines: MySQL # <--- This engine is used in MyCassandra
     
-### @0.6    
+### @ MyCassandra-0.1    
     <DataBase>MySQL</DataBase>
     <SQL>
         <SQLHost>localhost</SQLHost> # mysql host
@@ -45,7 +50,7 @@ For example, if you want to use MySQL,
         <SQLPass>cA33anDra</SQLPass> # user password
     </SQL>
 
-## 2) You define the database schema at storage-conf.xml.
+## 2) You define the database schema at {$config_file}.
 
 Example, if you want to make "mykeyspace" keyspace and "mycf1","mycf2","mycf3" column families in that.   
 If you use MySQL storage engine, you must specify several schema parameters.   
@@ -105,7 +110,7 @@ If you use MySQL storage engine, you must specify several schema parameters.
 2. The cassandra_user needs to hava all privileges.   
 3. For quickly starting, you should specify 'root'.   
 4. You make database by the keyspaces.  
-5. In the above example, you must make 'mykeyspace' database. (0.6 only)
+5. In the above example, you must make 'mykeyspace' database. (MyCassandra-0.1 only)
 
 ## 4) run.
     $ ./bin/cassandra
