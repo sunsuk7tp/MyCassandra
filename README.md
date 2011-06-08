@@ -1,6 +1,8 @@
 # MyCassandra
 
-MyCassandra is the 'modular' NoSQL.  
+![MyCassandra Logo](http://cdn.f.st-hatena.com/images/fotolife/s/sunsuk7tp/20110102/20110102225851.png)
+
+MyCassandra is a **modular** NoSQL.  
 MyCassandra is the project branched from Cassandra.  
 
 With MyCassandra, you can exchange Cassandra's storage like Bigtable (commitlog, memtable, sstable) with MySQL, Redis and others.  
@@ -8,11 +10,19 @@ The data storage component is called Storage Engine like MySQL.
 This means that you can select the Storage Engine for according to the I/O pattern of applications and the persistence.  
 
 # Release Note
+- [2011.06.??] MyCassandra-0.2.1
+    - It will support the following functions:
+        - secondary index
+        - select a storage engine by a keyspace
 - [2011.06.10] MyCassandra-0.2.0    
     - It is based on Cassandra-0.7.5.    
+    - It supports the following functions:
+        - the basic CRUD method for MySQL, Redis and MongoDB
+        - range query for only MySQL
+        - dynamic add or update keyspace/columnfamily
 - [2011.06.10] MyCassandra-0.1.0    
     - It is based on Cassanadra-0.6.2.    
-
+    - It is a experimental version.    
 # Use example of MyCassandra
 
 - decentralized any NoSQL cluster (MySQL, Redis, MongoDB, ...)
