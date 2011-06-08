@@ -38,7 +38,7 @@ public abstract class RangeDBInstance implements StorageEngine
         {
             Set<ByteBuffer> cNames = cf.getRemovedColumnNames();
             ColumnFamily cfOld = get(rowKey);
-            double token = key.getTokenInteger();
+            String token = key.getTokenString();
             if (cNames != null && !cNames.isEmpty())
             {
                 for (Object cName : cNames.toArray())
@@ -78,7 +78,7 @@ public abstract class RangeDBInstance implements StorageEngine
     public abstract int dropDB();
 
     public abstract int delete(String rowKey);
-    public abstract int insert(String rowKey, double token, ColumnFamily cf);
+    public abstract int insert(String rowKey, String token, ColumnFamily cf);
     public abstract int update(String rowKey, ColumnFamily newcf, ColumnFamily cf);
     public abstract byte[] select(String rowKey);
 
