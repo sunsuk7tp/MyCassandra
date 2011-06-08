@@ -2,7 +2,8 @@
 
 MyCassandra is the 'modular' NoSQL.  
 MyCassandra is the project branched from Cassandra.  
-MyCassandra-0.X.Y is based on Cassandra-0.X.Y.  
+MyCassandra-0.1.X is based on Cassandra-0.6.2.
+MyCassandra-0.2.X is based on Cassandra-0.7.5. 
 
 With MyCassandra, you can exchange Cassandra's storage like Bigtable (commitlog, memtable, sstable) with MySQL, Redis and others.  
 The data storage component is called Storage Engine like MySQL.  
@@ -23,7 +24,7 @@ In default, you can select that.
 - MongoDB   
 
 For example, if you want to use MySQL, 
-## 1) add several statements at conf/cassandra.yaml (0.7~) or conf/storage-conf.xml (0.6~)
+## 1) add several statements at conf/cassandra.yaml (MyCassandra-0.2) or conf/storage-conf.xml (MyCassandra-0.1)
 ### @0.7
     engines: 
         - name: MySQL
@@ -56,7 +57,7 @@ If you use MySQL storage engine, you must specify several schema parameters.
     - It depends on data type constraints of MySQL (VARBINARY or LONGBLOB or the others).   
 - storage_engine/StorageEngine: 'InnoDB', 'MyISAM', etc. MySQL storage engine itself.  
 
-### @0.7
+### @ MyCassandra-0.2
     keyspaces:
         - name: mykeyspace
         :
@@ -79,7 +80,7 @@ If you use MySQL storage engine, you must specify several schema parameters.
                 columnfamily_type: LONGBLOB
                 storage_engine: MyISAM
 
-### @0.6
+### @ MyCassandra-0.1
     <Keyspaces>
       <Keyspace Name="mykeyspace">
         <ColumnFamily Name="mycf1" RowKeySize="16" ColumnFamilySize="2048" ColumnFamilyType="VARBINARY" StorageEngine="InnoDB" />
@@ -111,10 +112,10 @@ If you use MySQL storage engine, you must specify several schema parameters.
 
 - You can run MyCassandra as Cassandra.
 
-## 5) schema load. (0.7~)
+## 5) schema load. (MyCassandra-0.2)
     $ ./bin/schmatool localhost 8080 import
 
-## 6) dynamicaly create keyspace/columnfamily (0.7~)
+## 6) dynamicaly create keyspace/columnfamily (MyCassandra-0.2)
     $ ./bin/cassandra-cli
     > connect localhost/9160;
     > create keyspace myksp;
