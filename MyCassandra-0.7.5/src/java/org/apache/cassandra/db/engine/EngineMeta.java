@@ -30,6 +30,7 @@ public class EngineMeta
     public static final int RANGEMYSQL = 4;
     public static final int HSMYSQL = 5;
     public static final int MONGODB = 6;
+
     // label name specified in cassandra.yaml 
     public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "RANGEMySQL", "HSMySQL", "MongoDB"};
     public static final Map<Integer, EngineInfo> enginesInfo = new HashMap<Integer, EngineInfo>(storageLabels.length);
@@ -40,11 +41,14 @@ public class EngineMeta
     // for mysql's column family data type params
     public static final String BINARY = "VARBINARY";
     public static final String BLOB = "LONGBLOB";
-    // mysql default setting
+
+    // schema default setting
     public static final int defaultRowKeySize = 64;
     public static final int defaultColumnFamilySize = 30 * 1024;
     public static final String defaultColumnFamilyType = BINARY;
     public static final String defaultStorageEngine = "InnoDB";
+    public static final String SYSTEM_STORAGE_ENGINE = "MyISAM";
+
     // se number
     private int storageType;
 
@@ -84,7 +88,7 @@ public class EngineMeta
     }
 
     // init setup and return the instance specified in storageType
-    public static StorageEngine getEngine(int storageType, String tableName, String cfName, int maxKeySize, int maxCFSize, String storageSize, String storageEngine, boolean isLong)
+    public static StorageEngine getEngine(int storageType, String tableName, String cfName, int maxKeySize, int maxCFSize, String storageSize, String storageEngine, boolean isSystem)
     {
         StorageEngine engine = null;
         switch (storageType)
@@ -97,14 +101,14 @@ public class EngineMeta
             case MYSQL:
             default:
                 DBSchemafulInstance dbi = new MySQLInstance(tableName, cfName);
-                if(isLong) dbi.create(maxKeySize, maxCFSize, BLOB, "MyISAM");
+                if(isSystem) dbi.create(maxKeySize, maxCFSize, BLOB, SYSTEM_STORAGE_ENGINE);
                 else dbi.create(maxKeySize, maxCFSize, storageSize, storageEngine);
                 dbi.createProcedure(maxKeySize, maxCFSize);
                 engine = dbi;
                 break;
             case RANGEMYSQL:
                 RangeMySQLInstance rdbi = new RangeMySQLInstance(tableName, cfName);
-                if(isLong) rdbi.create(maxKeySize, maxCFSize, BLOB, "MyISAM");
+                if(isSystem) rdbi.create(maxKeySize, maxCFSize, BLOB, SYSTEM_STORAGE_ENGINE);
                 else rdbi.create(maxKeySize, maxCFSize, storageSize, storageEngine);
                 rdbi.createProcedure(maxKeySize, maxCFSize);
                 engine = rdbi;

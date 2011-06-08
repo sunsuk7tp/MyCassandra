@@ -28,8 +28,8 @@ import redis.clients.jedis.BinaryJedis;
 public class RedisInstance extends DBSchemalessInstance
 {
     BinaryJedis conn;
-    
-    //override. default configuration
+
+    // default configuration
     int port = 6379;
 
     final String KEYSEPARATOR = ":";

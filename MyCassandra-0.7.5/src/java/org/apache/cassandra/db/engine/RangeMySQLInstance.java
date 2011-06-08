@@ -27,7 +27,7 @@ import org.apache.cassandra.db.DecoratedKey;
 
 public class RangeMySQLInstance extends RangeDBInstance
 {
-    // override. default configuration
+    // default configuration
     int port = 3306;
     String user = "root";
     int tokenLength = 40;
@@ -71,22 +71,9 @@ public class RangeMySQLInstance extends RangeDBInstance
         }
     }
 
-    public int insert(String rowKey, byte[] token, ColumnFamily cf)
-	{
-	    try
-	    {
-	        return doInsert(rowKey, token, cf.toBytes());
-	    }
-	    catch (SQLException e)
-	    {
-	        errorMsg("db insertion error", e);
-	        return -1;
-	    }
-	}
-
+    // Define CRUD statements.
     private void setStatementDefinition()
     {
-        /* define CRUD statements */
         insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + TOKEN + ", " + VALUE +") VALUES (?,?,?) ON DUPLICATE KEY UPDATE " + VALUE + " = ?"; 
         setSt = !this.ksName.equals(SYSTEM) ? "CALL " + SETPR + this.cfName + "(?,?)" : "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
         getSt = !this.ksName.equals(SYSTEM) ? "CALL " + GETPR + this.cfName + "(?)" : "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
@@ -104,6 +91,19 @@ public class RangeMySQLInstance extends RangeDBInstance
         String createStHeader = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL, `" + TOKEN + "` VARCHAR(" + tokenLength + ") NOT NULL, `" + VALUE + "` ";
         String createStFooter = ", PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         return createStHeader + statement + createStFooter;
+    }
+
+    public int insert(String rowKey, byte[] token, ColumnFamily cf)
+    {
+        try
+        {
+            return doInsert(rowKey, token, cf.toBytes());
+        }
+        catch (SQLException e)
+        {
+            errorMsg("db insertion error", e);
+            return -1;
+        }
     }
 
     public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)
