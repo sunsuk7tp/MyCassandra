@@ -29,6 +29,7 @@ import org.apache.avro.util.Utf8;
 import org.apache.cassandra.io.SerDeUtils;
 import org.apache.cassandra.locator.AbstractReplicationStrategy;
 import org.apache.cassandra.locator.SimpleStrategy;
+import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.commons.lang.StringUtils;
 
 public final class KSMetaData
@@ -38,6 +39,7 @@ public final class KSMetaData
     public final Map<String, String> strategyOptions;
     public final int replicationFactor;
     private final Map<String, CFMetaData> cfMetaData;
+    public final int storageEngineType;
 
     public KSMetaData(String name, Class<? extends AbstractReplicationStrategy> strategyClass, Map<String, String> strategyOptions, int replicationFactor, CFMetaData... cfDefs)
     {
@@ -49,8 +51,22 @@ public final class KSMetaData
         for (CFMetaData cfm : cfDefs)
             cfmap.put(cfm.cfName, cfm);
         this.cfMetaData = Collections.unmodifiableMap(cfmap);
+        this.storageEngineType = DatabaseDescriptor.getStorageType();
     }
-    
+
+    public KSMetaData(String name, Class<? extends AbstractReplicationStrategy> strategyClass, Map<String, String> strategyOptions, int replicationFactor, int storageEngineType, CFMetaData... cfDefs)
+    {
+        this.name = name;
+        this.strategyClass = strategyClass == null ? SimpleStrategy.class : strategyClass;
+        this.strategyOptions = strategyOptions;
+        this.replicationFactor = replicationFactor;
+        Map<String, CFMetaData> cfmap = new HashMap<String, CFMetaData>();
+        for (CFMetaData cfm : cfDefs)
+            cfmap.put(cfm.cfName, cfm);
+        this.cfMetaData = Collections.unmodifiableMap(cfmap);
+        this.storageEngineType = storageEngineType;
+    }
+
     public int hashCode()
     {
         return name.hashCode();
@@ -66,7 +82,8 @@ public final class KSMetaData
                 && ObjectUtils.equals(other.strategyOptions, strategyOptions)
                 && other.replicationFactor == replicationFactor
                 && other.cfMetaData.size() == cfMetaData.size()
-                && other.cfMetaData.equals(cfMetaData);
+                && other.cfMetaData.equals(cfMetaData)
+                && other.storageEngineType == storageEngineType;
     }
 
     public Map<String, CFMetaData> cfMetaData()
@@ -91,6 +108,7 @@ public final class KSMetaData
         ks.cf_defs = SerDeUtils.createArray(cfMetaData.size(), org.apache.cassandra.avro.CfDef.SCHEMA$);
         for (CFMetaData cfm : cfMetaData.values())
             ks.cf_defs.add(cfm.deflate());
+        ks.storage_engine = storageEngineType;
         return ks;
     }
 
@@ -105,6 +123,8 @@ public final class KSMetaData
           .append(strategyClass.getSimpleName())
           .append("{")
           .append(StringUtils.join(cfMetaData.values(), ", "))
+          .append("storage engine:")
+          .append(storageEngineType)
           .append("}");
         return sb.toString();
     }
@@ -135,8 +155,11 @@ public final class KSMetaData
         Iterator<org.apache.cassandra.avro.CfDef> cfiter = ks.cf_defs.iterator();
         for (int i = 0; i < cfsz; i++)
             cfMetaData[i] = CFMetaData.inflate(cfiter.next());
+        
+        int storageEngine = DatabaseDescriptor.getStorageType(ks.storage_engine.toString());
+        if (storageEngine < 0) storageEngine = DatabaseDescriptor.getStorageType();
 
-        return new KSMetaData(ks.name.toString(), repStratClass, strategyOptions, ks.replication_factor, cfMetaData);
+        return new KSMetaData(ks.name.toString(), repStratClass, strategyOptions, ks.replication_factor, storageEngine, cfMetaData);
     }
 
     public static String convertOldStrategyName(String name)
