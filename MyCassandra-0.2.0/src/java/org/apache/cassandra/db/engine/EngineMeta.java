@@ -62,6 +62,14 @@ public class EngineMeta
         return storageType;
     }
 
+    public int getStorageType(String label)
+    {
+        for (int i = 0; i < storageLabels.length; i++)
+            if (label.equals(storageLabels[i]))
+                return i+1;
+        return -1;
+    }
+
     public boolean isBigtable()
     {
         return storageType == BIGTABLE ? true : false;

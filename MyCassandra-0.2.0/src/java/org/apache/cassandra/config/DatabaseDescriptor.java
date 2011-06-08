@@ -1190,6 +1190,11 @@ public class DatabaseDescriptor
         return engineMeta.getStorageType();
     }
 
+    public static int getStorageType(String label)
+    {
+        return engineMeta.getStorageType(label);
+    }
+
     public static boolean isBigtable()
     {
         return engineMeta.isBigtable();
