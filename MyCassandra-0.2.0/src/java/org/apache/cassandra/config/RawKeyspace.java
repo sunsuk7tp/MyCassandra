@@ -38,5 +38,5 @@ public class RawKeyspace
     public int rowkey_size;
     public int columnfamily_size;
     public String storage_size;
-    public String storagee_ngine;
+    public String storage_engine;
 }
