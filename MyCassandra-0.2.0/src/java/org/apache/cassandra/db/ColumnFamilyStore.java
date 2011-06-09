@@ -292,7 +292,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         StorageEngine dbi = EngineMeta.getEngine(DatabaseDescriptor.getStorageType(), new String(table.name), columnFamilyName, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, isLong);
         if (!DatabaseDescriptor.isBigtable())
         {
-            setDBInstance(dbi);
+            setDBInstance(columnFamilyName, dbi);
         }
     }
 
@@ -484,9 +484,9 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         return count > 0 ? (int) (sum / count) : 0;
     }
 
-    public void setDBInstance(StorageEngine dbi)
+    public void setDBInstance(String columnFamilyName, StorageEngine dbi)
     {
-        dbis.put(columnFamily, dbi);
+        dbis.put(columnFamilyName, dbi);
     }
 
     public StorageEngine getDBInstance()

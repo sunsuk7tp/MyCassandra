@@ -155,10 +155,10 @@ protocol Cassandra {
         union { int, null } memtable_flush_after_mins = 60;
         union { null, int } memtable_throughput_in_mb = null;
         union { null, double} memtable_operations_in_millions = null;
-        union { null, int } rowkey_size;
-        union { null, int } columnfamily_size;
-        union { null, string } columnfamily_type;
-        union { null, string } storage_engine;
+        union { null, int } rowkey_size; /* MyCassandra param */
+        union { null, int } columnfamily_size; /* MyCassandra param */
+        union { null, string } columnfamily_type; /* MyCassandra param */
+        union { null, string } storage_engine; /* MyCassandra param */
         union { int, null } id;
         union { array<ColumnDef>, null } column_metadata;
     }
@@ -171,7 +171,7 @@ protocol Cassandra {
         union{ map<string>, null } strategy_options;
         int replication_factor;
         array<CfDef> cf_defs;
-        union {null, string} storage_engine;
+        union {string, null} storage_engine; /* MyCassandra param */
     }
     
     record StreamingMutation {
