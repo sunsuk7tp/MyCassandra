@@ -288,7 +288,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         }
 
         boolean isLong = DatabaseDescriptor.isSchemaUsed(table.name) && columnFamily.equals("Migrations") ? true : false;
-        StorageEngine dbi = EngineMeta.getEngine(DatabaseDescriptor.getStorageType(table.name), new String(table.name), columnFamilyName, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, isLong);
+        StorageEngine dbi = DatabaseDescriptor.engineMeta.getEngine(DatabaseDescriptor.getStorageType(table.name), new String(table.name), columnFamilyName, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, isLong);
         if (!DatabaseDescriptor.isBigtable(table.name))
         {
             setDBInstance(dbi);
