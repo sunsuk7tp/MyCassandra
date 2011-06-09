@@ -93,7 +93,8 @@ public class CliClient extends CliUserHelp
     private enum AddKeyspaceArgument {
         REPLICATION_FACTOR,
         PLACEMENT_STRATEGY,
-        STRATEGY_OPTIONS
+        STRATEGY_OPTIONS,
+        STORAGE_ENGINE,
     }
     private static final String DEFAULT_PLACEMENT_STRATEGY = "org.apache.cassandra.locator.SimpleStrategy";
 
@@ -829,6 +830,8 @@ public class CliClient extends CliUserHelp
             case STRATEGY_OPTIONS:
                 ksDef.setStrategy_options(getStrategyOptionsFromTree(statement.getChild(i + 1)));
                 break;
+            case STORAGE_ENGINE:
+                ksDef.setStorage_engine(CliUtils.unescapeSQLString(mValue));
             default:
                 //must match one of the above or we'd throw an exception at the valueOf statement above.
                 assert(false);
