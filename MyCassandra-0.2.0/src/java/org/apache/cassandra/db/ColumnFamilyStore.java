@@ -486,12 +486,17 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
     public void setDBInstance(StorageEngine dbi)
     {
-        dbis.put(columnFamily, dbi);
+        dbis.put(getUniqueKey(), dbi);
     }
 
     public StorageEngine getDBInstance()
     {
-        return dbis.get(columnFamily);
+        return dbis.get(getUniqueKey());
+    }
+
+    private String getUniqueKey()
+    {
+        return table + ":" + columnFamily;
     }
 
     public static ColumnFamilyStore createColumnFamilyStore(Table table, String columnFamily)
