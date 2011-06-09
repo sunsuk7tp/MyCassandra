@@ -382,6 +382,7 @@ public class DatabaseDescriptor
                                                    LocalStrategy.class,
                                                    null,
                                                    1,
+                                                   -1,
                                                    CFMetaData.StatusCf,
                                                    CFMetaData.HintsCf,
                                                    CFMetaData.MigrationsCf,
@@ -1233,7 +1234,7 @@ public class DatabaseDescriptor
     
     public static EngineInfo getEngineInfo(int storageType)
     {
-        return engineMeta.enginesInfo.get(storageType);
+        return engineMeta.getEngineInfo(storageType);
     }
 
     public static boolean hintedHandoffEnabled()

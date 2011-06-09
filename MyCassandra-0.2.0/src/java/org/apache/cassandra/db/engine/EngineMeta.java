@@ -74,6 +74,11 @@ public class EngineMeta
                 return i+1;
         return -1;
     }
+    
+    public EngineInfo getEngineInfo(int storageType)
+    {
+        return storageType > 0 ? enginesInfo.get(storageType) : enginesInfo.get(this.storageType);
+    }
 
     public boolean isBigtable()
     {
