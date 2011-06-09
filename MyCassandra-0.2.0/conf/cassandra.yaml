@@ -376,7 +376,7 @@ keyspaces:
           rowkey_size: 16
           columnfamily_size: 2048
           columnfamily_type: VARBINARY
-          storage_engine: InnoDB
+          mysql_engine: InnoDB
           compare_with: BytesType
           keys_cached: 10000
           rows_cached: 1000
