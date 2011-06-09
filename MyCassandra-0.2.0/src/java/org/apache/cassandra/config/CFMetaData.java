@@ -62,7 +62,7 @@ public final class CFMetaData
     public final static int DEFAULT_ROWKEY_SIZE = 64;
     public final static int DEFAULT_COLUMNFAMILY_SIZE = 30 *1024;
     public final static String DEFAULT_COLUMNFAMILY_TYPE = "VARBINARY";
-    public final static String DEFAULT_STORAGE_ENGINE = "INNODB";
+    public final static String DEFAULT_MYSQL_ENGINE = "INNODB";
 
     private static final int MIN_CF_ID = 1000;
 
@@ -227,7 +227,7 @@ public final class CFMetaData
                            : DEFAULT_COLUMNFAMILY_TYPE;
         this.mysqlEngine = mysqlEngine != null
                              ? mysqlEngine
-                             : DEFAULT_STORAGE_ENGINE;
+                             : DEFAULT_MYSQL_ENGINE;
     }
 
     private CFMetaData(String tableName,
@@ -289,7 +289,7 @@ public final class CFMetaData
         if (this.columnfamilyType == null)
             this.columnfamilyType = DEFAULT_COLUMNFAMILY_TYPE;
         if (this.mysqlEngine == null)
-            this.mysqlEngine = DEFAULT_STORAGE_ENGINE;
+            this.mysqlEngine = DEFAULT_MYSQL_ENGINE;
     }
     
     /** adds this cfm to the map. */
@@ -360,7 +360,7 @@ public final class CFMetaData
                            : DEFAULT_COLUMNFAMILY_TYPE;
         this.mysqlEngine = mysqlEngine != null
                              ? mysqlEngine
-                             : DEFAULT_STORAGE_ENGINE;
+                             : DEFAULT_MYSQL_ENGINE;
     }
 
     public CFMetaData(String tableName,
@@ -411,7 +411,7 @@ public final class CFMetaData
         if (this.columnfamilyType == null)
             this.columnfamilyType = DEFAULT_COLUMNFAMILY_TYPE;
         if (this.mysqlEngine == null)
-            this.mysqlEngine = DEFAULT_STORAGE_ENGINE;
+            this.mysqlEngine = DEFAULT_MYSQL_ENGINE;
     }
     
     public static CFMetaData newIndexMetadata(CFMetaData parent, ColumnDefinition info, AbstractType columnComparator)
@@ -569,7 +569,7 @@ public final class CFMetaData
         Integer rowkey_size = cf.rowkey_size == null ? DEFAULT_ROWKEY_SIZE : cf.rowkey_size;
         Integer columnfamily_size = cf.columnfamily_size == null ? DEFAULT_COLUMNFAMILY_SIZE : cf.columnfamily_size;
         String columnfamily_type = cf.columnfamily_type == null ? DEFAULT_COLUMNFAMILY_TYPE : cf.columnfamily_type.toString();
-        String mysql_engine = cf.mysql_engine == null ? DEFAULT_STORAGE_ENGINE : cf.mysql_engine.toString();
+        String mysql_engine = cf.mysql_engine == null ? DEFAULT_MYSQL_ENGINE : cf.mysql_engine.toString();
 
         return new CFMetaData(cf.keyspace.toString(),
                               cf.name.toString(),
@@ -820,8 +820,8 @@ public final class CFMetaData
             cf_def.setColumnfamily_size(CFMetaData.DEFAULT_COLUMNFAMILY_SIZE);
         if (!cf_def.isSetColumnfamily_type())
             cf_def.setColumnfamily_type(CFMetaData.DEFAULT_COLUMNFAMILY_TYPE);
-        if (!cf_def.isSetStorage_engine())
-            cf_def.setMySQL_engine(CFMetaData.DEFAULT_STORAGE_ENGINE);
+        if (!cf_def.isSetMysql_engine())
+            cf_def.setMysql_engine(CFMetaData.DEFAULT_MYSQL_ENGINE);
     }
     
     // merges some final fields from this CFM with modifiable fields from CfDef into a new CFMetaData.
@@ -934,7 +934,7 @@ public final class CFMetaData
         def.setRowkey_size(cfm.rowkeySize);
         def.setColumnfamily_size(cfm.columnfamilySize);
         def.setColumnfamily_type(cfm.columnfamilyType);
-        def.setStorage_engine(cfm.mysqlEngine);
+        def.setMysql_engine(cfm.mysqlEngine);
         List<org.apache.cassandra.thrift.ColumnDef> column_meta = new ArrayList< org.apache.cassandra.thrift.ColumnDef>(cfm.column_metadata.size());
         for (ColumnDefinition cd : cfm.column_metadata.values())
         {
@@ -1014,7 +1014,7 @@ public final class CFMetaData
         newDef.rowkey_size = def.getRowkey_size();
         newDef.columnfamily_size = def.getColumnfamily_size();
         newDef.columnfamily_type = def.getColumnfamily_type();
-        newDef.mysql_engine = def.getMySQL_engine();
+        newDef.mysql_engine = def.getMysql_engine();
         newDef.min_compaction_threshold = def.getMin_compaction_threshold();
         newDef.read_repair_chance = def.getRead_repair_chance();
         newDef.row_cache_save_period_in_seconds = def.getRow_cache_save_period_in_seconds();
