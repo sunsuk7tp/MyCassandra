@@ -158,7 +158,7 @@ protocol Cassandra {
         union { null, int } rowkey_size;
         union { null, int } columnfamily_size;
         union { null, string } columnfamily_type;
-        union { null, string } storage_engine;
+        union { null, string } mysql_engine;
         union { int, null } id;
         union { array<ColumnDef>, null } column_metadata;
     }
