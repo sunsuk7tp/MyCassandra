@@ -54,7 +54,7 @@ public final class KSMetaData
         this.storageEngineType = DatabaseDescriptor.getStorageType();
     }
 
-    public KSMetaData(String name, Class<? extends AbstractReplicationStrategy> strategyClass, Map<String, String> strategyOptions, int replicationFactor, int storageEngineType, CFMetaData... cfDefs)
+    public KSMetaData(String name, Class<? extends AbstractReplicationStrategy> strategyClass, Map<String, String> strategyOptions, int replicationFactor, String storageEngine, CFMetaData... cfDefs)
     {
         this.name = name;
         this.strategyClass = strategyClass == null ? SimpleStrategy.class : strategyClass;
@@ -64,7 +64,7 @@ public final class KSMetaData
         for (CFMetaData cfm : cfDefs)
             cfmap.put(cfm.cfName, cfm);
         this.cfMetaData = Collections.unmodifiableMap(cfmap);
-        this.storageEngineType = storageEngineType;
+        this.storageEngineType = DatabaseDescriptor.getStorageType(storageEngine);
     }
 
     public int hashCode()

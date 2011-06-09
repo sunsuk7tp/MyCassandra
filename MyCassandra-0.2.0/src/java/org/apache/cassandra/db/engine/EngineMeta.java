@@ -35,6 +35,8 @@ public class EngineMeta
     public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "RANGEMySQL", "HSMySQL", "MongoDB"};
     public static final Map<Integer, EngineInfo> enginesInfo = new HashMap<Integer, EngineInfo>(storageLabels.length);
     
+    public static Map<String, Integer> engineKSMap = new HashMap<String, Integer>();
+    
     // schema used se number
     public static final int[] schemaUsedTypes = {MYSQL, RANGEMYSQL};
 
@@ -68,6 +70,16 @@ public class EngineMeta
             if (label.equals(storageLabels[i]))
                 return i+1;
         return -1;
+    }
+
+    public int getStorageTypeForKS(String ksName)
+    {
+        return engineKSMap.get(ksName);
+    }
+
+    public void setStorageTypeForKS(String ksName, int engineType)
+    {
+        engineKSMap.put(ksName, engineType);
     }
 
     public boolean isBigtable()

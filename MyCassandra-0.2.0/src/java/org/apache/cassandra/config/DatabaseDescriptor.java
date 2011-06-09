@@ -710,10 +710,12 @@ public class DatabaseDescriptor
                                                  metadata);
                 }
             }
+            setStorageTypeForKS(keyspace.name, keyspace.storage_engine);
             defs.add(new KSMetaData(keyspace.name,
                                     strategyClass,
                                     keyspace.strategy_options,
                                     keyspace.replication_factor,
+                                    keyspace.storage_engine,
                                     cfDefs));
         }
 
@@ -1213,6 +1215,16 @@ public class DatabaseDescriptor
     public static EngineInfo getEngineInfo(int storageType)
     {
         return engineMeta.enginesInfo.get(storageType);
+    }
+
+    public static void setStorageTypeForKS(String ksName, int storageType)
+    {
+        engineMeta.setStorageTypeForKS(ksName, storageType);
+    }
+
+    public static int getStorageTypeForKS(String ksName)
+    {
+        return engineMeta.getStorageTypeForKS(ksName);
     }
 
     public static boolean hintedHandoffEnabled()
