@@ -885,7 +885,7 @@ public class CassandraServer implements Cassandra.Iface
                               cf_def.isSetRowkey_size() ? cf_def.rowkey_size : CFMetaData.DEFAULT_ROWKEY_SIZE,
                               cf_def.isSetColumnfamily_size() ? cf_def.columnfamily_size : CFMetaData.DEFAULT_COLUMNFAMILY_SIZE,
                               cf_def.isSetColumnfamily_type() ? cf_def.columnfamily_type : CFMetaData.DEFAULT_COLUMNFAMILY_TYPE,
-                              cf_def.isSetStorage_engine() ? cf_def.storage_engine : CFMetaData.DEFAULT_STORAGE_ENGINE,
+                              cf_def.isSetMySQL_engine() ? cf_def.mysql_engine : CFMetaData.DEFAULT_MYSQL_ENGINE,
                               ColumnDefinition.fromColumnDef(cf_def.column_metadata));
     }
 
