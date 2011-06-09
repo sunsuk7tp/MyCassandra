@@ -69,10 +69,11 @@ public class EngineMeta
 
     public int getStorageType(String label)
     {
+        if (label == null) return storageType;
         for (int i = 0; i < storageLabels.length; i++)
             if (label.equals(storageLabels[i]))
                 return i+1;
-        return -1;
+        return storageType;
     }
     
     public EngineInfo getEngineInfo(int storageType)
