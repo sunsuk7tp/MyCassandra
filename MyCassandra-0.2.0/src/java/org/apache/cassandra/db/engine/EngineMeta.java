@@ -117,7 +117,7 @@ public class EngineMeta
         return emeta;
     }
 
-    public void setStorageKSMap(String ksName, String label)
+    public void setStorageTypeForKS(String ksName, String label)
     {
         int storageType = getStorageType(label);
         if (storageType > 0)
@@ -126,7 +126,7 @@ public class EngineMeta
             // throw new ConfigurationException("Wrong storage engine name");
     }
 
-    public int getKSEngine(String ksName)
+    public int getStorageTypeForKS(String ksName)
     {
         if(ksName == null)
             return getStorageType();

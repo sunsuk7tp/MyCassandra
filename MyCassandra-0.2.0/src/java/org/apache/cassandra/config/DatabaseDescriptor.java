@@ -570,7 +570,7 @@ public class DatabaseDescriptor
             
             if (keyspace.storage_engine != null)
             {
-                engineMeta.setStorageKSMap(keyspace.name, keyspace.storage_engine);
+                engineMeta.setStorageTypeForKS(keyspace.name, keyspace.storage_engine);
             }
             
             int size2 = keyspace.column_families.length;
@@ -596,7 +596,7 @@ public class DatabaseDescriptor
                 int columnfamilySize = (cf.columnfamily_size > 0 ? cf.columnfamily_size : EngineMeta.defaultColumnFamilySize);
                 String columnfamilyType = (cf.columnfamily_type != null ? cf.columnfamily_type : EngineMeta.defaultColumnFamilyType);
                 String storageEngine = (cf.storage_engine != null ? cf.storage_engine : EngineMeta.defaultStorageEngine);
-                engineMeta.setStorageKSMap(keyspace.name, keyspace.storage_engine);
+                engineMeta.setStorageTypeForKS(keyspace.name, keyspace.storage_engine);
                 if(engineMeta.isSchemaUsed(keyspace.name)) {
                     engineMeta.getEngine(engineMeta.getStorageType(), keyspace.name, cf.name, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, false);
                 }
@@ -721,7 +721,7 @@ public class DatabaseDescriptor
                                     strategyClass,
                                     keyspace.strategy_options,
                                     keyspace.replication_factor,
-                                    getStorageType(keyspace.storage_engine),
+                                    getStorageTypeForKS(keyspace.storage_engine),
                                     cfDefs));
         }
 
@@ -1203,9 +1203,9 @@ public class DatabaseDescriptor
         return engineMeta.getStorageType(label);
     }
 
-    public static int getKSEngine(String ksName)
+    public static int getStorageTypeForKS(String ksName)
     {
-        return engineMeta.getKSEngine(ksName);
+        return engineMeta.getStorageTypeForKS(ksName);
     }
 
     public static boolean isBigtable()
