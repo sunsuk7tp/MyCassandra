@@ -99,8 +99,9 @@ public class EngineMeta
 
     public boolean isSchemaUsed(String ksName)
     {
+        int storageType = getKSEngine(ksName);
         for (int schemaUsedType : schemaUsedTypes)
-            if (getKSEngine(ksName) == schemaUsedType) return true;
+            if (storageType == schemaUsedType) return true;
         return false;
     }
 
@@ -121,6 +122,8 @@ public class EngineMeta
         int storageType = getStorageType(label);
         if (storageType > 0)
             storageKSMap.put(ksName, storageType);
+        //else
+            // throw new ConfigurationException("Wrong storage engine name");
     }
 
     public int getKSEngine(String ksName)
