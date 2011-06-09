@@ -1,6 +1,6 @@
 # MyCassandra
 
-![MyCassandra Logo](http://cdn.f.st-hatena.com/images/fotolife/s/sunsuk7tp/20110102/20110102225851.png)
+![MyCassandra Logo](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sunsuk7tp/20110610/20110610044036.png?1307649333?changed=1307649333)
 
 MyCassandra is a **modular** NoSQL.  
 MyCassandra is the project branched from Cassandra.  
