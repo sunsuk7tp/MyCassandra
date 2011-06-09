@@ -88,7 +88,7 @@ public class EngineMeta
 
     public boolean isBigtable(String ksName)
     {
-        return getKSEngine(ksName) == BIGTABLE ? true : false;
+        return getStorageTypeForKS(ksName) == BIGTABLE ? true : false;
     }
 
     // schema used storage engine (MySQL, PostgreSQL, ...)
@@ -99,7 +99,7 @@ public class EngineMeta
 
     public boolean isSchemaUsed(String ksName)
     {
-        int storageType = getKSEngine(ksName);
+        int storageType = getStorageTypeForKS(ksName);
         for (int schemaUsedType : schemaUsedTypes)
             if (storageType == schemaUsedType) return true;
         return false;
