@@ -51,34 +51,34 @@ public class EngineMeta
     public static final String defaultStorageEngine = "InnoDB";
     public static final String SYSTEM_STORAGE_ENGINE = "MyISAM";
 
-    // se number
-    private int storageType;
+    // default se type (SystemTable and not specified Keyspace)
+    private int defaultStorageType;
 
     // se map
     public static final Map<String, Integer> storageKSMap = new HashMap<String, Integer>();
 
     public void setStorageType(int storageType)
     {
-        this.storageType = storageType;
+        this.defaultStorageType = storageType;
     }
 
     public int getStorageType()
     {
-        return storageType;
+        return defaultStorageType;
     }
 
     public int getStorageType(String label)
     {
-        if (label == null) return storageType;
+        if (label == null) return defaultStorageType;
         for (int i = 0; i < storageLabels.length; i++)
             if (label.equals(storageLabels[i]))
                 return i+1;
-        return storageType;
+        return defaultStorageType;
     }
     
     public EngineInfo getEngineInfo(int storageType)
     {
-        return storageType > 0 ? enginesInfo.get(storageType) : enginesInfo.get(this.storageType);
+        return storageType > 0 ? enginesInfo.get(storageType) : enginesInfo.get(this.defaultStorageType);
     }
 
     public boolean isBigtable()
