@@ -368,15 +368,29 @@ request_scheduler: org.apache.cassandra.scheduler.NoScheduler
 index_interval: 128
 
 keyspaces:
-    - name: usertable
+    - name: mykeyspace1
       replica_placement_strategy: org.apache.cassandra.locator.SimpleStrategy
       replication_factor: 1
       column_families:
-        - name: data
+        - name: mycf1
           rowkey_size: 16
           columnfamily_size: 2048
           columnfamily_type: VARBINARY
           storage_engine: InnoDB
+          compare_with: BytesType
+          keys_cached: 10000
+          rows_cached: 1000
+          row_cache_save_period_in_seconds: 0
+          key_cache_save_period_in_seconds: 3600
+          memtable_flush_after_mins: 59
+          memtable_throughput_in_mb: 255
+          memtable_operations_in_millions: 0.29
+    - name: mykeyspace2
+      replica_placement_strategy: org.apache.cassandra.locator.SimpleStrategy
+      replication_factor: 1
+      storage_engine: Redis
+      column_families:
+        - name: mycf2
           compare_with: BytesType
           keys_cached: 10000
           rows_cached: 1000

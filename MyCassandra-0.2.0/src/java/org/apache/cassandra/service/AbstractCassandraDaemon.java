@@ -171,11 +171,11 @@ public abstract class AbstractCassandraDaemon implements CassandraDaemon
         }
 
         // replay the log if necessary and check for compaction candidates
-        if(DatabaseDescriptor.isBigtable())
-        {
+        //if(DatabaseDescriptor.isBigtable())
+        //{
             CommitLog.recover();
             CompactionManager.instance.checkAllColumnFamilies();
-        }
+        //}
         
         // check to see if CL.recovery modified the lastMigrationId. if it did, we need to re apply migrations. this isn't
         // the same as merely reloading the schema (which wouldn't perform file deletion after a DROP). The solution

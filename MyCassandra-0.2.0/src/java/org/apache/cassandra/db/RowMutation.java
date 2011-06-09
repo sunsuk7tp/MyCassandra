@@ -187,7 +187,7 @@ public class RowMutation
     */
     public void apply() throws IOException
     {
-        if (DatabaseDescriptor.isBigtable())
+        if (DatabaseDescriptor.isBigtable(table_))
             Table.open(table_).apply(this, getSerializedBuffer(), true);
         else
             applyUnsafe();

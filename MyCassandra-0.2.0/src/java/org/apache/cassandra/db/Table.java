@@ -66,7 +66,7 @@ public class Table
     // proper directories here as well as in CassandraDaemon.
     static 
     {
-        if (!StorageService.instance.isClientMode() && DatabaseDescriptor.isBigtable())
+        if (!StorageService.instance.isClientMode()) //&& DatabaseDescriptor.isBigtable())
         {
             try
             {
@@ -107,7 +107,7 @@ public class Table
                     instances.put(table, tableInstance);
 
                     //table has to be constructed and in the cache before cacheRow can be called
-                    if (DatabaseDescriptor.isBigtable())
+                    if (DatabaseDescriptor.isBigtable(table))
                         for (ColumnFamilyStore cfs : tableInstance.getColumnFamilyStores())
                             cfs.initRowCache();
                 }
@@ -226,7 +226,7 @@ public class Table
             try
             {
                 String keyspaceDir = dataDir + File.separator + table;
-                if (!StorageService.instance.isClientMode() && DatabaseDescriptor.isBigtable())
+                if (!StorageService.instance.isClientMode() && DatabaseDescriptor.isBigtable(table))
                     FileUtils.createDirectory(keyspaceDir);
     
                 // remove the deprecated streaming directory.

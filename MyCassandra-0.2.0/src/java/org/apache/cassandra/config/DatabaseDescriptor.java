@@ -567,6 +567,11 @@ public class DatabaseDescriptor
                 throw new ConfigurationException("Missing replication_factor directory for keyspace " + keyspace.name);
             }
             
+            if (keyspace.storage_engine != null)
+            {
+                engineMeta.setStorageKSMap(keyspace.name, keyspace.storage_engine);
+            }
+            
             int size2 = keyspace.column_families.length;
             CFMetaData[] cfDefs = new CFMetaData[size2];
             int j = 0;
@@ -590,7 +595,7 @@ public class DatabaseDescriptor
                 int columnfamilySize = (cf.columnfamily_size > 0 ? cf.columnfamily_size : EngineMeta.defaultColumnFamilySize);
                 String columnfamilyType = (cf.columnfamily_type != null ? cf.columnfamily_type : EngineMeta.defaultColumnFamilyType);
                 String storageEngine = (cf.storage_engine != null ? cf.storage_engine : EngineMeta.defaultStorageEngine);
-                if(engineMeta.isSchemaUsed()) {
+                if(engineMeta.isSchemaUsed(keyspace.name)) {
                     engineMeta.getEngine(engineMeta.getStorageType(), keyspace.name, cf.name, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, false);
                 }
                 
@@ -661,7 +666,7 @@ public class DatabaseDescriptor
                     metadata.put(columnName, new ColumnDefinition(columnName, rcd.validator_class, rcd.index_type, rcd.index_name));
                 }
                 
-                if (engineMeta.isSchemaUsed())
+                if (engineMeta.isSchemaUsed(keyspace.name))
                 {
                      cfDefs[j++] = new CFMetaData(keyspace.name, 
                                                  cf.name, 
@@ -710,12 +715,11 @@ public class DatabaseDescriptor
                                                  metadata);
                 }
             }
-            setStorageTypeForKS(keyspace.name, keyspace.storage_engine);
             defs.add(new KSMetaData(keyspace.name,
                                     strategyClass,
                                     keyspace.strategy_options,
                                     keyspace.replication_factor,
-                                    keyspace.storage_engine,
+                                    getStorageType(keyspace.storage_engine),
                                     cfDefs));
         }
 
@@ -1189,7 +1193,7 @@ public class DatabaseDescriptor
 
     public static int getStorageType()
     {
-        return engineMeta.getStorageType();
+        return getStorageType(null);
     }
 
     public static int getStorageType(String label)
@@ -1197,14 +1201,29 @@ public class DatabaseDescriptor
         return engineMeta.getStorageType(label);
     }
 
+    public static int getKSEngine(String ksName)
+    {
+        return engineMeta.getKSEngine(ksName);
+    }
+
     public static boolean isBigtable()
     {
-        return engineMeta.isBigtable();
+        return isBigtable(null);
+    }
+
+    public static boolean isBigtable(String ksName)
+    {
+        return engineMeta.isBigtable(ksName);
     }
 
     public static boolean isSchemaUsed()
     {
-        return engineMeta.isSchemaUsed();
+        return isSchemaUsed(null);
+    }
+
+    public static boolean isSchemaUsed(String ksName)
+    {
+        return engineMeta.isSchemaUsed(ksName);
     }
 
     public static EngineInfo getEngineInfo()
@@ -1215,16 +1234,6 @@ public class DatabaseDescriptor
     public static EngineInfo getEngineInfo(int storageType)
     {
         return engineMeta.enginesInfo.get(storageType);
-    }
-
-    public static void setStorageTypeForKS(String ksName, int storageType)
-    {
-        engineMeta.setStorageTypeForKS(ksName, storageType);
-    }
-
-    public static int getStorageTypeForKS(String ksName)
-    {
-        return engineMeta.getStorageTypeForKS(ksName);
     }
 
     public static boolean hintedHandoffEnabled()

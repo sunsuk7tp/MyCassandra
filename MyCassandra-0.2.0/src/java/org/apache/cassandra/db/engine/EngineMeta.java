@@ -54,6 +54,9 @@ public class EngineMeta
     // se number
     private int storageType;
 
+    // se map
+    public static final Map<String, Integer> storageKSMap = new HashMap<String, Integer>();
+
     public void setStorageType(int storageType)
     {
         this.storageType = storageType;
@@ -72,26 +75,26 @@ public class EngineMeta
         return -1;
     }
 
-    public int getStorageTypeForKS(String ksName)
-    {
-        return engineKSMap.get(ksName);
-    }
-
-    public void setStorageTypeForKS(String ksName, int engineType)
-    {
-        engineKSMap.put(ksName, engineType);
-    }
-
     public boolean isBigtable()
     {
-        return storageType == BIGTABLE ? true : false;
+        return isBigtable(null);
+    }
+
+    public boolean isBigtable(String ksName)
+    {
+        return getKSEngine(ksName) == BIGTABLE ? true : false;
     }
 
     // schema used storage engine (MySQL, PostgreSQL, ...)
     public boolean isSchemaUsed()
     {
+        return isSchemaUsed(null);
+    }
+
+    public boolean isSchemaUsed(String ksName)
+    {
         for (int schemaUsedType : schemaUsedTypes)
-            if (storageType == schemaUsedType) return true;
+            if (getKSEngine(ksName) == schemaUsedType) return true;
         return false;
     }
 
@@ -107,6 +110,21 @@ public class EngineMeta
         return emeta;
     }
 
+    public void setStorageKSMap(String ksName, String label)
+    {
+        int storageType = getStorageType(label);
+        if (storageType > 0)
+            storageKSMap.put(ksName, storageType);
+    }
+
+    public int getKSEngine(String ksName)
+    {
+        if(ksName == null)
+            return getStorageType();
+        return storageKSMap.containsKey(ksName) ? storageKSMap.get(ksName) : getStorageType();
+       
+    }
+ 
     // init setup and return the instance specified in storageType
     public static StorageEngine getEngine(int storageType, String tableName, String cfName, int maxKeySize, int maxCFSize, String storageSize, String storageEngine, boolean isSystem)
     {

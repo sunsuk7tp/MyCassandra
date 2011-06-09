@@ -33,10 +33,6 @@ public class RawKeyspace
     public Map<String,String> strategy_options;
     public Integer replication_factor;
     public RawColumnFamily[] column_families;
-    
     //MyCassandra elements
-    public int rowkey_size;
-    public int columnfamily_size;
-    public String storage_size;
     public String storage_engine;
 }
