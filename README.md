@@ -2,6 +2,9 @@
 
 ![MyCassandra Logo](http://cdn-ak.f.st-hatena.com/images/fotolife/s/sunsuk7tp/20110610/20110610044036.png?1307649333?changed=1307649333)
 
+> Cassandra = Dynamo + Bigtable    
+> **MyCassandra = Dynamo + MySQL (or Bigtable or Redis or MongoDB or etc...)**  
+
 MyCassandra is a **modular** NoSQL.  
 MyCassandra is the project branched from Cassandra.  
 
