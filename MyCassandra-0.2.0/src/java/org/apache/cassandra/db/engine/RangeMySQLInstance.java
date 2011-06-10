@@ -44,11 +44,12 @@ public class RangeMySQLInstance extends RangeDBInstance
     private final String SYSTEM = "system";
     private final String SETPR = "set_row";
     private final String GETPR = "get_row";
+    private final String RANGEPR = "range_get_row";
     
     private final String BINARY = "BINARY";
     private final String BLOB = "BLOB";
 
-    private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, dropTableSt, dropDBSt, getPr, setPr;
+    private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, dropTableSt, dropDBSt, getPr, setPr, rangePr;
 
     public RangeMySQLInstance(String ksName, String cfName)
     {
@@ -77,13 +78,14 @@ public class RangeMySQLInstance extends RangeDBInstance
         insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + TOKEN + ", " + VALUE +") VALUES (?,?,?) ON DUPLICATE KEY UPDATE " + VALUE + " = ?"; 
         setSt = !this.ksName.equals(SYSTEM) ? "CALL " + SETPR + this.cfName + "(?,?)" : "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
         getSt = !this.ksName.equals(SYSTEM) ? "CALL " + GETPR + this.cfName + "(?)" : "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
-        rangeSt = "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + " WHERE " + TOKEN + " >= ? AND " + TOKEN + " < ? LIMIT ?";
+        rangeSt = !this.ksName.equals(SYSTEM) ? "CALL " + RANGEPR + this.cfName + "(?,?,?)" : "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + " WHERE " + TOKEN + " >= ? AND " + TOKEN + " < ? LIMIT ?";
         deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
         truncateSt = "TRUNCATE TABLE " + this.cfName;
         dropTableSt = "DROP TABLE" + this.cfName;
         dropDBSt = "DROP DATABASE" + this.ksName;
         setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
         getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
+        rangePr = "CREARTE PROCEDURE " + RANGEPR + this.cfName + "(IN begin VARCHAR(?), IN end VARCHAR(?), IN limitN INT) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " +  TOKEN + " >= begin AND " + TOKEN + "< end LIMIT limitN"  + "; END";
     }
 
     private String getCreateSt(String statement)
@@ -305,12 +307,15 @@ public class RangeMySQLInstance extends RangeDBInstance
                     return 0;
             PreparedStatement gst = conn.prepareStatement(getPr);
             PreparedStatement sst = conn.prepareStatement(setPr);
+            PreparedStatement rst = conn.prepareStatement(rangePr);
 
             gst.setInt(1, rowKeySize);
             sst.setInt(1, columnFamilySize);
             sst.setInt(2, rowKeySize);
+            rst.setInt(1, rowKeySize);
+            rst.setInt(2, rowKeySize);
             
-            return gst.executeUpdate() * sst.executeUpdate();
+            return gst.executeUpdate() * sst.executeUpdate() * rst.executeUpdate();
         }
         catch (SQLException e)
         {
