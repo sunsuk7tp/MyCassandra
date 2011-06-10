@@ -398,7 +398,20 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     public void buildSecondaryIndexes(Collection<SSTableReader> sstables, SortedSet<ByteBuffer> columns)
     {
         logger.info(String.format("Submitting index build of %s for data in %s",
-                                  metadata.comparator.getString(columns), StringUtils.join(sstables, ", ")));
+                metadata.comparator.getString(columns), StringUtils.join(sstables, ", ")));
+        if(DatabaseDescriptor.isBigtable())
+        {
+            buildSecondaryIndexesForBigtable(sstables, columns);
+        }
+        else
+        {
+            buildSecondaryIndexesForDB(columns);
+        }
+        logger.info("Index build of " + metadata.comparator.getString(columns) + " complete");
+    }
+
+    public void buildSecondaryIndexesForBigtable(Collection<SSTableReader> sstables, SortedSet<ByteBuffer> columns)
+    {
         Table.IndexBuilder builder = table.createIndexBuilder(this, columns, new ReducingKeyIterator(sstables));
         Future future = CompactionManager.instance.submitIndexBuild(this, builder);
         try
@@ -415,7 +428,11 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         {
             throw new RuntimeException(e);
         }
-        logger.info("Index build of " + metadata.comparator.getString(columns) + " complete");
+    }
+
+    public void buildSecondaryIndexesForDB(SortedSet<ByteBuffer> columns)
+    {
+        
     }
 
     // called when dropping or renaming a CF. Performs mbean housekeeping and invalidates CFS to other operations.
