@@ -86,7 +86,7 @@ public class MySQLInstance extends DBSchemafulInstance
         dropDBSt = "DROP DATABASE" + this.ksName;
         setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
         getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
-        rangePr = "CREARTE PROCEDURE " + RANGEPR + this.cfName + "(IN begin VARCHAR(?), IN end VARCHAR(?), IN limitN INT) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end LIMIT limitN"  + "; END";
+        rangePr = "CREATE PROCEDURE " + RANGEPR + this.cfName + "(IN begin VARCHAR(?),IN end VARCHAR(?),IN limitNum INT) BEGIN SQL_SELECT_LIMIT = limitNum; SELECT " + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
     }
 
     private String getCreateSt(String statement)
