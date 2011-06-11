@@ -731,6 +731,7 @@ public class CassandraServer implements Cassandra.Iface
                                             AbstractReplicationStrategy.getClass(ks_def.strategy_class),
                                             ks_def.strategy_options,
                                             ks_def.replication_factor,
+                                            ks_def.storage_engine,
                                             cfDefs.toArray(new CFMetaData[cfDefs.size()]));
             applyMigrationOnStage(new AddKeyspace(ksm));
             return DatabaseDescriptor.getDefsVersion().toString();
@@ -790,7 +791,8 @@ public class CassandraServer implements Cassandra.Iface
                     ks_def.name, 
                     AbstractReplicationStrategy.getClass(ks_def.strategy_class),
                     ks_def.strategy_options,
-                    ks_def.replication_factor);
+                    ks_def.replication_factor,
+                    ks_def.storage_engine);
             applyMigrationOnStage(new UpdateKeyspace(ksm));
             return DatabaseDescriptor.getDefsVersion().toString();
         }
