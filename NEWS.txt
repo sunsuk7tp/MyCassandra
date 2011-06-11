@@ -28,8 +28,7 @@ nous deletion now)
 -------
     - It will support the following functions:
         - secondry index
-        - select a storage engine by a keyspace
-
+        - asynchronous deletion (tombstone, expired data)
 0.2.0 [2011.06.13]
 =====
 
@@ -39,7 +38,7 @@ nous deletion now)
         - the basic CRUD method for MySQL, Redis and MongoDB
         - range query for only MySQL
         - dynamic add or update keyspace and columnfamily
-
+        - select a storage engine by a keyspace
 0.1.0 [2011.06.13]
 =====
 
