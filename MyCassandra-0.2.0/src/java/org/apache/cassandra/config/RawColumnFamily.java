@@ -51,5 +51,5 @@ public class RawColumnFamily
     public int rowkey_size;
     public int columnfamily_size;
     public String columnfamily_type;
-    public String storage_engine;
+    public String mysql_engine;
 }

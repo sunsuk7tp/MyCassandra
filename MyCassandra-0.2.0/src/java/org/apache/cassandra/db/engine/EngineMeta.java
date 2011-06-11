@@ -48,7 +48,7 @@ public class EngineMeta
     public static final int defaultRowKeySize = 64;
     public static final int defaultColumnFamilySize = 30 * 1024;
     public static final String defaultColumnFamilyType = BINARY;
-    public static final String defaultStorageEngine = "InnoDB";
+    public static final String defaultMySQLEngine = "InnoDB";
     public static final String SYSTEM_STORAGE_ENGINE = "MyISAM";
 
     // default se type (SystemTable and not specified Keyspace)

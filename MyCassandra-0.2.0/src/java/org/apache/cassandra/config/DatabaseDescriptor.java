@@ -595,10 +595,10 @@ public class DatabaseDescriptor
                 int rowkeySize = (cf.rowkey_size > 0 ? cf.rowkey_size : EngineMeta.defaultRowKeySize);
                 int columnfamilySize = (cf.columnfamily_size > 0 ? cf.columnfamily_size : EngineMeta.defaultColumnFamilySize);
                 String columnfamilyType = (cf.columnfamily_type != null ? cf.columnfamily_type : EngineMeta.defaultColumnFamilyType);
-                String storageEngine = (cf.storage_engine != null ? cf.storage_engine : EngineMeta.defaultStorageEngine);
+                String mysqlEngine = (cf.mysql_engine != null ? cf.mysql_engine : EngineMeta.defaultMySQLEngine);
                 engineMeta.setStorageTypeForKS(keyspace.name, keyspace.storage_engine);
                 if(engineMeta.isSchemaUsed(keyspace.name)) {
-                    engineMeta.getEngine(engineMeta.getStorageType(), keyspace.name, cf.name, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, false);
+                    engineMeta.getEngine(engineMeta.getStorageType(), keyspace.name, cf.name, rowkeySize, columnfamilySize, columnfamilyType, mysqlEngine, false);
                 }
                 
                 ColumnFamilyType cfType = cf.column_type == null ? ColumnFamilyType.Standard : cf.column_type;
@@ -691,7 +691,7 @@ public class DatabaseDescriptor
                                                  rowkeySize,
                                                  columnfamilySize,
                                                  columnfamilyType,
-                                                 storageEngine,
+                                                 mysqlEngine,
                                                  metadata);
                 }
                 else

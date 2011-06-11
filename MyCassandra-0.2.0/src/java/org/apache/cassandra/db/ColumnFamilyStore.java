@@ -157,7 +157,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     private int rowkeySize = EngineMeta.defaultRowKeySize;
     private int columnfamilySize = EngineMeta.defaultColumnFamilySize;
     private String columnfamilyType = EngineMeta.defaultColumnFamilyType;
-    private String storageEngine = EngineMeta.defaultStorageEngine;
+    private String mysqlEngine = EngineMeta.defaultMySQLEngine;
 
     public void reload()
     {
@@ -230,7 +230,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         this.rowkeySize = metadata.getRowkeySize();
         this.columnfamilySize = metadata.getColumnfamilySize();
         this.columnfamilyType = metadata.getColumnfamilyType();
-        this.storageEngine = metadata.getStorageEngine();
+        this.mysqlEngine = metadata.getMySQLEngine();
         fileIndexGenerator.set(generation);
         memtable = new Memtable(this);
         binaryMemtable = new AtomicReference<BinaryMemtable>(new BinaryMemtable(this));
@@ -288,7 +288,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         }
 
         boolean isLong = columnFamily.equals("Migrations") ? true : false;
-        StorageEngine dbi = DatabaseDescriptor.engineMeta.getEngine(DatabaseDescriptor.getStorageTypeForKS(table.name), new String(table.name), columnFamilyName, rowkeySize, columnfamilySize, columnfamilyType, storageEngine, isLong);
+        StorageEngine dbi = DatabaseDescriptor.engineMeta.getEngine(DatabaseDescriptor.getStorageTypeForKS(table.name), new String(table.name), columnFamilyName, rowkeySize, columnfamilySize, columnfamilyType, mysqlEngine, isLong);
         if (!DatabaseDescriptor.isBigtable(table.name))
         {
             setDBInstance(dbi);
