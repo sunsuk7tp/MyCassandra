@@ -928,8 +928,8 @@ public class CliClient extends CliUserHelp
             case COLUMNFAMILY_TYPE:
                 cfDef.setColumnfamily_type(CliUtils.unescapeSQLString(mValue));
                 break;
-            case STORAGE_ENGINE:
-                cfDef.setStorage_engine(CliUtils.unescapeSQLString(mValue));
+            case MYSQL_ENGINE:
+                cfDef.setMysql_engine(CliUtils.unescapeSQLString(mValue));
                 break;
             default:
                 //must match one of the above or we'd throw an exception at the valueOf statement above.

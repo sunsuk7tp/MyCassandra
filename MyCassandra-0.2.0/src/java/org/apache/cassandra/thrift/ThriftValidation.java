@@ -483,7 +483,7 @@ public class ThriftValidation
             int rowkeySize = cf_def.rowkey_size;
             int columnfamilySize = cf_def.columnfamily_size;
             String columnfamilyType = cf_def.columnfamily_type;
-            String storageEngine = cf_def.storage_engine;
+            String mysqlEngine = cf_def.mysql_engine;
             //if (rowkeySize <= 0 || rowkeySize > 65535)
             //    throw new InvalidRequestException("Too small or large rowKeySize: " + rowkeySize);
             //if (columnfamilySize <= 0 || columnfamilySize > 65535)

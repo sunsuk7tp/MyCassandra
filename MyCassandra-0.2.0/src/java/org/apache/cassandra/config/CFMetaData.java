@@ -820,8 +820,13 @@ public final class CFMetaData
             cf_def.setColumnfamily_size(CFMetaData.DEFAULT_COLUMNFAMILY_SIZE);
         if (!cf_def.isSetColumnfamily_type())
             cf_def.setColumnfamily_type(CFMetaData.DEFAULT_COLUMNFAMILY_TYPE);
+<<<<<<< HEAD
         if (!cf_def.isSetStorage_engine())
             cf_def.setStorage_engine(CFMetaData.DEFAULT_MYSQL_ENGINE);
+=======
+        if (!cf_def.isSetMysql_engine())
+            cf_def.setMysql_engine(CFMetaData.DEFAULT_MYSQL_ENGINE);
+>>>>>>> 398973cc908d7bb9eb283723337a6775f34357bf
     }
     
     // merges some final fields from this CFM with modifiable fields from CfDef into a new CFMetaData.
@@ -934,7 +939,8 @@ public final class CFMetaData
         def.setRowkey_size(cfm.rowkeySize);
         def.setColumnfamily_size(cfm.columnfamilySize);
         def.setColumnfamily_type(cfm.columnfamilyType);
-        def.setStorage_engine(cfm.mysqlEngine);
+        def.setMysql_engine(cfm.mysqlEngine);
+
         List<org.apache.cassandra.thrift.ColumnDef> column_meta = new ArrayList< org.apache.cassandra.thrift.ColumnDef>(cfm.column_metadata.size());
         for (ColumnDefinition cd : cfm.column_metadata.values())
         {
@@ -1014,7 +1020,11 @@ public final class CFMetaData
         newDef.rowkey_size = def.getRowkey_size();
         newDef.columnfamily_size = def.getColumnfamily_size();
         newDef.columnfamily_type = def.getColumnfamily_type();
+<<<<<<< HEAD
         newDef.mysql_engine = def.getMySQL_engine();
+=======
+        newDef.mysql_engine = def.getMysql_engine();
+>>>>>>> 398973cc908d7bb9eb283723337a6775f34357bf
         newDef.min_compaction_threshold = def.getMin_compaction_threshold();
         newDef.read_repair_chance = def.getRead_repair_chance();
         newDef.row_cache_save_period_in_seconds = def.getRow_cache_save_period_in_seconds();
