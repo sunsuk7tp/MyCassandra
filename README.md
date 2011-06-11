@@ -12,8 +12,9 @@ This means that you can select one or more Storage Engine for according to the f
 
 - I/O pattern of applications and the persistence.   
 - persistent or in-memory cache
-- your favorite skills for the data stores
+- your skills for a data store
 
+Also with MyCassandra, you can apply any data store which do not support distributed model for the cloud to the decentralized archetecture of Cassandra.    
 # Release Note
 - [2011.06.??] MyCassandra-0.2.1
     - It will support the following functions:
