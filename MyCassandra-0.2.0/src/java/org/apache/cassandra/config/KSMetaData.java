@@ -39,7 +39,7 @@ public final class KSMetaData
     public final Map<String, String> strategyOptions;
     public final int replicationFactor;
     private final Map<String, CFMetaData> cfMetaData;
-    public final int storageEngineType;
+    public final String storageEngine;
 
     public KSMetaData(String name, Class<? extends AbstractReplicationStrategy> strategyClass, Map<String, String> strategyOptions, int replicationFactor, CFMetaData... cfDefs)
     {
@@ -51,10 +51,10 @@ public final class KSMetaData
         for (CFMetaData cfm : cfDefs)
             cfmap.put(cfm.cfName, cfm);
         this.cfMetaData = Collections.unmodifiableMap(cfmap);
-        this.storageEngineType = DatabaseDescriptor.getStorageType();
+        this.storageEngine = DatabaseDescriptor.getStorageLabel();
     }
 
-    public KSMetaData(String name, Class<? extends AbstractReplicationStrategy> strategyClass, Map<String, String> strategyOptions, int replicationFactor, int storageEngineType, CFMetaData... cfDefs)
+    public KSMetaData(String name, Class<? extends AbstractReplicationStrategy> strategyClass, Map<String, String> strategyOptions, int replicationFactor, String storageEngine, CFMetaData... cfDefs)
     {
         this.name = name;
         this.strategyClass = strategyClass == null ? SimpleStrategy.class : strategyClass;
@@ -64,7 +64,7 @@ public final class KSMetaData
         for (CFMetaData cfm : cfDefs)
             cfmap.put(cfm.cfName, cfm);
         this.cfMetaData = Collections.unmodifiableMap(cfmap);
-        this.storageEngineType = storageEngineType;
+        this.storageEngine = storageEngine;
     }
 
     public int hashCode()
@@ -83,7 +83,7 @@ public final class KSMetaData
                 && other.replicationFactor == replicationFactor
                 && other.cfMetaData.size() == cfMetaData.size()
                 && other.cfMetaData.equals(cfMetaData)
-                && other.storageEngineType == storageEngineType;
+                && other.storageEngine == storageEngine;
     }
 
     public Map<String, CFMetaData> cfMetaData()
@@ -108,7 +108,7 @@ public final class KSMetaData
         ks.cf_defs = SerDeUtils.createArray(cfMetaData.size(), org.apache.cassandra.avro.CfDef.SCHEMA$);
         for (CFMetaData cfm : cfMetaData.values())
             ks.cf_defs.add(cfm.deflate());
-        ks.storage_engine = new Utf8(DatabaseDescriptor.getEngineInfo(storageEngineType).name);
+        ks.storage_engine = new Utf8(storageEngine);
         return ks;
     }
 
@@ -124,7 +124,7 @@ public final class KSMetaData
           .append("{")
           .append(StringUtils.join(cfMetaData.values(), ", "))
           .append("storage engine:")
-          .append(storageEngineType)
+          .append(storageEngine)
           .append("}");
         return sb.toString();
     }
@@ -156,8 +156,8 @@ public final class KSMetaData
         for (int i = 0; i < cfsz; i++)
             cfMetaData[i] = CFMetaData.inflate(cfiter.next());
         
-        int storageEngine = DatabaseDescriptor.getStorageType(ks.storage_engine.toString());
-        if (storageEngine < 0) storageEngine = DatabaseDescriptor.getStorageType();
+        String storageEngine = ks.storage_engine.toString();
+        if (storageEngine == null) storageEngine = DatabaseDescriptor.getStorageLabel();
 
         return new KSMetaData(ks.name.toString(), repStratClass, strategyOptions, ks.replication_factor, storageEngine, cfMetaData);
     }

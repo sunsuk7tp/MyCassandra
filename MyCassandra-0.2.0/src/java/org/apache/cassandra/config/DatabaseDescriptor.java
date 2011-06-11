@@ -382,7 +382,7 @@ public class DatabaseDescriptor
                                                    LocalStrategy.class,
                                                    null,
                                                    1,
-                                                   -1,
+                                                   getStorageLabel(),
                                                    CFMetaData.StatusCf,
                                                    CFMetaData.HintsCf,
                                                    CFMetaData.MigrationsCf,
@@ -721,7 +721,7 @@ public class DatabaseDescriptor
                                     strategyClass,
                                     keyspace.strategy_options,
                                     keyspace.replication_factor,
-                                    getStorageTypeForKS(keyspace.storage_engine),
+                                    getStorageLabel(getStorageTypeForKS(keyspace.name)),
                                     cfDefs));
         }
 
@@ -1191,6 +1191,16 @@ public class DatabaseDescriptor
     public static boolean isAutoBootstrap()
     {
         return conf.auto_bootstrap;
+    }
+
+    public static String getStorageLabel()
+    {
+        return getStorageLabel(getStorageType());
+    }
+    
+    public static String getStorageLabel(int storageType)
+    {
+        return engineMeta.getStorageLabel(storageType);
     }
 
     public static int getStorageType()

@@ -208,6 +208,7 @@ public class Table
     {
         name = table;
         KSMetaData ksm = DatabaseDescriptor.getKSMetaData(table);
+        DatabaseDescriptor.engineMeta.setStorageTypeForKS(ksm.name, ksm.storageEngine);
         try
         {
             createReplicationStrategy(ksm);

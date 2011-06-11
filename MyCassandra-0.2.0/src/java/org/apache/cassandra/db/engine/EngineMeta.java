@@ -75,7 +75,18 @@ public class EngineMeta
                 return i+1;
         return defaultStorageType;
     }
-    
+
+    public String getStorageLabel(int storageType)
+    {
+        if (storageType < 0 || storageType > storageLabels.length) return null;
+        return storageLabels[storageType - 1];
+    }
+
+    public String getStorageLabel()
+    {
+        return getStorageLabel(defaultStorageType);
+    }
+
     public EngineInfo getEngineInfo(int storageType)
     {
         return storageType > 0 ? enginesInfo.get(storageType) : enginesInfo.get(this.defaultStorageType);
