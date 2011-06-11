@@ -157,11 +157,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     private int rowkeySize = EngineMeta.defaultRowKeySize;
     private int columnfamilySize = EngineMeta.defaultColumnFamilySize;
     private String columnfamilyType = EngineMeta.defaultColumnFamilyType;
-<<<<<<< HEAD
     private String mysqlEngine = EngineMeta.defaultMySQLEngine;
-=======
-    private String storageEngine = EngineMeta.defaultMySQLEngine;
->>>>>>> 398973cc908d7bb9eb283723337a6775f34357bf
 
     public void reload()
     {
