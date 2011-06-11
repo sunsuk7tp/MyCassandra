@@ -371,12 +371,13 @@ keyspaces:
     - name: mykeyspace1
       replica_placement_strategy: org.apache.cassandra.locator.SimpleStrategy
       replication_factor: 1
+      storage_engine: MySQL
       column_families:
         - name: mycf1
           rowkey_size: 16
           columnfamily_size: 2048
           columnfamily_type: VARBINARY
-          storage_engine: InnoDB
+          mysql_engine: InnoDB
           compare_with: BytesType
           keys_cached: 10000
           rows_cached: 1000
@@ -388,7 +389,7 @@ keyspaces:
     - name: mykeyspace2
       replica_placement_strategy: org.apache.cassandra.locator.SimpleStrategy
       replication_factor: 1
-      storage_engine: Redis
+      storage_engine: MySQL
       column_families:
         - name: mycf2
           compare_with: BytesType

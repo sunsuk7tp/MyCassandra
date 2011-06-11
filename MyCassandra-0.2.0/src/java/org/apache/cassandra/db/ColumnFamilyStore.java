@@ -157,7 +157,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     private int rowkeySize = EngineMeta.defaultRowKeySize;
     private int columnfamilySize = EngineMeta.defaultColumnFamilySize;
     private String columnfamilyType = EngineMeta.defaultColumnFamilyType;
-    private String storageEngine = EngineMeta.defaultStorageEngine;
+    private String storageEngine = EngineMeta.defaultMySQLEngine;
 
     public void reload()
     {
@@ -230,7 +230,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         this.rowkeySize = metadata.getRowkeySize();
         this.columnfamilySize = metadata.getColumnfamilySize();
         this.columnfamilyType = metadata.getColumnfamilyType();
-        this.storageEngine = metadata.getStorageEngine();
+        this.storageEngine = metadata.getMySQLEngine();
         fileIndexGenerator.set(generation);
         memtable = new Memtable(this);
         binaryMemtable = new AtomicReference<BinaryMemtable>(new BinaryMemtable(this));

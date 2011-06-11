@@ -48,8 +48,8 @@ public class EngineMeta
     public static final int defaultRowKeySize = 64;
     public static final int defaultColumnFamilySize = 30 * 1024;
     public static final String defaultColumnFamilyType = BINARY;
-    public static final String defaultStorageEngine = "InnoDB";
-    public static final String SYSTEM_STORAGE_ENGINE = "MyISAM";
+    public static final String defaultMySQLEngine = "InnoDB";
+    public static final String SYSTEM_MYSQL_ENGINE = "MyISAM";
 
     // default se type (SystemTable and not specified Keyspace)
     private int defaultStorageType;
@@ -148,14 +148,14 @@ public class EngineMeta
             case MYSQL:
             default:
                 DBSchemafulInstance dbi = new MySQLInstance(tableName, cfName);
-                if(isSystem) dbi.create(maxKeySize, maxCFSize, BLOB, SYSTEM_STORAGE_ENGINE);
+                if(isSystem) dbi.create(maxKeySize, maxCFSize, BLOB, SYSTEM_MYSQL_ENGINE);
                 else dbi.create(maxKeySize, maxCFSize, storageSize, storageEngine);
                 dbi.createProcedure(maxKeySize, maxCFSize);
                 engine = dbi;
                 break;
             case RANGEMYSQL:
                 RangeMySQLInstance rdbi = new RangeMySQLInstance(tableName, cfName);
-                if(isSystem) rdbi.create(maxKeySize, maxCFSize, BLOB, SYSTEM_STORAGE_ENGINE);
+                if(isSystem) rdbi.create(maxKeySize, maxCFSize, BLOB, SYSTEM_MYSQL_ENGINE);
                 else rdbi.create(maxKeySize, maxCFSize, storageSize, storageEngine);
                 rdbi.createProcedure(maxKeySize, maxCFSize);
                 engine = rdbi;

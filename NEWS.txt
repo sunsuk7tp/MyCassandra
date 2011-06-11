@@ -1,0 +1,49 @@
+== MyCassandra NEWS ==
+
+0.3.0 (in future)
+=====
+
+-----
+    - It will be based on Cassandra-0.8
+    - It supports the following functions:
+        - atomic counter
+
+0.2 TODO LIST
+=====
+
+------
+    - asynchronous deletion for tombstone data and expired data. (support only synchoro
+nous deletion now)
+    - secondary index
+    - range query for the other engine
+    - add the new engines (HandlerSocket plugin, Hibari, VoltDB, Voldemort,
+ ...)
+    - select a storage engine by a keyspace or a column family
+    - the replication strategy considering the storage engine types
+    
+
+0.2.1 (in future) [2011.07?]
+=====
+
+-------
+    - It will support the following functions:
+        - secondry index
+        - select a storage engine by a keyspace
+
+0.2.0 [2011.06.13]
+=====
+
+--------
+    - It is based on Cassandra-0.7.5
+    - It supports the following functions:
+        - the basic CRUD method for MySQL, Redis and MongoDB
+        - range query for only MySQL
+        - dynamic add or update keyspace and columnfamily
+
+0.1.0 [2011.06.13]
+=====
+
+--------
+    - It is based on Cassandra-0.6.2
+    - It is a experimental version.
+
