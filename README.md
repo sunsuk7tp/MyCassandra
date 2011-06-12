@@ -145,6 +145,7 @@ If you use MySQL storage engine, you must specify several schema parameters.
 
 - If you do not specify 'storage_engine' when creating a keyspace, MyCassandra uses default storage engine.    
 - If you do not specify each parameters when creating a column family, MyCassandra uses default parameters specified by system.    
+
 # License
                                                                                                                                                                                  
 Copyright 2011 Shunsuke Nakamura, and contributors.
