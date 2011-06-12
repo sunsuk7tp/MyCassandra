@@ -47,6 +47,7 @@ In default, you can select that.
 For example, if you want to use MySQL, 
 ## 1) add several statements at {$config_file}
 {$config_file} is cassandra.yaml (MyCassandra-0.2) or conf/storage-conf.xml (MyCassandra-0.1).    
+A user for MyCassandra needs to hava all privileges to create MySQL's database and table.    
 ### @ MyCassandra-0.2
     engines: 
         - name: MySQL
@@ -59,13 +60,13 @@ For example, if you want to use MySQL,
     defaultengines: MySQL # <--- This engine is used in MyCassandra
     
 ### @ MyCassandra-0.1    
-    <DataBase>MySQL</DataBase>
-    <SQL>
-        <SQLHost>localhost</SQLHost> # mysql host
-        <SQLPort>3306</SQLPort> # mysql port
-        <SQLUser>cassandra_user</SQLUser> # mysql connection user ("root" is easier but it is not secure.)
-        <SQLPass>cA33anDra</SQLPass> # user password
-    </SQL>
+    <Engine>
+        <Name>MySQL</Name>
+        <Host>localhost</Host> # mysql host
+        <Port>3306</Port> # mysql port
+        <User>cassandra_user</User> # mysql connection user
+        <Pass>cA33anDra</Pass> # user password
+    </Engine>
 
 ## 2) You define the database schema at {$config_file}.
 

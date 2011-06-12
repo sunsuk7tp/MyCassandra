@@ -487,7 +487,7 @@ public class DatabaseDescriptor
             // database setup
             dataBase = defaultDataBase;
             String val;
-            if ((val = xmlUtils.getNodeValue("/Storage/DataBase")) != null)
+            if ((val = xmlUtils.getNodeValue("/Storage/Engine/Name")) != null)
             {
                 if(val.equals("MSTable"))
                 {
@@ -516,10 +516,10 @@ public class DatabaseDescriptor
             }
             
             /* sql configure */
-            sqlHost = xmlUtils.getNodeValue("/Storage/SQL/SQLHost");
-            sqlPort = xmlUtils.getNodeValue("/Storage/SQL/SQLPort");
-            sqlUser = xmlUtils.getNodeValue("/Storage/SQL/SQLUser");
-            sqlPass = xmlUtils.getNodeValue("/Storage/SQL/SQLPass");
+            sqlHost = xmlUtils.getNodeValue("/Storage/Engine/Host");
+            sqlPort = xmlUtils.getNodeValue("/Storage/Engine/Port");
+            sqlUser = xmlUtils.getNodeValue("/Storage/Engine/User");
+            sqlPass = xmlUtils.getNodeValue("/Storage/Engine/Pass");
             /* threshold after which commit log should be rotated. */
             String value = xmlUtils.getNodeValue("/Storage/CommitLogRotationThresholdInMB");
             if ( value != null)

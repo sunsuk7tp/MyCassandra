@@ -45,13 +45,13 @@
   -->
   <AutoBootstrap>false</AutoBootstrap>
 
-  <DataBase>MySQL</DataBase>
-  <SQL>
-        <SQLHost>localhost</SQLHost>
-        <SQLPort>3306</SQLPort>
-        <SQLUser>cassandra_user</SQLUser>
-        <SQLPass>ca33andra</SQLPass>
-  </SQL>
+  <Engine>
+        <Name>MySQL</Name>
+        <Host>localhost</SQLHost>
+        <Port>3306</SQLPort>
+        <User>cassandra_user</SQLUser>
+        <Pass>ca33andra</SQLPass>
+  </Engine>
 
   <!--
    ~ Keyspaces and ColumnFamilies:
@@ -62,7 +62,7 @@
    ~ There is an implicit keyspace named 'system' for Cassandra internals.
   -->
   <Keyspaces>
-    <Keyspace Name="mykeyspace">
+    <Keyspace Name="myks">
       <!--
        ~ ColumnFamily definitions have one required attribute (Name)
        ~ and several optional ones.
