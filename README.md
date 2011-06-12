@@ -81,7 +81,7 @@ If you use MySQL storage engine, you must specify several schema parameters.
 
 ### @ MyCassandra-0.2
     keyspaces:
-        - name: mykeyspace
+        - name: myks
         :
           column_families:
               - name: mycf1
@@ -104,7 +104,7 @@ If you use MySQL storage engine, you must specify several schema parameters.
 
 ### @ MyCassandra-0.1
     <Keyspaces>
-      <Keyspace Name="mykeyspace">
+      <Keyspace Name="myks">
         <ColumnFamily Name="mycf1" RowKeySize="16" ColumnFamilySize="2048" ColumnFamilyType="VARBINARY" StorageEngine="InnoDB" />
         <ColumnFamily Name="mycf2" RowKeySize="32" ColumnFamilySize="4096" ColumnFamilyType="VARBINARY" StorageEngine="MyISAM" />
         <ReplicaPlacementStrategy>org.apache.cassandra.locator.RackAwareStrategy</ReplicaPlacementStrategy>
@@ -138,13 +138,14 @@ If you use MySQL storage engine, you must specify several schema parameters.
     $ ./bin/schmatool localhost 8080 import
 
 ## 6) dynamicaly create keyspace/columnfamily (MyCassandra-0.2)
-    $ ./bin/cassandra-cli
-    > connect localhost/9160;
-    > create keyspace myksp;
+    $ ./bin/cassandra-cli -h localhost -p 9160
+    > create keyspace myks with storage_engine = MySQL;
     > use keyspace;
     > create column family mycf1 with rowkey_size = 64 and columnfamily_size = 2048 and columnfamily_type = BINARY and mysql_engine = InnoDB;
 
-#  License
+- If you do not specify 'storage_engine' when creating a keyspace, MyCassandra uses default storage engine.    
+- If you do not specify each parameters when creating a column family, MyCassandra uses default parameters specified by system.    
+# License
                                                                                                                                                                                  
 Copyright 2011 Shunsuke Nakamura, and contributors.
 
@@ -159,8 +160,13 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations under the License.
 
+# Detail
+If you know more about MyCassandra, please look [https://github.com/sunsuk7tp/MyCassandra/wiki](https://github.com/sunsuk7tp/MyCassandra/wiki "wiki"). 
+
 # Contact
 If you have something, please contact me!!
+
+- Issue Reports: [https://github.com/sunsuk7tp/MyCassandra/issues](https://github.com/sunsuk7tp/MyCassandra/issues "github-issues")
 
 - Google Group: [http://groups.google.com/group/my-cassandra/](http://groups.google.com/group/my-cassandra/ "http://groups.google.com/group/my-cassandra/")
 
