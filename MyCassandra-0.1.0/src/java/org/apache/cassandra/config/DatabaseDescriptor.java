@@ -746,7 +746,7 @@ public class DatabaseDescriptor
                     {
                     	storageSize = value;
                     }
-                    if ((value = XMLUtils.getAttributeValue(columnFamily, "StorageEngine")) != null)
+                    if ((value = XMLUtils.getAttributeValue(columnFamily, "MySQLEngine")) != null)
                     {
                     	storageEngine = value;
                     }

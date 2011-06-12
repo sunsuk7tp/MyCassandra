@@ -108,7 +108,7 @@
        ~ Remember, when using caches as a percentage, they WILL grow with
        ~ your data set!
       -->
-      <ColumnFamily Name="mycf1" RowKeySize="16" ColumnFamilySize="2048" CompareWith="BytesType" StorageType="VARBINARY" StorageEngine="InnoDB" />
+      <ColumnFamily Name="mycf1" RowKeySize="16" ColumnFamilySize="2048" ColumnFamilyType="VARBINARY" MySQLEngine="InnoDB" CompareWith="BytesType" />
 
       <!--
        ~ Strategy: Setting this to the class that implements

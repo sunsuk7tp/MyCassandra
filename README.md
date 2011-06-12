@@ -78,7 +78,7 @@ If you use MySQL storage engine, you must specify several schema parameters.
 - columnfamily_type/ColumnFamilyType: columnfamily type (MySQL data type).  
     - With 'VARBINARY', the max columnFamily size is 65535 bytes, and with 'LONGBLOB', 4 GB.   
     - It depends on data type constraints of MySQL (VARBINARY or LONGBLOB or the others).   
-- mysql_engine/StorageEngine: 'InnoDB', 'MyISAM', etc. MySQL storage engine itself.  
+- mysql_engine/MySQLEngine: 'InnoDB', 'MyISAM', etc. MySQL storage engine itself.  
 
 ### @ MyCassandra-0.2
     keyspaces:
@@ -106,8 +106,8 @@ If you use MySQL storage engine, you must specify several schema parameters.
 ### @ MyCassandra-0.1
     <Keyspaces>
       <Keyspace Name="myks">
-        <ColumnFamily Name="mycf1" RowKeySize="16" ColumnFamilySize="2048" ColumnFamilyType="VARBINARY" StorageEngine="InnoDB" />
-        <ColumnFamily Name="mycf2" RowKeySize="32" ColumnFamilySize="4096" ColumnFamilyType="VARBINARY" StorageEngine="MyISAM" />
+        <ColumnFamily Name="mycf1" RowKeySize="16" ColumnFamilySize="2048" ColumnFamilyType="VARBINARY" MySQLEngine="InnoDB" />
+        <ColumnFamily Name="mycf2" RowKeySize="32" ColumnFamilySize="4096" ColumnFamilyType="VARBINARY" MySQLEngine="MyISAM" />
         <ReplicaPlacementStrategy>org.apache.cassandra.locator.RackAwareStrategy</ReplicaPlacementStrategy>
         <ReplicationFactor>1</ReplicationFactor>
         <EndPointSnitch>org.apache.cassandra.locator.EndPointSnitch</EndPointSnitch>
