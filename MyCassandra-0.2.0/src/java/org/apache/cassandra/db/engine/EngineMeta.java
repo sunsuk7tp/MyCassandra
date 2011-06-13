@@ -32,7 +32,7 @@ public class EngineMeta
     public static final int MONGODB = 6;
 
     // label name specified in cassandra.yaml 
-    public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "RANGEMySQL", "HSMySQL", "MongoDB"};
+    public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "RangeMySQL", "HSMySQL", "MongoDB"};
     public static final Map<Integer, EngineInfo> enginesInfo = new HashMap<Integer, EngineInfo>(storageLabels.length);
     
     public static Map<String, Integer> engineKSMap = new HashMap<String, Integer>();
