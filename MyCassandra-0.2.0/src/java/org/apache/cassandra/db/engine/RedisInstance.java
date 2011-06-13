@@ -36,9 +36,12 @@ public class RedisInstance extends DBSchemalessInstance
 
     public RedisInstance(String ksName, String cfName, int dbIndex)
     {
+        engineName = "Redis";
         this.ksName = ksName;
         this.cfName = cfName;
+
         setConfiguration();
+
         conn = new BinaryJedis(host, port);
         if(!auth()) System.exit(1);
     }

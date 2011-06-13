@@ -27,7 +27,6 @@ import org.apache.cassandra.db.DecoratedKey;
 
 public class MySQLInstance extends DBSchemafulInstance
 {
-
     // override. default configuration
     int port = 3306;
     String user = "root";
@@ -54,6 +53,7 @@ public class MySQLInstance extends DBSchemafulInstance
  
     public MySQLInstance(String ksName, String cfName)
     {
+        engineName = "MySQL";
         this.ksName = ksName;
         this.cfName = PREFIX + cfName;
 

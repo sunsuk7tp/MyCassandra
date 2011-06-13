@@ -53,6 +53,7 @@ public class RangeMySQLInstance extends RangeDBInstance
 
     public RangeMySQLInstance(String ksName, String cfName)
     {
+        engineName = "RangeMySQL";
         this.ksName = ksName;
         this.cfName = PREFIX + cfName;
 

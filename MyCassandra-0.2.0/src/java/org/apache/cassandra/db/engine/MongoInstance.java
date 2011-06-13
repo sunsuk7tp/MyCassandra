@@ -44,8 +44,11 @@ public class MongoInstance extends DBSchemalessInstance
 
     public MongoInstance(String ksName, String cfName)
     {
+        engineName = "MongoDB";
         this.ksName = PREFIX + ksName;
         this.cfName = cfName;
+
+        setConfiguration();
 
         conn = new MongoConfigure().connect(this.ksName, host, port, user, pass);
         coll = conn.getCollection(this.cfName);

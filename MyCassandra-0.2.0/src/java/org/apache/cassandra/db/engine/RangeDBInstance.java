@@ -33,6 +33,7 @@ import org.apache.cassandra.db.DecoratedKey;
 public abstract class RangeDBInstance implements StorageEngine
 {
     private static final Logger logger = LoggerFactory.getLogger(RangeDBInstance.class);
+    String engineName;
     String ksName;
     String cfName;
 
@@ -110,7 +111,8 @@ public abstract class RangeDBInstance implements StorageEngine
 
     public void setConfiguration()
     {
-        EngineInfo einfo = DatabaseDescriptor.getEngineInfo();
+        int storageType = DatabaseDescriptor.getStorageType(engineName);
+        EngineInfo einfo = DatabaseDescriptor.getEngineInfo(storageType);
         if (einfo.host != null)
             host = einfo.host;
         if (einfo.port > 0)
