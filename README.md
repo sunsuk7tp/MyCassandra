@@ -32,9 +32,9 @@ Also with MyCassandra, you can apply any data store which do not support distrib
 
 # Use example of MyCassandra
 
-- decentralized any NoSQL cluster (MySQL, Redis, MongoDB, ...)
+- decentralized NoSQL cluster using your favorite storage engine (MySQL, Redis, MongoDB, ...)
 
-- read and write optimized NoSQL which combine different storage engines
+- read/write optimized NoSQL which select or combine different storage engines
 
 # MyCassandra Storage Engine
 In default, you can select that.
