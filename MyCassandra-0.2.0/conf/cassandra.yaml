@@ -368,7 +368,7 @@ request_scheduler: org.apache.cassandra.scheduler.NoScheduler
 index_interval: 128
 
 keyspaces:
-    - name: mykeyspace1
+    - name: myks1
       replica_placement_strategy: org.apache.cassandra.locator.SimpleStrategy
       replication_factor: 1
       storage_engine: MySQL
@@ -386,7 +386,7 @@ keyspaces:
           memtable_flush_after_mins: 59
           memtable_throughput_in_mb: 255
           memtable_operations_in_millions: 0.29
-    - name: mykeyspace2
+    - name: myks2
       replica_placement_strategy: org.apache.cassandra.locator.SimpleStrategy
       replication_factor: 1
       storage_engine: MySQL
