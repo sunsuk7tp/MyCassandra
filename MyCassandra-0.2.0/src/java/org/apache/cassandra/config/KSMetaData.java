@@ -108,7 +108,7 @@ public final class KSMetaData
         ks.cf_defs = SerDeUtils.createArray(cfMetaData.size(), org.apache.cassandra.avro.CfDef.SCHEMA$);
         for (CFMetaData cfm : cfMetaData.values())
             ks.cf_defs.add(cfm.deflate());
-        ks.storage_engine = new Utf8(storageEngine);
+        ks.storage_engine = storageEngine != null ? new Utf8(storageEngine) : new Utf8(DatabaseDescriptor.getStorageLabel());
         return ks;
     }
 
