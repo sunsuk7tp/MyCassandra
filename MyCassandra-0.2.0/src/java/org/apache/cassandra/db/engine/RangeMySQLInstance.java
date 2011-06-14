@@ -28,8 +28,6 @@ import org.apache.cassandra.db.DecoratedKey;
 public class RangeMySQLInstance extends RangeDBInstance
 {
     // default configuration
-    int port = 3306;
-    String user = "root";
     int tokenLength = 40;
 
     Connection conn;

@@ -30,7 +30,6 @@ import org.apache.cassandra.db.DecoratedKey;
 public class HSMySQLInstance extends DBSchemafulInstance
 {
     HandlerSocket hs;
-    int port = 3306;
 
     private final String PREFIX = "";
     private final String ID = "1";

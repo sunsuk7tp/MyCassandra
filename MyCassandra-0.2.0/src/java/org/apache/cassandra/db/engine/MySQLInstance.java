@@ -27,9 +27,6 @@ import org.apache.cassandra.db.DecoratedKey;
 
 public class MySQLInstance extends DBSchemafulInstance
 {
-    // override. default configuration
-    int port = 3306;
-    String user = "root";
 
     Connection conn;
     PreparedStatement pstInsert, pstUpdate, pstDelete;

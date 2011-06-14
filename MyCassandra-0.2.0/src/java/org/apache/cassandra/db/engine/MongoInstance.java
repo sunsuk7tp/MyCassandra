@@ -33,10 +33,6 @@ public class MongoInstance extends DBSchemalessInstance
 
     DB conn;
     DBCollection coll;
-    //override. default configuration
-    int port = 27017;
-    String user = null;
-    String pass = null;
 
     public static final String PREFIX = "_";
     public static final String KEY = "k";

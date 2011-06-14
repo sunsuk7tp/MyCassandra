@@ -29,9 +29,6 @@ public class RedisInstance extends DBSchemalessInstance
 {
     BinaryJedis conn;
 
-    // default configuration
-    int port = 6379;
-
     final String KEYSEPARATOR = ":";
 
     public RedisInstance(String ksName, String cfName, int dbIndex)
