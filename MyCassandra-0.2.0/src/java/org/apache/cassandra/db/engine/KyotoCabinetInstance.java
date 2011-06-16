@@ -28,8 +28,8 @@ import kyotocabinet.*;
 
 public class KyotoCabinetInstance extends DBSchemalessInstance {
 
-    kyotocabinet.DB db;
-    String dbFileName = "casket.ksh";
+    DB db;
+    String dbFileName = "casket.kch";
     
     final String KEYSEPARATOR = ":";
 
@@ -43,7 +43,7 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
 
         db = new DB();
         String dbFile = DatabaseDescriptor.getStoragePath(engineName) + "/" + dbFileName;
-        if(!db.open(dbFile, DB.OWRITER | DB.OCREATE))
+        if(!db.open(dbFile, DB.OWRITER | DB.OCREATE | DB.OTRYLOCK))
         {
             System.err.println("DB connection Error: " + db.error());
             System.exit(1);
