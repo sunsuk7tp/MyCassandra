@@ -1193,6 +1193,11 @@ public class DatabaseDescriptor
         return conf.auto_bootstrap;
     }
 
+    public static String getStoragePath(String label)
+    {
+        return getEngineInfo(getStorageType(label)).path;
+    }
+
     public static String getStorageLabel()
     {
         return getStorageLabel(getStorageType());

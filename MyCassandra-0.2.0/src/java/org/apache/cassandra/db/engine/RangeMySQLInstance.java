@@ -107,11 +107,11 @@ public class RangeMySQLInstance extends RangeDBInstance
         }
     }
 
-    public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)
+    public int update(String rowKey, ColumnFamily newcf)
     {
         try
         {
-            return doUpdate(rowKey, mergeColumnFamily(cf, newcf));
+            return doUpdate(rowKey, newcf.toBytes());
         }
         catch (SQLException e)
         {

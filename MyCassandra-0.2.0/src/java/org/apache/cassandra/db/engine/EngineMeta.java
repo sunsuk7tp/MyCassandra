@@ -30,9 +30,10 @@ public class EngineMeta
     public static final int RANGEMYSQL = 4;
     public static final int HSMYSQL = 5;
     public static final int MONGODB = 6;
+    public static final int KYOTOCABINET = 7;
 
     // label name specified in cassandra.yaml 
-    public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "RangeMySQL", "HSMySQL", "MongoDB"};
+    public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "RangeMySQL", "HSMySQL", "MongoDB", "KyotoCabinet"};
     public static final Map<Integer, EngineInfo> enginesInfo = new HashMap<Integer, EngineInfo>(storageLabels.length);
     
     public static Map<String, Integer> engineKSMap = new HashMap<String, Integer>();
@@ -176,6 +177,9 @@ public class EngineMeta
                 break;
             case HSMYSQL:
                 engine = new HSMySQLInstance(tableName, cfName);
+                break;
+            case KYOTOCABINET:
+                engine = new KyotoCabinetInstance(tableName, cfName);
                 break;
         }
         return engine;

@@ -65,7 +65,7 @@ public abstract class DBInstance implements StorageEngine
             }
             else
             {
-                return cfOld != null ? update(rowKey, cfOld, cf) : insert(rowKey, cf);
+                return cfOld != null ? update(rowKey, mergeColumnFamily(cfOld, cf)) : insert(rowKey, cf);
             }
         }
     }
@@ -95,13 +95,13 @@ public abstract class DBInstance implements StorageEngine
 
     public abstract int delete(String rowKey);
     public abstract int insert(String rowKey, ColumnFamily cf);
-    public abstract int update(String rowKey, ColumnFamily newcf, ColumnFamily cf);
+    public abstract int update(String rowKey, ColumnFamily newcf);
     public abstract byte[] select(String rowKey);
 
-    public byte[] mergeColumnFamily(ColumnFamily cf, ColumnFamily newcf)
+    public ColumnFamily mergeColumnFamily(ColumnFamily cf, ColumnFamily newcf)
     {
         cf.addAll(newcf);
-        return cf.toBytes();
+        return cf;
     }
 
     public ColumnFamily bytes2ColumnFamily(byte[] b) throws IOException

@@ -17,94 +17,92 @@
 package org.apache.cassandra.db.engine;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Map;
 import java.nio.ByteBuffer;
+import java.util.Map;
 
-import org.apache.cassandra.db.DecoratedKey;
+import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.cassandra.db.ColumnFamily;
+import org.apache.cassandra.db.DecoratedKey;
 
-import redis.clients.jedis.BinaryJedis;
+import kyotocabinet.*;
 
-public class RedisInstance extends DBSchemalessInstance
-{
-    BinaryJedis conn;
+public class KyotoCabinetInstance extends DBSchemalessInstance {
 
+    kyotocabinet.DB db;
+    String dbFileName = "casket.ksh";
+    
     final String KEYSEPARATOR = ":";
 
-    public RedisInstance(String ksName, String cfName, int dbIndex)
+    public KyotoCabinetInstance(String ksName, String cfName)
     {
-        engineName = "Redis";
+        engineName = "KyotoCabinet";
         this.ksName = ksName;
         this.cfName = cfName;
 
         setConfiguration();
 
-        conn = new BinaryJedis(host, port);
-        if(!auth()) System.exit(1);
+        db = new DB();
+        String dbFile = DatabaseDescriptor.getStoragePath(engineName) + dbFileName;
+        if(!db.open(dbFile, DB.OWRITER | DB.OCREATE))
+        {
+            System.err.println("DB connection Error: " + db.error());
+            System.exit(1);
+        }
     }
 
-    public RedisInstance(String ksName, String cfName)
+    @Override
+    public int update(String rowKey, ColumnFamily newcf)
     {
-        this.ksName = ksName;
-        this.cfName = cfName;
-        setConfiguration();
-        conn = new BinaryJedis(host, port);
-        if(!auth()) System.exit(1);
+        return doUpdate(makeRowKey(rowKey), newcf.toBytes());
     }
-
-    public boolean auth()
-    {
-        if(pass == null) pass = "redis"; // dummy pass
-        String status = conn.auth(pass);
-        return status.equals("OK") ? true : false;
-    }
-
+    
+    @Override
     public int insert(String rowKey, ColumnFamily cf)
     {
         return doInsert(makeRowKey(rowKey), cf.toBytes());
     }
 
-    public int update(String rowKey, ColumnFamily newcf)
-    {
-        return doInsert(makeRowKey(rowKey), newcf.toBytes());
-    }
-
+    @Override
     public byte[] select(String rowKey)
     {
-            return conn.get(makeRowKey(rowKey));
-    }
-
-    public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults)
-    {
-        return null;
+        return db.get(makeRowKey(rowKey));
     }
     
-    synchronized public int truncate()
-    {
-        return -1;
-    }
-
-    synchronized public int dropTable()
-    {
-        return -1;
-    }
-
-    public synchronized int dropDB()
-    {
-        conn.flushDB();
-        return 1;
-    }
-
+    @Override
     public synchronized int delete(String rowKey)
     {
-        conn.del(makeRowKey(rowKey));
-        return 1;
+        return db.remove(makeRowKey(rowKey)) ? 1 : -1;
     }
 
+    @Override
+    public int dropDB() {
+        return -1;
+    }
+
+    @Override
+    public int dropTable() {
+        return -1;
+    }
+
+    @Override
+    public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith,
+            DecoratedKey stopAt, int maxResults) {
+        return null;
+    }
+
+    @Override
+    public int truncate() {
+        return -1;
+    }
+    
     private synchronized int doInsert(byte[] rowKey, byte[] cfValue)
     {
-        conn.set(rowKey, cfValue);
-        return 1;
+        return db.append(rowKey, cfValue) ? 1 : -1;
+    }
+    
+    private synchronized int doUpdate(byte[] rowKey, byte[] cfValue)
+    {
+        return db.replace(rowKey, cfValue) ? 1 : -1;
     }
 
     public byte[] makeRowKey(String rowKey)

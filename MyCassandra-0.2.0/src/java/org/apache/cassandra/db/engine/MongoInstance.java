@@ -1,4 +1,4 @@
-/*                                                                                                                                                                                 
+/*
  * Copyright 2011 Shunsuke Nakamura, and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,9 +51,9 @@ public class MongoInstance extends DBSchemalessInstance
         coll.createIndex(new BasicDBObject(KEY, 1).append("unique", true));
     }
 
-    public int update(String rowKey, ColumnFamily newcf, ColumnFamily cf)
+    public int update(String rowKey, ColumnFamily newcf)
     {
-        return doUpdate(rowKey, mergeColumnFamily(cf, newcf));
+        return doUpdate(rowKey, newcf.toBytes());
     }
 
     public int insert(String rowKey, ColumnFamily cf)

@@ -7,4 +7,5 @@ public class EngineInfo
     public int port;
     public String user;
     public String pass;
+    public String path;
 }
