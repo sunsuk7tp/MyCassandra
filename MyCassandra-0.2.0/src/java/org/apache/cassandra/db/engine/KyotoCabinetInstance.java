@@ -42,7 +42,7 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
         setConfiguration();
 
         db = new DB();
-        String dbFile = DatabaseDescriptor.getStoragePath(engineName) + dbFileName;
+        String dbFile = DatabaseDescriptor.getStoragePath(engineName) + "/" + dbFileName;
         if(!db.open(dbFile, DB.OWRITER | DB.OCREATE))
         {
             System.err.println("DB connection Error: " + db.error());

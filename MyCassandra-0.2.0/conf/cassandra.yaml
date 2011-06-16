@@ -58,6 +58,8 @@ engines:
       port: 27017
       user: 
       pass:
+    - name: KyotoCabinet
+      path: /var/cassandra/kyotocabinet
 
 defaultengine: MySQL
 # See http://wiki.apache.org/cassandra/HintedHandoff
