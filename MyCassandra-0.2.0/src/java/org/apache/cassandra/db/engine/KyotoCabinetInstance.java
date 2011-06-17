@@ -45,7 +45,7 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
             put("ForestDB", "kcf");
         }
     };
-    
+
     final String KEYSEPARATOR = ":";
 
     public KyotoCabinetInstance(String ksName, String cfName)
@@ -57,9 +57,8 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
         setConfiguration();
 
         db = new DB();
-        String dbClass = DatabaseDescriptor.getStorageDBClass(engineName);
-        dbFormat = getFileFormatForDBClass(dbClass);
-        String dbFile = DatabaseDescriptor.getStoragePath(engineName) + "/" + this.ksName + "-" + this.cfName + "." + dbFormat;
+        dbFormat = getFileFormatForDBClass(kcclass);
+        String dbFile = kcdir + "/" + this.ksName + "-" + this.cfName + "." + dbFormat;
         if(!db.open(dbFile, DB.OWRITER | DB.OCREATE | DB.OTRYLOCK))
         {
             System.err.println("DB connection Error: " + db.error());
