@@ -158,7 +158,8 @@ protocol Cassandra {
         union { null, int } rowkey_size; /* MyCassandra param */
         union { null, int } columnfamily_size; /* MyCassandra param */
         union { null, string } columnfamily_type; /* MyCassandra param */
-        union { null, string } mysql_engine; /* MyCassandra param */
+        union { null, string } mysql_engine; /* MyCassandra-MySQL param */
+        union { null, string } kc_dbclass; /* MyCassandra-KyotoCabinet param */
         union { int, null } id;
         union { array<ColumnDef>, null } column_metadata;
     }

@@ -370,6 +370,7 @@ struct CfDef {
     25: optional i32 columnfamily_size,
     26: optional string columnfamily_type,
     27: optional string mysql_engine,
+    28: optional string kc_dbclass,
 }
 
 /* describes a keyspace. */

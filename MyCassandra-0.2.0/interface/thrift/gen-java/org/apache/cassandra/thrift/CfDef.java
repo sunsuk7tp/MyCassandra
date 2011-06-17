@@ -69,6 +69,7 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
   private static final org.apache.thrift.protocol.TField COLUMNFAMILY_SIZE_FIELD_DESC = new org.apache.thrift.protocol.TField("columnfamily_size", org.apache.thrift.protocol.TType.I32, (short)25);
   private static final org.apache.thrift.protocol.TField COLUMNFAMILY_TYPE_FIELD_DESC = new org.apache.thrift.protocol.TField("columnfamily_type", org.apache.thrift.protocol.TType.STRING, (short)26);
   private static final org.apache.thrift.protocol.TField MYSQL_ENGINE_FIELD_DESC = new org.apache.thrift.protocol.TField("mysql_engine", org.apache.thrift.protocol.TType.STRING, (short)27);
+  private static final org.apache.thrift.protocol.TField KC_DBCLASS_FIELD_DESC = new org.apache.thrift.protocol.TField("kc_dbclass", org.apache.thrift.protocol.TType.STRING, (short)28);
 
   public String keyspace;
   public String name;
@@ -94,6 +95,7 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
   public int columnfamily_size;
   public String columnfamily_type;
   public String mysql_engine;
+  public String kc_dbclass;
 
   /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
   public enum _Fields implements org.apache.thrift.TFieldIdEnum {
@@ -120,7 +122,8 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
     ROWKEY_SIZE((short)24, "rowkey_size"),
     COLUMNFAMILY_SIZE((short)25, "columnfamily_size"),
     COLUMNFAMILY_TYPE((short)26, "columnfamily_type"),
-    MYSQL_ENGINE((short)27, "mysql_engine");
+    MYSQL_ENGINE((short)27, "mysql_engine"),
+    KC_DBCLASS((short)28, "kc_dbclass");
 
     private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
 
@@ -183,6 +186,8 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
           return COLUMNFAMILY_TYPE;
         case 27: // MYSQL_ENGINE
           return MYSQL_ENGINE;
+        case 28: // KC_DBCLASS
+          return KC_DBCLASS;
         default:
           return null;
       }
@@ -291,6 +296,8 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.MYSQL_ENGINE, new org.apache.thrift.meta_data.FieldMetaData("mysql_engine", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+    tmpMap.put(_Fields.KC_DBCLASS, new org.apache.thrift.meta_data.FieldMetaData("kc_dbclass", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(CfDef.class, metaDataMap);
   }
@@ -371,6 +378,9 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
     if (other.isSetMysql_engine()) {
       this.mysql_engine = other.mysql_engine;
     }
+    if (other.isSetKc_dbclass()) {
+      this.kc_dbclass = other.kc_dbclass;
+    }
   }
 
   public CfDef deepCopy() {
@@ -419,6 +429,7 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
     this.columnfamily_size = 0;
     this.columnfamily_type = null;
     this.mysql_engine = null;
+    this.kc_dbclass = null;
   }
 
   public String getKeyspace() {
@@ -998,6 +1009,30 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
     }
   }
 
+  public String getKc_dbclass() {
+    return this.kc_dbclass;
+  }
+
+  public CfDef setKc_dbclass(String kc_dbclass) {
+    this.kc_dbclass = kc_dbclass;
+    return this;
+  }
+
+  public void unsetKc_dbclass() {
+    this.kc_dbclass = null;
+  }
+
+  /** Returns true if field kc_dbclass is set (has been assigned a value) and false otherwise */
+  public boolean isSetKc_dbclass() {
+    return this.kc_dbclass != null;
+  }
+
+  public void setKc_dbclassIsSet(boolean value) {
+    if (!value) {
+      this.kc_dbclass = null;
+    }
+  }
+
   public void setFieldValue(_Fields field, Object value) {
     switch (field) {
     case KEYSPACE:
@@ -1192,6 +1227,14 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
       }
       break;
 
+    case KC_DBCLASS:
+      if (value == null) {
+        unsetKc_dbclass();
+      } else {
+        setKc_dbclass((String)value);
+      }
+      break;
+
     }
   }
 
@@ -1269,6 +1312,9 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
     case MYSQL_ENGINE:
       return getMysql_engine();
 
+    case KC_DBCLASS:
+      return getKc_dbclass();
+
     }
     throw new IllegalStateException();
   }
@@ -1328,6 +1374,8 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
       return isSetColumnfamily_type();
     case MYSQL_ENGINE:
       return isSetMysql_engine();
+    case KC_DBCLASS:
+      return isSetKc_dbclass();
     }
     throw new IllegalStateException();
   }
@@ -1561,6 +1609,15 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
         return false;
     }
 
+    boolean this_present_kc_dbclass = true && this.isSetKc_dbclass();
+    boolean that_present_kc_dbclass = true && that.isSetKc_dbclass();
+    if (this_present_kc_dbclass || that_present_kc_dbclass) {
+      if (!(this_present_kc_dbclass && that_present_kc_dbclass))
+        return false;
+      if (!this.kc_dbclass.equals(that.kc_dbclass))
+        return false;
+    }
+
     return true;
   }
 
@@ -1687,6 +1744,11 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
     builder.append(present_mysql_engine);
     if (present_mysql_engine)
       builder.append(mysql_engine);
+
+    boolean present_kc_dbclass = true && (isSetKc_dbclass());
+    builder.append(present_kc_dbclass);
+    if (present_kc_dbclass)
+      builder.append(kc_dbclass);
 
     return builder.toHashCode();
   }
@@ -1939,6 +2001,16 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
         return lastComparison;
       }
     }
+    lastComparison = Boolean.valueOf(isSetKc_dbclass()).compareTo(typedOther.isSetKc_dbclass());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    if (isSetKc_dbclass()) {
+      lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.kc_dbclass, typedOther.kc_dbclass);
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+    }
     return 0;
   }
 
@@ -2149,6 +2221,13 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
             org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
           }
           break;
+        case 28: // KC_DBCLASS
+          if (field.type == org.apache.thrift.protocol.TType.STRING) {
+            this.kc_dbclass = iprot.readString();
+          } else { 
+            org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
+          }
+          break;
         default:
           org.apache.thrift.protocol.TProtocolUtil.skip(iprot, field.type);
       }
@@ -2304,6 +2383,13 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
       if (isSetMysql_engine()) {
         oprot.writeFieldBegin(MYSQL_ENGINE_FIELD_DESC);
         oprot.writeString(this.mysql_engine);
+        oprot.writeFieldEnd();
+      }
+    }
+    if (this.kc_dbclass != null) {
+      if (isSetKc_dbclass()) {
+        oprot.writeFieldBegin(KC_DBCLASS_FIELD_DESC);
+        oprot.writeString(this.kc_dbclass);
         oprot.writeFieldEnd();
       }
     }
@@ -2492,6 +2578,16 @@ public class CfDef implements org.apache.thrift.TBase<CfDef, CfDef._Fields>, jav
         sb.append("null");
       } else {
         sb.append(this.mysql_engine);
+      }
+      first = false;
+    }
+    if (isSetKc_dbclass()) {
+      if (!first) sb.append(", ");
+      sb.append("kc_dbclass:");
+      if (this.kc_dbclass == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.kc_dbclass);
       }
       first = false;
     }
