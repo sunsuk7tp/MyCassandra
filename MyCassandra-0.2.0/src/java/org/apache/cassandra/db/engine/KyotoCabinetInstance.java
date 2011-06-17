@@ -29,7 +29,7 @@ import kyotocabinet.*;
 public class KyotoCabinetInstance extends DBSchemalessInstance {
 
     DB db;
-    String dbFileName = "casket.kch";
+    String dbFormat = ".kch";
     
     final String KEYSEPARATOR = ":";
 
@@ -42,7 +42,7 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
         setConfiguration();
 
         db = new DB();
-        String dbFile = DatabaseDescriptor.getStoragePath(engineName) + "/" + dbFileName;
+        String dbFile = DatabaseDescriptor.getStoragePath(engineName) + "/" + this.ksName + "-" + this.cfName + dbFormat;
         if(!db.open(dbFile, DB.OWRITER | DB.OCREATE | DB.OTRYLOCK))
         {
             System.err.println("DB connection Error: " + db.error());
@@ -81,7 +81,7 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
 
     @Override
     public int dropTable() {
-        return -1;
+        return db.clear() ? 1 : -1;
     }
 
     @Override
@@ -92,7 +92,7 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
 
     @Override
     public int truncate() {
-        return -1;
+        return dropTable();
     }
     
     private synchronized int doInsert(byte[] rowKey, byte[] cfValue)
@@ -109,8 +109,7 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
     {
         try
         {
-            byte[] key = (ksName + KEYSEPARATOR + cfName + KEYSEPARATOR + rowKey).getBytes("UTF-8");
-            return key;
+            return rowKey.getBytes("UTF-8");
         }
         catch (UnsupportedEncodingException e)
         {
