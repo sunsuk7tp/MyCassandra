@@ -931,6 +931,9 @@ public class CliClient extends CliUserHelp
             case MYSQL_ENGINE:
                 cfDef.setMysql_engine(CliUtils.unescapeSQLString(mValue));
                 break;
+            case KC_DBCLASS:
+                cfDef.setKc_dbclass(CliUtils.unescapeSQLString(mValue));
+                break;
             default:
                 //must match one of the above or we'd throw an exception at the valueOf statement above.
                 assert(false);
