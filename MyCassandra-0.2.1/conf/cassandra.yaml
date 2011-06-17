@@ -48,10 +48,9 @@ engines:
       port: 3306
       user: root
       pass:
+    - name: HailDB
+      dir: /var/cassandra/haildb
     - name: Bigtable
-      host: 
-      user:
-      pass:
     - name: Redis
       host: localhost
       port: 6379
@@ -63,10 +62,10 @@ engines:
       user: 
       pass:
     - name: KyotoCabinet
-      kcdir: /var/cassandra/kyotocabinet
+      dir: /var/cassandra/kyotocabinet
       kcclass: HashDB
 
-defaultengine: MySQL
+defaultengine: HailDB
 # See http://wiki.apache.org/cassandra/HintedHandoff
 hinted_handoff_enabled: true
 # this defines the maximum amount of time a dead host will have hints

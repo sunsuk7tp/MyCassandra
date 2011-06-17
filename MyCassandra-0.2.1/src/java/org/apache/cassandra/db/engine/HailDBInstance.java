@@ -44,14 +44,14 @@ public class HailDBInstance extends DBSchemafulInstance
     private final String PREFIX = "_";
     private final String KEY = "rkey";
     private final String VALUE = "cf";
-    private final String SEPARATOR = "-";
+    private final String SEPARATOR = "/";
 
     private final String SYSTEM = "system";
 
     private final String VARBINARY = "VARBINARY";
     private final String MEDIUMBLOB = "MEDIUMBLOB";
     private final String LONGBLOB = "LONGBLOB";
- 
+
     public HailDBInstance(String ksName, String cfName)
     {
         engineName = "HailDB";
@@ -60,7 +60,9 @@ public class HailDBInstance extends DBSchemafulInstance
 
         setConfiguration();
 
-        db = new Database();
+        DatabaseConfiguration config = new DatabaseConfiguration();
+        config.setDataHomeDir(dir + "/");
+        db = new Database(config);
         dt = new DatabaseTemplate(db);
         createDB();
     }
@@ -72,44 +74,62 @@ public class HailDBInstance extends DBSchemafulInstance
     
     public int insert(final String rowKey, final ColumnFamily cf)
     {
-        dt.inTransaction(TransactionLevel.REPEATABLE_READ,
-            new TransactionCallback<Void>()
-            {
-                @Override
-                public Void inTransaction(Transaction txn)
+        try
+        {
+            dt.inTransaction(TransactionLevel.REPEATABLE_READ,
+                new TransactionCallback<Void>()
                 {
-                    Map<String, Object> map = new LinkedHashMap<String, Object>();
-                    map.put(rowKey, cf.toBytes());
-                    dt.insert(txn, tdef, map);
+                    @Override
+                    public Void inTransaction(Transaction txn)
+                    {
+                        Map<String, Object> map = new LinkedHashMap<String, Object>();
+                        map.put(rowKey, cf.toBytes());
+                        dt.insert(txn, tdef, map);
 
-                    return null;
+                        return null;
+                    }
                 }
-            }
-        );
+            );
+            return 1;
+        }
+        catch (Exception e)
+        {
+            return -1;
+        }
     }
 
     public int update(final String rowKey, final ColumnFamily newcf)
     {
-        dt.inTransaction(TransactionLevel.REPEATABLE_READ,
-            new TransactionCallback<Void>()
-            {
-                @Override
-                public Void inTransaction(Transaction txn)
+        try
+        {
+            dt.inTransaction(TransactionLevel.REPEATABLE_READ,
+                new TransactionCallback<Void>()
                 {
-                    Map<String, Object> map = new LinkedHashMap<String, Object>();
-                    map.put(rowKey, newcf.toBytes());
-                    dt.update(txn, tdef, map);
+                    @Override
+                    public Void inTransaction(Transaction txn)
+                    {
+                        Map<String, Object> map = new LinkedHashMap<String, Object>();
+                        map.put(rowKey, newcf.toBytes());
+                        dt.update(txn, tdef, map);
 
-                    return null;
-                }
-            }
-        );
+                        return null;
+                    }
+                 }
+            );
+            return 1;
+        }
+        catch (Exception e)
+        {
+            return -1;
+        }
     }
 
     public byte[] select(final String rowKey)
     {
         final byte[] res;
         Transaction txn = db.beginTransaction(TransactionLevel.REPEATABLE_READ);
+        Map<String, Object> map = new LinkedHashMap<String, Object>();
+        map.put(rowKey, 0L);
         Map<String, Object> resMap = dt.load(txn, tdef, map);
         txn.commit();
         return resMap.containsKey(rowKey) ? (byte[])resMap.get(rowKey) : null;
@@ -128,7 +148,6 @@ public class HailDBInstance extends DBSchemafulInstance
                 }
             }
         );*/
-        return null;
     }
 
     public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults)
@@ -138,20 +157,27 @@ public class HailDBInstance extends DBSchemafulInstance
 
     public int delete(final String rowKey)
     {
-        dt.inTransaction(TransactionLevel.REPEATABLE_READ,
-            new TransactionCallback<Void>()
-            {
-                @Override
-                public Void inTransaction(Transaction txn)
+        try {
+            dt.inTransaction(TransactionLevel.REPEATABLE_READ,
+                new TransactionCallback<Void>()
                 {
-                    Map<String, Object> map = new LinkedHashMap<String, Object>();
-                    map.put(rowKey, 0L);
-                    dt.delete(txn, tdef, map);
+                    @Override
+                    public Void inTransaction(Transaction txn)
+                    {
+                        Map<String, Object> map = new LinkedHashMap<String, Object>();
+                        map.put(rowKey, 0L);
+                        dt.delete(txn, tdef, map);
 
-                    return null;
+                        return null;
+                    }
                 }
-            }
-        );
+            );
+            return 1;
+        }
+        catch (Exception e)
+        {
+            return -1;
+        }
     }
 
     public synchronized int truncate()
@@ -195,7 +221,7 @@ public class HailDBInstance extends DBSchemafulInstance
     }
 
     // Init MySQL Table for Keyspaces
-    public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngine)
+    public synchronized int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngine)
     {
         setup(rowKeySize, columnFamilySize, columnFamilyType);
         if(!db.tableExists(tdef))

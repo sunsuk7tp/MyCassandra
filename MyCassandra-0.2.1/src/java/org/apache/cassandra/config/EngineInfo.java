@@ -14,10 +14,10 @@ public class EngineInfo
     public int port;
     public String user;
     public String pass;
+    public String dir;
 
     /*
      *  For Kyoto Cabinet parameters
     */
-    public String kcdir;
     public String kcclass;
 }

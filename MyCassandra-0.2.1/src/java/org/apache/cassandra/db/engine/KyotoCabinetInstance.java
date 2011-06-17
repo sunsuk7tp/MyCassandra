@@ -67,7 +67,7 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
 
         db = new DB();
         dbFormat = dbClass != null ? getFileFormatForDBClass(dbClass) : getFileFormatForDBClass(this.kcclass);
-        String dbFile = kcdir + "/" + this.ksName + "-" + this.cfName + "." + dbFormat;
+        String dbFile = dir + "/" + this.ksName + "-" + this.cfName + "." + dbFormat;
         if(!db.open(dbFile, DB.OWRITER | DB.OCREATE | DB.OTRYLOCK))
         {
             System.err.println("DB connection Error: " + db.error());

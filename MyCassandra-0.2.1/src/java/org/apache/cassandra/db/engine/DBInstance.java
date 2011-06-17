@@ -44,8 +44,8 @@ public abstract class DBInstance implements StorageEngine
     String user;
     String pass;
 
-    String kcdir;
-    String kcclass;
+    String dir = ".";
+    String kcclass = "HashDB";
 
     public int put(DecoratedKey key, ColumnFamily cf)
     {
@@ -124,8 +124,8 @@ public abstract class DBInstance implements StorageEngine
             user = einfo.user;
         if (einfo.pass != null)
             pass = einfo.pass;
-        if (einfo.kcdir != null)
-            kcdir = einfo.kcdir;
+        if (einfo.dir != null)
+            dir = einfo.dir;
         if (einfo.kcclass != null)
             kcclass = einfo.kcclass;
     }
