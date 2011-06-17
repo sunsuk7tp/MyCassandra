@@ -26,20 +26,21 @@ public class EngineMeta
     // A write-optimize SE is a smaller number, and a read-optimized SE is a bigger number.
     public static final int BIGTABLE = 1;
     public static final int REDIS = 2;
-    public static final int MYSQL = 3;
-    public static final int RANGEMYSQL = 4;
-    public static final int HSMYSQL = 5;
-    public static final int MONGODB = 6;
-    public static final int KYOTOCABINET = 7;
+    public static final int MONGODB = 3;
+    public static final int MYSQL = 4;
+    public static final int RANGEMYSQL = 5;
+    public static final int HSMYSQL = 6;
+    public static final int HAILDB = 7;
+    public static final int KYOTOCABINET = 8;
 
     // label name specified in cassandra.yaml 
-    public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "RangeMySQL", "HSMySQL", "MongoDB", "KyotoCabinet"};
+    public static final String[] storageLabels = {"Bigtable", "Redis", "MongoDB", "MySQL", "RangeMySQL", "HSMySQL", "HailDB", "KyotoCabinet"};
     public static final Map<Integer, EngineInfo> enginesInfo = new HashMap<Integer, EngineInfo>(storageLabels.length);
     
     public static Map<String, Integer> engineKSMap = new HashMap<String, Integer>();
     
     // schema used se number
-    public static final int[] schemaUsedTypes = {MYSQL, RANGEMYSQL};
+    public static final int[] schemaUsedTypes = {MYSQL, RANGEMYSQL, HAILDB};
     public static final int[] needSetupTypes = {KYOTOCABINET};
 
     // for mysql's column family data type params
@@ -191,6 +192,12 @@ public class EngineMeta
                 break;
             case HSMYSQL:
                 engine = new HSMySQLInstance(tableName, cfName);
+                break;
+            case HAILDB:
+                DBSchemafulInstance hdbi = new HailDBInstance(tableName, cfName);
+                if(isSystem) hdbi.create(maxKeySize, maxCFSize, BLOB, SYSTEM_MYSQL_ENGINE);
+                else hdbi.create(maxKeySize, maxCFSize, storageSize, mysqlEngine);
+                engine = hdbi;
                 break;
             case KYOTOCABINET:
                 engine = kcDBClass != null 
