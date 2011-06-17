@@ -888,6 +888,7 @@ public class CassandraServer implements Cassandra.Iface
                               cf_def.isSetColumnfamily_size() ? cf_def.columnfamily_size : CFMetaData.DEFAULT_COLUMNFAMILY_SIZE,
                               cf_def.isSetColumnfamily_type() ? cf_def.columnfamily_type : CFMetaData.DEFAULT_COLUMNFAMILY_TYPE,
                               cf_def.isSetMysql_engine() ? cf_def.mysql_engine : CFMetaData.DEFAULT_MYSQL_ENGINE,
+                              cf_def.isSetKc_dbclass() ? cf_def.kc_dbclass : CFMetaData.DEFAULT_KC_DBCLASS,
                               ColumnDefinition.fromColumnDef(cf_def.column_metadata));
     }
 

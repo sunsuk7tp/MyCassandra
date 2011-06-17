@@ -48,16 +48,25 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
 
     final String KEYSEPARATOR = ":";
 
+    public KyotoCabinetInstance(String ksName, String cfName, String dbClass)
+    {
+        setup(ksName, cfName, dbClass);
+    }
+
     public KyotoCabinetInstance(String ksName, String cfName)
+    {
+        setup(ksName, cfName, null);
+    }
+
+    private void setup(String ksName, String cfName, String dbClass)
     {
         engineName = "KyotoCabinet";
         this.ksName = ksName;
         this.cfName = cfName;
-
         setConfiguration();
 
         db = new DB();
-        dbFormat = getFileFormatForDBClass(kcclass);
+        dbFormat = dbClass != null ? getFileFormatForDBClass(dbClass) : getFileFormatForDBClass(this.kcclass);
         String dbFile = kcdir + "/" + this.ksName + "-" + this.cfName + "." + dbFormat;
         if(!db.open(dbFile, DB.OWRITER | DB.OCREATE | DB.OTRYLOCK))
         {

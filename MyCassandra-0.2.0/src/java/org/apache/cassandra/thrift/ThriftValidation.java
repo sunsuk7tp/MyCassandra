@@ -484,6 +484,7 @@ public class ThriftValidation
             int columnfamilySize = cf_def.columnfamily_size;
             String columnfamilyType = cf_def.columnfamily_type;
             String mysqlEngine = cf_def.mysql_engine;
+            String kcDBClass = cf_def.kc_dbclass;
             //if (rowkeySize <= 0 || rowkeySize > 65535)
             //    throw new InvalidRequestException("Too small or large rowKeySize: " + rowkeySize);
             //if (columnfamilySize <= 0 || columnfamilySize > 65535)
@@ -492,6 +493,7 @@ public class ThriftValidation
             //if (!storageSize.contains("BINARY") && !storageSize.contains("BLOB"))
             //    throw new InvalidRequestException("Invalid storage size: " + storageSize);
             //TODO MyCassandra: validation for MySQL's storage engine
+            //TODO MyCassandra: validation for KC's db class
         }
         catch (ConfigurationException e)
         {

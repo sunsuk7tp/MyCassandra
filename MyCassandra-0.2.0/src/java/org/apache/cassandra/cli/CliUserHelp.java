@@ -52,7 +52,8 @@ public class CliUserHelp {
         ROWKEY_SIZE,
         COLUMNFAMILY_SIZE,
         COLUMNFAMILY_TYPE,
-        MYSQL_ENGINE
+        MYSQL_ENGINE,
+        KC_DBCLASS,
     }
 
     protected EnumMap<ColumnFamilyArgument, String> argumentExplanations = new EnumMap<ColumnFamilyArgument, String>(ColumnFamilyArgument.class)
@@ -76,6 +77,7 @@ public class CliUserHelp {
         put(ColumnFamilyArgument.COLUMNFAMILY_SIZE, "Max CF Size (1024-) With MyCassandra-MySQL");
         put(ColumnFamilyArgument.COLUMNFAMILY_TYPE, "CF type (MySQL data type) With MyCassandra-MySQL");
         put(ColumnFamilyArgument.MYSQL_ENGINE, "Storage Engine　With MySQL");
+        put(ColumnFamilyArgument.KC_DBCLASS, "DB CLASS With KyotoCabinet");
     }};
     
     protected void printCmdHelp(Tree statement, CliSessionState state)
@@ -195,6 +197,7 @@ public class CliUserHelp {
                 state.out.println("create column family Bar with <att1>=<value1>;");
                 state.out.println("create column family Bar with <att1>=<value1> and <att2>=<value2>...;\n");
                 state.out.println("create column family Bar with rowkey_size = 32 and columnfamily_size = 2048 and columnfamily_type = 'VARBINARY' and mysql_engine = 'MyISAM'");
+                state.out.println("create column family Bar with kc_dbclass = 'TreeDB'");
                 state.out.println("Create a new column family with the specified values for the given set of");
                 state.out.println("attributes. Note that you must be using a keyspace.\n");
                 state.out.println("valid attributes are:");

@@ -47,9 +47,14 @@ public class RawColumnFamily
     public Integer memtable_throughput_in_mb;
     public Double memtable_operations_in_millions;
     
-    //MyCassandra extends
+    /*
+     * MyCassandra extends
+     */
     public int rowkey_size;
     public int columnfamily_size;
     public String columnfamily_type;
+    // for mysql
     public String mysql_engine;
+    // for kyoto cabinet
+    public String kc_dbclass;
 }

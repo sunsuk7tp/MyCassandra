@@ -40,6 +40,7 @@ public class EngineMeta
     
     // schema used se number
     public static final int[] schemaUsedTypes = {MYSQL, RANGEMYSQL};
+    public static final int[] needSetupTypes = {KYOTOCABINET};
 
     // for mysql's column family data type params
     public static final String BINARY = "VARBINARY";
@@ -49,8 +50,13 @@ public class EngineMeta
     public static final int defaultRowKeySize = 64;
     public static final int defaultColumnFamilySize = 30 * 1024;
     public static final String defaultColumnFamilyType = BINARY;
+
+    // mysql
     public static final String defaultMySQLEngine = "InnoDB";
     public static final String SYSTEM_MYSQL_ENGINE = "MyISAM";
+
+    // kyoto cabinet
+    public static final String defaultKCDBClass = "HashDB";
 
     // default se type (SystemTable and not specified Keyspace)
     private int defaultStorageType;
@@ -117,6 +123,14 @@ public class EngineMeta
         return false;
     }
 
+    public boolean isNeedSetup(String ksName)
+    {
+        int storageType = getStorageTypeForKS(ksName);
+        for (int needSetupType : needSetupTypes)
+            if (storageType == needSetupType) return true;
+        return false;
+    }
+
     public static EngineMeta getEngineMeta(String label)
     {
         EngineMeta emeta = new EngineMeta();
@@ -145,9 +159,9 @@ public class EngineMeta
         return storageKSMap.containsKey(ksName) ? storageKSMap.get(ksName) : getStorageType();
        
     }
- 
+
     // init setup and return the instance specified in storageType
-    public static StorageEngine getEngine(int storageType, String tableName, String cfName, int maxKeySize, int maxCFSize, String storageSize, String storageEngine, boolean isSystem)
+    public static StorageEngine getEngine(int storageType, String tableName, String cfName, int maxKeySize, int maxCFSize, String storageSize, String mysqlEngine, String kcDBClass, boolean isSystem)
     {
         StorageEngine engine = null;
         switch (storageType)
@@ -161,14 +175,14 @@ public class EngineMeta
             default:
                 DBSchemafulInstance dbi = new MySQLInstance(tableName, cfName);
                 if(isSystem) dbi.create(maxKeySize, maxCFSize, BLOB, SYSTEM_MYSQL_ENGINE);
-                else dbi.create(maxKeySize, maxCFSize, storageSize, storageEngine);
+                else dbi.create(maxKeySize, maxCFSize, storageSize, mysqlEngine);
                 dbi.createProcedure(maxKeySize, maxCFSize);
                 engine = dbi;
                 break;
             case RANGEMYSQL:
                 RangeMySQLInstance rdbi = new RangeMySQLInstance(tableName, cfName);
                 if(isSystem) rdbi.create(maxKeySize, maxCFSize, BLOB, SYSTEM_MYSQL_ENGINE);
-                else rdbi.create(maxKeySize, maxCFSize, storageSize, storageEngine);
+                else rdbi.create(maxKeySize, maxCFSize, storageSize, mysqlEngine);
                 rdbi.createProcedure(maxKeySize, maxCFSize);
                 engine = rdbi;
                 break;
@@ -179,7 +193,9 @@ public class EngineMeta
                 engine = new HSMySQLInstance(tableName, cfName);
                 break;
             case KYOTOCABINET:
-                engine = new KyotoCabinetInstance(tableName, cfName);
+                engine = kcDBClass != null 
+                                   ? new KyotoCabinetInstance(tableName, cfName, kcDBClass)
+                                   : new KyotoCabinetInstance(tableName, cfName);
                 break;
         }
         return engine;

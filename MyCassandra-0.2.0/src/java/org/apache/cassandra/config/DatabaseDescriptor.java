@@ -592,13 +592,16 @@ public class DatabaseDescriptor
                 AbstractType subcolumnComparator = null;
                 AbstractType default_validator = getComparator(cf.default_validation_class);
 
-                int rowkeySize = (cf.rowkey_size > 0 ? cf.rowkey_size : EngineMeta.defaultRowKeySize);
-                int columnfamilySize = (cf.columnfamily_size > 0 ? cf.columnfamily_size : EngineMeta.defaultColumnFamilySize);
-                String columnfamilyType = (cf.columnfamily_type != null ? cf.columnfamily_type : EngineMeta.defaultColumnFamilyType);
-                String mysqlEngine = (cf.mysql_engine != null ? cf.mysql_engine : EngineMeta.defaultMySQLEngine);
+                int rowkeySize = cf.rowkey_size > 0 ? cf.rowkey_size : EngineMeta.defaultRowKeySize;
+                int columnfamilySize = cf.columnfamily_size > 0 ? cf.columnfamily_size : EngineMeta.defaultColumnFamilySize;
+                String columnfamilyType = cf.columnfamily_type != null ? cf.columnfamily_type : EngineMeta.defaultColumnFamilyType;
+                String mysqlEngine = cf.mysql_engine != null ? cf.mysql_engine : EngineMeta.defaultMySQLEngine;
+                String kcDBClass = cf.kc_dbclass != null ? cf.kc_dbclass : EngineMeta.defaultKCDBClass;
                 engineMeta.setStorageTypeForKS(keyspace.name, keyspace.storage_engine);
+
+                
                 if(engineMeta.isSchemaUsed(keyspace.name)) {
-                    engineMeta.getEngine(engineMeta.getStorageType(), keyspace.name, cf.name, rowkeySize, columnfamilySize, columnfamilyType, mysqlEngine, false);
+                    engineMeta.getEngine(engineMeta.getStorageType(), keyspace.name, cf.name, rowkeySize, columnfamilySize, columnfamilyType, mysqlEngine, null, false);
                 }
                 
                 ColumnFamilyType cfType = cf.column_type == null ? ColumnFamilyType.Standard : cf.column_type;
@@ -692,6 +695,7 @@ public class DatabaseDescriptor
                                                  columnfamilySize,
                                                  columnfamilyType,
                                                  mysqlEngine,
+                                                 kcDBClass,
                                                  metadata);
                 }
                 else

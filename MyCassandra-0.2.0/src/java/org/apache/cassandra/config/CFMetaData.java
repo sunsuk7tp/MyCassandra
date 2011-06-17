@@ -63,6 +63,7 @@ public final class CFMetaData
     public final static int DEFAULT_COLUMNFAMILY_SIZE = 30 *1024;
     public final static String DEFAULT_COLUMNFAMILY_TYPE = "VARBINARY";
     public final static String DEFAULT_MYSQL_ENGINE = "INNODB";
+    public final static String DEFAULT_KC_DBCLASS = "HashDB";
 
     private static final int MIN_CF_ID = 1000;
 
@@ -163,8 +164,9 @@ public final class CFMetaData
     private double memtableOperationsInMillions;      // default based on throughput
     private int rowkeySize;                           // default 64
     private int columnfamilySize;                     // default 30 * 1024
-    private String columnfamilyType;                       // default VARBINARY
-    private String mysqlEngine;                     // default INNODB
+    private String columnfamilyType;                  // default VARBINARY
+    private String mysqlEngine;                       // default INNODB
+    private String kcDBClass;                         // default HashDB
     // NOTE: if you find yourself adding members to this class, make sure you keep the convert methods in lockstep.
 
     private final Map<ByteBuffer, ColumnDefinition> column_metadata;
@@ -191,6 +193,7 @@ public final class CFMetaData
             int columnfamilySize,
             String columnfamilyType,
             String mysqlEngine,
+            String kcDBClass,
             Integer cfId,
             Map<ByteBuffer, ColumnDefinition> column_metadata)
     {
@@ -228,6 +231,9 @@ public final class CFMetaData
         this.mysqlEngine = mysqlEngine != null
                              ? mysqlEngine
                              : DEFAULT_MYSQL_ENGINE;
+        this.kcDBClass = kcDBClass != null
+                             ? kcDBClass
+                             : DEFAULT_KC_DBCLASS;
     }
 
     private CFMetaData(String tableName,
@@ -290,6 +296,8 @@ public final class CFMetaData
             this.columnfamilyType = DEFAULT_COLUMNFAMILY_TYPE;
         if (this.mysqlEngine == null)
             this.mysqlEngine = DEFAULT_MYSQL_ENGINE;
+        if (this.kcDBClass == null)
+            this.kcDBClass = DEFAULT_KC_DBCLASS;
     }
     
     /** adds this cfm to the map. */
@@ -326,6 +334,7 @@ public final class CFMetaData
             int columnfamilySize,
             String columnfamilyType,
             String mysqlEngine,
+            String kcDBClass,
             //This constructor generates the id!
             Map<ByteBuffer, ColumnDefinition> column_metadata)
     {
@@ -361,6 +370,9 @@ public final class CFMetaData
         this.mysqlEngine = mysqlEngine != null
                              ? mysqlEngine
                              : DEFAULT_MYSQL_ENGINE;
+        this.kcDBClass = kcDBClass != null
+                             ? kcDBClass
+                             : DEFAULT_KC_DBCLASS;
     }
 
     public CFMetaData(String tableName,
@@ -412,6 +424,8 @@ public final class CFMetaData
             this.columnfamilyType = DEFAULT_COLUMNFAMILY_TYPE;
         if (this.mysqlEngine == null)
             this.mysqlEngine = DEFAULT_MYSQL_ENGINE;
+        if (this.kcDBClass == null)
+            this.kcDBClass = DEFAULT_KC_DBCLASS;
     }
     
     public static CFMetaData newIndexMetadata(CFMetaData parent, ColumnDefinition info, AbstractType columnComparator)
@@ -526,6 +540,7 @@ public final class CFMetaData
         cf.columnfamily_size = columnfamilySize;
         cf.columnfamily_type = new Utf8(columnfamilyType);
         cf.mysql_engine = new Utf8(mysqlEngine);
+        cf.kc_dbclass = new Utf8(kcDBClass);
         cf.column_metadata = SerDeUtils.createArray(column_metadata.size(),
                                                     org.apache.cassandra.avro.ColumnDef.SCHEMA$);
         for (ColumnDefinition cd : column_metadata.values())
@@ -570,6 +585,7 @@ public final class CFMetaData
         Integer columnfamily_size = cf.columnfamily_size == null ? DEFAULT_COLUMNFAMILY_SIZE : cf.columnfamily_size;
         String columnfamily_type = cf.columnfamily_type == null ? DEFAULT_COLUMNFAMILY_TYPE : cf.columnfamily_type.toString();
         String mysql_engine = cf.mysql_engine == null ? DEFAULT_MYSQL_ENGINE : cf.mysql_engine.toString();
+        String kc_dbclass = cf.kc_dbclass == null ? DEFAULT_KC_DBCLASS : cf.kc_dbclass.toString();
 
         return new CFMetaData(cf.keyspace.toString(),
                               cf.name.toString(),
@@ -593,6 +609,7 @@ public final class CFMetaData
                               columnfamily_size,
                               columnfamily_type,
                               mysql_engine,
+                              kc_dbclass,
                               cf.id,
                               column_metadata);
     }
@@ -682,6 +699,11 @@ public final class CFMetaData
         return mysqlEngine;
     }
 
+    public String getKCDBClass()
+    {
+        return kcDBClass;
+    }
+
     public Map<ByteBuffer, ColumnDefinition> getColumn_metadata()
     {
         return Collections.unmodifiableMap(column_metadata);
@@ -723,6 +745,7 @@ public final class CFMetaData
             .append(columnfamilySize, rhs.columnfamilySize)
             .append(columnfamilyType, rhs.columnfamilyType)
             .append(mysqlEngine, rhs.mysqlEngine)
+            .append(kcDBClass, rhs.kcDBClass)
             .isEquals();
     }
 
@@ -753,6 +776,7 @@ public final class CFMetaData
             .append(columnfamilySize)
             .append(columnfamilyType)
             .append(mysqlEngine)
+            .append(kcDBClass)
             .toHashCode();
     }
 
@@ -795,6 +819,8 @@ public final class CFMetaData
             cf_def.columnfamily_type = CFMetaData.DEFAULT_COLUMNFAMILY_TYPE;
         if (cf_def.mysql_engine == null)
             cf_def.mysql_engine = CFMetaData.DEFAULT_MYSQL_ENGINE;
+        if (cf_def.kc_dbclass == null)
+           cf_def.kc_dbclass = CFMetaData.DEFAULT_KC_DBCLASS;
     }
     
     /** applies implicit defaults to cf definition. useful in updates */
@@ -822,6 +848,8 @@ public final class CFMetaData
             cf_def.setColumnfamily_type(CFMetaData.DEFAULT_COLUMNFAMILY_TYPE);
         if (!cf_def.isSetMysql_engine())
             cf_def.setMysql_engine(CFMetaData.DEFAULT_MYSQL_ENGINE);
+        if (!cf_def.isSetKc_dbclass())
+            cf_def.setKc_dbclass(CFMetaData.DEFAULT_KC_DBCLASS);
     }
     
     // merges some final fields from this CFM with modifiable fields from CfDef into a new CFMetaData.
@@ -867,6 +895,7 @@ public final class CFMetaData
         columnfamilySize = cf_def.columnfamily_size;
         columnfamilyType = cf_def.columnfamily_type == null ? "" : cf_def.columnfamily_type.toString();
         mysqlEngine = cf_def.mysql_engine == null ? "" : cf_def.mysql_engine.toString();
+        kcDBClass = cf_def.kc_dbclass == null ? "" : cf_def.kc_dbclass.toString();
         
         // adjust secondary indexes. figure out who is coming and going.
         Set<ByteBuffer> toRemove = new HashSet<ByteBuffer>();
@@ -935,6 +964,7 @@ public final class CFMetaData
         def.setColumnfamily_size(cfm.columnfamilySize);
         def.setColumnfamily_type(cfm.columnfamilyType);
         def.setMysql_engine(cfm.mysqlEngine);
+        def.setKc_dbclass(cfm.kcDBClass);
 
         List<org.apache.cassandra.thrift.ColumnDef> column_meta = new ArrayList< org.apache.cassandra.thrift.ColumnDef>(cfm.column_metadata.size());
         for (ColumnDefinition cd : cfm.column_metadata.values())
@@ -981,6 +1011,7 @@ public final class CFMetaData
         def.columnfamily_size = cfm.columnfamilySize;
         def.columnfamily_type = cfm.columnfamilyType;
         def.mysql_engine = cfm.mysqlEngine;
+        def.kc_dbclass = cfm.kcDBClass;
         List<org.apache.cassandra.avro.ColumnDef> column_meta = new ArrayList<org.apache.cassandra.avro.ColumnDef>(cfm.column_metadata.size());
         for (ColumnDefinition cd : cfm.column_metadata.values())
         {
@@ -1016,6 +1047,7 @@ public final class CFMetaData
         newDef.columnfamily_size = def.getColumnfamily_size();
         newDef.columnfamily_type = def.getColumnfamily_type();
         newDef.mysql_engine = def.getMysql_engine();
+        newDef.kc_dbclass = def.getKc_dbclass();
         newDef.min_compaction_threshold = def.getMin_compaction_threshold();
         newDef.read_repair_chance = def.getRead_repair_chance();
         newDef.row_cache_save_period_in_seconds = def.getRow_cache_save_period_in_seconds();
@@ -1146,6 +1178,7 @@ public final class CFMetaData
             .append("columnfamilySize", columnfamilySize)
             .append("columnfamilyType", columnfamilyType)
             .append("mysqlEngine", mysqlEngine)
+            .append("kcDBClass", kcDBClass)
             .append("column_metadata", column_metadata)
             .toString();
     }
