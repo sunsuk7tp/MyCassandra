@@ -599,7 +599,6 @@ public class DatabaseDescriptor
                 String kcDBClass = cf.kc_dbclass != null ? cf.kc_dbclass : EngineMeta.defaultKCDBClass;
                 engineMeta.setStorageTypeForKS(keyspace.name, keyspace.storage_engine);
 
-                
                 if(engineMeta.isSchemaUsed(keyspace.name)) {
                     engineMeta.getEngine(engineMeta.getStorageType(), keyspace.name, cf.name, rowkeySize, columnfamilySize, columnfamilyType, mysqlEngine, null, false);
                 }
@@ -671,7 +670,7 @@ public class DatabaseDescriptor
                     metadata.put(columnName, new ColumnDefinition(columnName, rcd.validator_class, rcd.index_type, rcd.index_name));
                 }
                 
-                if (engineMeta.isSchemaUsed(keyspace.name))
+                if (engineMeta.isSchemaUsed(keyspace.name) || engineMeta.isNeedSetup(keyspace.name))
                 {
                      cfDefs[j++] = new CFMetaData(keyspace.name, 
                                                  cf.name, 
