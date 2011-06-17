@@ -19,6 +19,7 @@ package org.apache.cassandra.db.engine;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Map;
+import java.util.HashMap;
 
 import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.cassandra.db.ColumnFamily;
@@ -29,7 +30,21 @@ import kyotocabinet.*;
 public class KyotoCabinetInstance extends DBSchemalessInstance {
 
     DB db;
-    String dbFormat = ".kch";
+    String defaultDBFormat = "kch";
+    String dbFormat;
+    Map<String, String> dbClassFormatMap = new HashMap() {
+        {
+            put("ProtoHashDB", "kcph");
+            put("ProtoTreeDB", "kcpt");
+            put("StashDB", "kcs");
+            put("CacheDB", "kcc");
+            put("GrassDB", "kcg");
+            put("HashDB", "kch");
+            put("TreeDB", "kct");
+            put("DirDB", "kcd");
+            put("ForestDB", "kcf");
+        }
+    };
     
     final String KEYSEPARATOR = ":";
 
@@ -42,12 +57,19 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
         setConfiguration();
 
         db = new DB();
-        String dbFile = DatabaseDescriptor.getStoragePath(engineName) + "/" + this.ksName + "-" + this.cfName + dbFormat;
+        String dbClass = DatabaseDescriptor.getStorageDBClass(engineName);
+        dbFormat = getFileFormatForDBClass(dbClass);
+        String dbFile = DatabaseDescriptor.getStoragePath(engineName) + "/" + this.ksName + "-" + this.cfName + "." + dbFormat;
         if(!db.open(dbFile, DB.OWRITER | DB.OCREATE | DB.OTRYLOCK))
         {
             System.err.println("DB connection Error: " + db.error());
             System.exit(1);
         }
+    }
+
+    private String getFileFormatForDBClass(String dbClass)
+    {
+        return dbClassFormatMap.containsKey(dbClass) ? dbClassFormatMap.get(dbClass) : defaultDBFormat;
     }
 
     @Override

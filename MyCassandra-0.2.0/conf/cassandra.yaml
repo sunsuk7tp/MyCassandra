@@ -32,6 +32,10 @@ auto_bootstrap: false
 # Set storage engine type (Bigtable, MySQL, Redis, MongoDB, ...) and
 # db host, port, username and pass
 
+# With kyoto cabinet, you select kcdir and kcclass
+# kcclass includes nine types ('ProtoHashDB', 'ProtoTreeDB', 'StashDB', 'CacheDB',
+# 'GrasDB', 'HashDB', 'TreeDB', 'DirDB', 'ForestDB'). 
+# Dor more information about each db class, you should look at kyoto cabinet web site (http://fallabs.com/kyotocabinet/spex.html). 
 
 engines:
     - name: MySQL
@@ -59,7 +63,8 @@ engines:
       user: 
       pass:
     - name: KyotoCabinet
-      path: /var/cassandra/kyotocabinet
+      kcdir: /var/cassandra/kyotocabinet
+      kcclass: HashDB
 
 defaultengine: MySQL
 # See http://wiki.apache.org/cassandra/HintedHandoff
