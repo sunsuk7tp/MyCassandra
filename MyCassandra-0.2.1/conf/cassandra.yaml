@@ -49,7 +49,6 @@ engines:
       user: root
       pass:
     - name: HailDB
-      dir: /var/cassandra/haildb
     - name: Bigtable
     - name: Redis
       host: localhost
