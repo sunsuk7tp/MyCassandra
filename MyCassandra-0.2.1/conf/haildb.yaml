@@ -1,0 +1,26 @@
+filePerTableEnabled: true 
+ioCapacityIOPS: 1000
+syncSpinLoops: 30
+printVerboseLog: true
+statusFileEnabled: false
+sysMallocEnabled: false
+rollbackOnTimeoutEnabled: false
+adaptiveHashEnabled: false
+adaptiveFlushingEnabled: false
+additionalMemPoolSize: 16777216 # 16 * 1024 * 1024
+autoextendIncrementSizePages: 8
+bufferPoolSize: 134217728 # 128 * 1024 * 1024
+pageChecksumsEnabled: true
+datafilePath: ibdata1:16M:autoextend
+doublewriteEnabled: true
+openFilesLimit: 300
+lockWaitTimeoutSeconds: 60
+logBufferSize: 1M
+logFileSize: 16M
+logFilesInGroup: 2
+logFileHomeDirectory: /var/log/cassandra/haildb
+dataHomeDir: /var/lib/cassandra/haildb
+maxDirtyPagesPct: 75
+maxPurgeLagSeconds: 0
+lruOldBlocksPct: 37
+lruBlockAccessRecency: 0

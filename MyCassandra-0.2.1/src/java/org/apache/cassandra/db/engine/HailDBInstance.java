@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.nio.ByteBuffer;
 
 import com.g414.haildb.*;
+import com.g414.haildb.DatabaseConfiguration;
 import com.g414.haildb.ColumnType;
 import com.g414.haildb.Database;
 import com.g414.haildb.TableBuilder;
@@ -60,8 +61,7 @@ public class HailDBInstance extends DBSchemafulInstance
 
         setConfiguration();
 
-        DatabaseConfiguration config = new DatabaseConfiguration();
-        config.setDataHomeDir(dir + "/");
+        DatabaseConfiguration config = HailDBConfigure.getConfiguration();
         db = new Database(config);
         dt = new DatabaseTemplate(db);
         createDB();
