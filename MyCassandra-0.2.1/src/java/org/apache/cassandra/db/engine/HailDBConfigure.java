@@ -66,7 +66,6 @@ public class HailDBConfigure
         try
         {
             URL url = getConfigURL();
-
             InputStream input = null;
             try
             {
@@ -94,9 +93,9 @@ public class HailDBConfigure
             if (conf.bufferPoolSize > 0)
                 config.setBufferPoolSize(conf.bufferPoolSize);
             config.setPageChecksumsEnabled(conf.pageChecksumsEnabled);
-            if (conf.datafilePath != null)
+            /*if (conf.datafilePath != null)
                 config.setDatafilePath(conf.datafilePath + File.separator);
-            if (conf.dataHomeDir != null)
+            */if (conf.dataHomeDir != null)
                 config.setDataHomeDir(conf.dataHomeDir + File.separator);
             config.setDoublewriteEnabled(conf.doublewriteEnabled);
             //if (conf.fileFormat != null)
