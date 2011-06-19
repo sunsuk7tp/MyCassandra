@@ -139,12 +139,12 @@ public class HailDBConfigure
         }
         catch (ConfigurationException e)
         {
-            System.err.println(e.getMessage() + "\nFatal configuration error; unable to start server.  See log for stacktrace.");
+            System.err.println(e.getMessage() + "\nFatal configuration error; unable to start haildb.  See log for stacktrace.");
             System.exit(1);
         }
         catch (YAMLException e)
         {
-            System.err.println(e.getMessage() + "\nInvalid yaml; unable to start server.  See log for stacktrace.");
+            System.err.println(e.getMessage() + "\nInvalid yaml; unable to start haildb.  See log for stacktrace.");
             System.exit(1);
         }
         return new DatabaseConfiguration();

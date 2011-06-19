@@ -17,6 +17,7 @@
 package org.apache.cassandra.db.engine;
 
 import java.io.IOException;
+import java.io.File;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -45,7 +46,6 @@ public class HailDBInstance extends DBSchemafulInstance
     private final String PREFIX = "_";
     private final String KEY = "rkey";
     private final String VALUE = "cf";
-    private final String SEPARATOR = "/";
 
     private final String SYSTEM = "system";
 
@@ -206,7 +206,7 @@ public class HailDBInstance extends DBSchemafulInstance
 
     private void setup(int rowKeySize, int columnFamilySize, String columnFamilyType)
     {
-        TableBuilder tb = new TableBuilder(ksName + SEPARATOR + cfName);
+        TableBuilder tb = new TableBuilder(ksName + File.separator + cfName);
         tb.addColumn(KEY, ColumnType.VARCHAR, rowKeySize);
         if (columnFamilyType.equals(VARBINARY) && columnFamilySize < 64*1024-1)
         {
