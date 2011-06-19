@@ -11,7 +11,7 @@ additionalMemPoolSize: 16777216 # 16 * 1024 * 1024
 autoextendIncrementSizePages: 8
 bufferPoolSize: 134217728 # 128 * 1024 * 1024
 pageChecksumsEnabled: true
-datafilePath: ibdata1:16M:autoextend
+#datafilePath: ibdata1\:16M\:autoextend
 doublewriteEnabled: true
 openFilesLimit: 300
 lockWaitTimeoutSeconds: 60
