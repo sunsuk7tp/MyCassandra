@@ -101,17 +101,17 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
     @Override
     public synchronized int delete(String rowKey)
     {
-        return db.remove(makeRowKey(rowKey)) ? 1 : -1;
+        return db.remove(makeRowKey(rowKey)) ? SUCCESS : FAILURE;
     }
 
     @Override
     public int dropDB() {
-        return -1;
+        return FAILURE;
     }
 
     @Override
     public int dropTable() {
-        return db.clear() ? 1 : -1;
+        return db.clear() ? SUCCESS : FAILURE;
     }
 
     @Override
@@ -127,12 +127,12 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
     
     private synchronized int doInsert(byte[] rowKey, byte[] cfValue)
     {
-        return db.append(rowKey, cfValue) ? 1 : -1;
+        return db.append(rowKey, cfValue) ? SUCCESS : FAILURE;
     }
     
     private synchronized int doUpdate(byte[] rowKey, byte[] cfValue)
     {
-        return db.replace(rowKey, cfValue) ? 1 : -1;
+        return db.replace(rowKey, cfValue) ? SUCCESS : FAILURE;
     }
 
     public byte[] makeRowKey(String rowKey)

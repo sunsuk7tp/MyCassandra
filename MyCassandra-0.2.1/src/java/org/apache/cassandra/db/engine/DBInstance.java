@@ -34,6 +34,9 @@ import org.apache.cassandra.db.DecoratedKey;
 public abstract class DBInstance implements StorageEngine
 {
     private static final Logger logger = LoggerFactory.getLogger(DBInstance.class);
+    static final int SUCCESS = 1;
+    static final int FAILURE = -1;
+
     String engineName;
     String ksName;
     String cfName;
@@ -130,8 +133,9 @@ public abstract class DBInstance implements StorageEngine
             kcclass = einfo.kcclass;
     }
 
-    public void errorMsg(String msg, Exception e)
+    public int errorMsg(String msg, Exception e)
     {
         logger.info("[MyCassandra (" + " Keyspace:" + ksName + "/ CF: " + cfName + ")] " + msg + ": " + e);
+        return FAILURE;
     }
 }

@@ -83,13 +83,13 @@ public class MongoInstance extends DBSchemalessInstance
     public synchronized int dropTable()
     {
         coll.drop();
-        return 1;
+        return SUCCESS;
     }
 
     public synchronized int dropDB()
     {
         conn.dropDatabase();
-        return 1;
+        return SUCCESS;
     }
     
     public synchronized int delete(String rowKey)
@@ -120,9 +120,8 @@ public class MongoInstance extends DBSchemalessInstance
     {
         if (res.getError() != null)
         {
-            errorMsg(res.getError(), null);
-            return -1;
+            return errorMsg(res.getError(), null);
         }
-        return -1;
+        return SUCCESS;
     }
 }

@@ -102,8 +102,7 @@ public class RangeMySQLInstance extends RangeDBInstance
         }
         catch (SQLException e)
         {
-            errorMsg("db insertion error", e);
-            return -1;
+            return errorMsg("db insertion error", e);
         }
     }
 
@@ -115,8 +114,7 @@ public class RangeMySQLInstance extends RangeDBInstance
         }
         catch (SQLException e)
         {
-            errorMsg("db update error" , e);
-            return -1;
+            return errorMsg("db update error" , e);
         }
     }
 
@@ -182,8 +180,7 @@ public class RangeMySQLInstance extends RangeDBInstance
         }
         catch (SQLException e)
         {
-            errorMsg("db row deletion error", e);
-            return -1;
+            return errorMsg("db row deletion error", e);
         }
     }
 
@@ -191,13 +188,11 @@ public class RangeMySQLInstance extends RangeDBInstance
     {
         try
         {
-            Statement stmt = conn.createStatement();
-            return stmt.executeUpdate(truncateSt);
+            return conn.createStatement().executeUpdate(truncateSt);
         }
         catch (SQLException e)
         {
-            errorMsg("db truncation error", e);
-            return -1;
+            return errorMsg("db truncation error", e);
         }
     }
 
@@ -205,13 +200,11 @@ public class RangeMySQLInstance extends RangeDBInstance
     {
         try
         {
-            Statement stmt = conn.createStatement();
-            return stmt.executeUpdate(dropTableSt);
+            return conn.createStatement().executeUpdate(dropTableSt);
         }
         catch (SQLException e)
         {
-            errorMsg("db dropTable error", e);
-            return -1;
+            return errorMsg("db dropTable error", e);
         }
     }
 
@@ -219,13 +212,11 @@ public class RangeMySQLInstance extends RangeDBInstance
     {
         try
         {
-            Statement stmt = conn.createStatement();
-            return stmt.executeUpdate(dropDBSt);
+            return conn.createStatement().executeUpdate(dropDBSt);
         }
         catch (SQLException e)
         {
-            errorMsg("db dropDB error" , e);
-            return -1;
+            return errorMsg("db dropDB error" , e);
         }
     }
 
@@ -237,13 +228,12 @@ public class RangeMySQLInstance extends RangeDBInstance
           ResultSet rs = stmt.executeQuery("SHOW DATABASES");
           while (rs.next())
               if (rs.getString(1).equals(ksName))
-                  return 1;
+                  return SUCCESS;
           return stmt.executeUpdate("CREATE DATABASE " + ksName);
         }
         catch (SQLException e) 
         {
-            errorMsg("db database creation error", e);
-            return -1;
+            return errorMsg("db database creation error", e);
         }
     }
 
@@ -259,14 +249,13 @@ public class RangeMySQLInstance extends RangeDBInstance
             ResultSet rs = stmt.executeQuery("SHOW TABLES");
             while (rs.next()) 
                 if (rs.getString(1).equals(cfName))
-                    return 0;
+                    return SUCCESS;
 
             return getCreatePreparedSt(rowKeySize, columnFamilySize, storageSize, storageEngine).executeUpdate();
         }
         catch (SQLException e) 
         {
-            errorMsg("db table creation error", e);
-            return -1;
+            return errorMsg("db table creation error", e);
         }
     }
 
@@ -318,8 +307,7 @@ public class RangeMySQLInstance extends RangeDBInstance
         }
         catch (SQLException e)
         {
-            errorMsg("db procedure creation error", e);
-            return -1;
+            return errorMsg("db procedure creation error", e);
         }
     }
 

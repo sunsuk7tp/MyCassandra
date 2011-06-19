@@ -17,6 +17,11 @@
 package org.apache.cassandra.db.engine;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -30,11 +35,16 @@ import org.apache.cassandra.db.DecoratedKey;
 public class HSMySQLInstance extends DBSchemafulInstance
 {
     HandlerSocket hs;
+    Connection conn;
 
     private final String PREFIX = "";
     private final String ID = "1";
     private final String KEY = "rkey";
     private final String VALUE = "cf";
+    private final String SYSTEM = "system";
+    private final String RANGEPR = "range_get_row";
+
+    private String rangeSt, truncateSt, dropTableSt, dropDBSt, rangePr;
 
     int debug = 0;
 
@@ -43,6 +53,9 @@ public class HSMySQLInstance extends DBSchemafulInstance
         this.ksName = ksName;
         this.cfName = PREFIX + cfName;
         setConfiguration();
+        setStatementDefinition();
+        createDB();
+        
         try
         {
             hs = new HandlerSocket();
@@ -55,6 +68,16 @@ public class HSMySQLInstance extends DBSchemafulInstance
             errorMsg("can't open hs", e);
         }
     }
+    
+    private void setStatementDefinition()
+    {
+        /* define statements */
+        rangeSt = !this.ksName.equals(SYSTEM) ? "CALL " + RANGEPR + this.cfName + "(?,?,?)" : "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " >= ? AND " + KEY + " < ? LIMIT ?";
+        truncateSt = "TRUNCATE TABLE " + this.cfName;
+        dropTableSt = "DROP TABLE" + this.cfName;
+        dropDBSt = "DROP DATABASE" + this.ksName;
+        rangePr = "CREATE PROCEDURE " + RANGEPR + this.cfName + "(IN begin VARCHAR(?),IN end VARCHAR(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
+    }
 
     public int insert(String rowKey, ColumnFamily cf)
     {
@@ -64,8 +87,7 @@ public class HSMySQLInstance extends DBSchemafulInstance
         }
         catch (IOException e)
         {
-            errorMsg("db insertion error", e);
-            return -1;
+            return errorMsg("db insertion error", e);
         }
     }
 
@@ -77,8 +99,7 @@ public class HSMySQLInstance extends DBSchemafulInstance
         }
         catch (IOException e)
         {
-            errorMsg("db update error", e);
-            return -1;
+            return errorMsg("db update error", e);
         }
     }
 
@@ -99,6 +120,29 @@ public class HSMySQLInstance extends DBSchemafulInstance
 
     public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults)
     {
+        Map<ByteBuffer, ColumnFamily> rowMap = new HashMap<ByteBuffer, ColumnFamily>();
+        try
+        {
+            PreparedStatement pstRange = conn.prepareStatement(rangeSt);
+            pstRange.setString(1, new String(startWith.getTokenBytes()));
+            pstRange.setString(2, new String(stopAt.getTokenBytes()));
+            pstRange.setInt(3, maxResults);
+            ResultSet rs = pstRange.executeQuery();
+            if (rs != null)
+                while (rs.next())
+                    rowMap.put(ByteBuffer.wrap(rs.getBytes(1)), bytes2ColumnFamily(rs.getBytes(2)));
+            rs.close();
+            pstRange.close();
+            return rowMap;
+        }
+        catch (SQLException e)
+        {
+            errorMsg("db get range slice error", e);
+        }
+        catch (IOException e)
+        {
+            errorMsg("db get range slice error", e);
+        }
         return null;
     }
 
@@ -108,86 +152,118 @@ public class HSMySQLInstance extends DBSchemafulInstance
         {
             hs.command().findModifyDelete(ID, rowKey, "=", "1", "0");
             List<HandlerSocketResult> Results =  hs.execute();
-            return 1;
+            return SUCCESS;
         }
         catch (IOException e)
         {
-            errorMsg("db deletion error", e);
-            return -1;
+            return errorMsg("db deletion error", e);
         }
     }
 
     public synchronized int truncate()
     {
-        return -1;
+        try
+        {
+            return conn.createStatement().executeUpdate(truncateSt);
+        }
+        catch (SQLException e)
+        {
+            return errorMsg("db truncation error", e);
+        }
     }
 
     public synchronized int dropTable()
     {
-        return -1;
+        try
+        {
+            return conn.createStatement().executeUpdate(dropTableSt);
+        }
+        catch (SQLException e)
+        {
+            return errorMsg("db dropTable error", e);
+        }
     }
     
     public synchronized int dropDB()
     {
-        return -1;
-    }
-
-    public synchronized int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType)
-    {
-        return 0;
-    }
-
-    public int createProcedure(int rowKeySize, int columnFanukySize)
-    {
-        return 0;
-    }
-
-    // Init MySQL Table for Keyspaces
-    /*public int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType) throws SQLException
-    {
         try
         {
-            Statement stmt = conn.createStatement();
-            
-            if(debug > 0)
-            {
-                stmt.executeUpdate("TRUNCATE TABLE "+table);
-            }
-            
-            ResultSet rs = stmt.executeQuery("SHOW TABLES");
-            while(rs.next())
-            {
-                if(rs.getString(1).equals(table))
-                {
-                    return 0;
-                }
-            }
-            
-            String sPrepareSQL = "CREATE Table "+table + "(" +
-                //"`ID` INT NOT NULL AUTO_INCREMENT," + 
-                "`` VARCHAR(?) NOT NULL," +
-                "`cf` VARBINARY(?)," +
-                "PRIMARY KEY (`" + KEY + "`)" +
-            ")";// PARTITION BY KEY(`" + KEY + "`);";
-            
-            PreparedStatement pst = conn.prepareStatement(sPrepareSQL);
-            pst.setInt(1,rowKeySize);
-            pst.setInt(2,columnFamilySize);
-            
-            return pst.executeUpdate();
+            return conn.createStatement().executeUpdate(dropDBSt);
         }
         catch (SQLException e)
         {
-            System.out.println("db connection error "+ e);
+            return errorMsg("db dropDB error" , e);
+        }
+    }
+
+    // Init MySQL Table for Keyspaces
+    public synchronized int create(int rowKeySize, int columnFamilySize, String storageSize, String storageEngine)
+    {
+        try {
+            Statement stmt = conn.createStatement();
+            
+            if (debug > 0)
+                stmt.executeUpdate(truncateSt);
+            
+            ResultSet rs = stmt.executeQuery("SHOW TABLES");
+            while (rs.next()) 
+                if (rs.getString(1).equals(cfName))
+                    return 0;
+
+            return 1;
+        }
+        catch (SQLException e) 
+        {
+            errorMsg("db table creation error", e);
             return -1;
         }
-    }*/
+    }
 
-    private synchronized int doInsert(String rowKey, byte[] cfValue) throws IOException
+    public int createProcedure(int rowKeySize, int columnFamilySize)
     {
-        hs.command().insert(ID, rowKey, cfValue);
-        List<HandlerSocketResult> res = hs.execute();
-        return res.get(0).getStatus();
+        try {
+            Statement stmt = conn.createStatement();
+            
+            ResultSet rs = stmt.executeQuery("SHOW PROCEDURE STATUS");
+            while (rs.next())
+                if (rs.getString(1).equals(ksName))
+                    return SUCCESS;
+            PreparedStatement rst = conn.prepareStatement(rangePr);
+            
+            rst.setInt(1, rowKeySize);
+            rst.setInt(2, rowKeySize);
+            
+            return rst.executeUpdate();
+        }
+        catch (SQLException e)
+        {
+            return errorMsg("db procedure creation error", e);
+        }
+    }
+
+    public synchronized int createDB()
+    {
+        try
+        {
+          Statement stmt = new MySQLConfigure().connect("", host, port, user, pass).createStatement();
+          ResultSet rs = stmt.executeQuery("SHOW DATABASES");
+          while (rs.next())
+              if (rs.getString(1).equals(ksName))
+                  return 1;
+          return stmt.executeUpdate("CREATE DATABASE " + ksName);
+        }
+        catch (SQLException e) 
+        {
+            return errorMsg("db database creation error", e);
+        }
+    }
+
+    private int doInsert(String rowKey, byte[] cfValue) throws IOException
+    {
+        //hs.command().insert(ID, rowKey, cfValue);
+        //List<HandlerSocketResult> res = hs.execute();
+        //return res.get(0).getStatus();
+        return doUpdate(rowKey, cfValue);
     }
 
     private synchronized int doUpdate(String rowKey, byte[] cfValue) throws IOException

@@ -81,30 +81,30 @@ public class RedisInstance extends DBSchemalessInstance
     
     synchronized public int truncate()
     {
-        return -1;
+        return FAILURE;
     }
 
     synchronized public int dropTable()
     {
-        return -1;
+        return FAILURE;
     }
 
     public synchronized int dropDB()
     {
         conn.flushDB();
-        return 1;
+        return SUCCESS;
     }
 
     public synchronized int delete(String rowKey)
     {
         conn.del(makeRowKey(rowKey));
-        return 1;
+        return SUCCESS;
     }
 
     private synchronized int doInsert(byte[] rowKey, byte[] cfValue)
     {
         conn.set(rowKey, cfValue);
-        return 1;
+        return SUCCESS;
     }
 
     public byte[] makeRowKey(String rowKey)
