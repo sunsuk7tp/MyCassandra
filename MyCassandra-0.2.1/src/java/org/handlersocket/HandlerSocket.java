@@ -493,7 +493,7 @@ public class HandlerSocket {
             List<HandlerSocketResult> results = new ArrayList<HandlerSocketResult>();
             //TODO 中途半端で終わったレスポンス内容は破棄しています。その実装で良いか確認。
             for(int i = 0 ; i < data.length ; ){
-                byte[] messages = new byte[data.length];
+                List<byte[]> messages = new ArrayList<byte[]>();
                 ByteArrayOutputStream buf = new ByteArrayOutputStream();
 
                 HandlerSocketResult result = new HandlerSocketResult();
@@ -522,7 +522,7 @@ public class HandlerSocket {
                     byte b = data[i];
                     i++;
                     if(b == COMMAND_TERMINATE){
-                        messages = buf.toByteArray();
+                        messages.add(buf.toByteArray());
 
                         result.setStatus(status);
                         result.setFieldNum(fieldNum);
