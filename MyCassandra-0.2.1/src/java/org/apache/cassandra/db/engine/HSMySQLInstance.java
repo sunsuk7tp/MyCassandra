@@ -61,11 +61,11 @@ public class HSMySQLInstance extends DBSchemafulInstance
             /* HandlerSocket uses three ports. */
             conn = new MySQLConfigure().connect(this.ksName, host, 3306, user, pass);
             hsR = new HandlerSocket();
-            hsR.open(host, port); // default port 9998
+            hsR.open(host, 9998); // default port 9998
             hsR.command().openIndex(ID, this.ksName, this.cfName, "PRIMARY", KEY + "," + VALUE);
             hsR.execute();
             hsW = new HandlerSocket();
-            hsW.open(host, port+1); // default port 9999
+            hsW.open(host, 9999); // default port 9999
             hsW.command().openIndex(ID, this.ksName, this.cfName, "PRIMARY", KEY + "," + VALUE);
             hsW.execute();
         }

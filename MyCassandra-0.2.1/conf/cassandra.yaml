@@ -50,7 +50,7 @@ engines:
       pass:
     - name: HSMySQL
       host: localhost
-      port: 9998
+      port: 3306
       user: root
       pass: 
     - name: Bigtable
