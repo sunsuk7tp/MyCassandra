@@ -300,10 +300,10 @@ public class HSMySQLInstance extends DBSchemafulInstance
 
     private int doInsert(String rowKey, byte[] cfValue) throws IOException
     {
-        //hs.command().insert(ID, rowKey, cfValue);
-        //List<HandlerSocketResult> res = hs.execute();
-        //return res.get(0).getStatus();
-        return doUpdate(rowKey, cfValue);
+        hsW.command().insert(ID, rowKey, cfValue);
+        List<HandlerSocketResult> res = hsW.execute();
+        return res.get(0).getStatus();
+        //return doUpdate(rowKey, cfValue);
     }
 
     private synchronized int doUpdate(String rowKey, byte[] cfValue) throws IOException

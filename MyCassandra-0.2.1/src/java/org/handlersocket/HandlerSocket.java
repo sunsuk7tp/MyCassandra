@@ -335,6 +335,31 @@ public class HandlerSocket {
             commandBuffer.add(buffer.toByteArray());
         }
         
+        public void insert(String id, String key, byte[] val) throws IOException{
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            DataOutputStream dos = new DataOutputStream(buffer);
+            
+            //id
+            writeToken(dos, id);
+            writeTokenSeparator(dos);
+            //operator
+            writeToken(dos, OPERATOR_INSERT);
+            writeTokenSeparator(dos);
+            //key nums
+            writeToken(dos, "1");
+            writeTokenSeparator(dos);
+            writeToken(dos, key == null ? null : key.getBytes(encoding));
+            writeTokenSeparator(dos);
+            // value
+            writeToken(dos, val);
+            
+            writeCommandTerminate(dos);
+            
+            dos.flush();
+            
+            commandBuffer.add(buffer.toByteArray());
+        }
+        
         /**
          * insertコマンドを実行します。
          * @param id
@@ -531,11 +556,11 @@ public class HandlerSocket {
                         results.add(result);
                         break;
                     }
-                    /*if(b == TOKEN_SEPARATOR){
-                        messages.add(new String(buf.toByteArray(), encoding));
+                    if(b == TOKEN_SEPARATOR){
+                        messages.add(buf.toByteArray());
                         buf = new ByteArrayOutputStream();
                         continue;
-                    }*/
+                    }
                     buf.write(b);
                 }
                 
