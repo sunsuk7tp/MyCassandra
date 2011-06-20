@@ -43,6 +43,8 @@ public class HSMySQLInstance extends DBSchemafulInstance
     private final String VALUE = "cf";
     private final String SYSTEM = "system";
     private final String RANGEPR = "range_get_row";
+    private final String BINARY = "BINARY";
+    private final String BLOB = "BLOB";
 
     private String rangeSt, truncateSt, dropTableSt, dropDBSt, rangePr;
 
@@ -83,6 +85,13 @@ public class HSMySQLInstance extends DBSchemafulInstance
         dropTableSt = "DROP TABLE" + this.cfName;
         dropDBSt = "DROP DATABASE" + this.ksName;
         rangePr = "CREATE PROCEDURE " + RANGEPR + this.cfName + "(IN begin VARCHAR(?),IN end VARCHAR(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
+    }
+
+    private String getCreateSt(String statement)
+    {
+        String createStHeader = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` ";
+        String createStFooter = ", PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
+        return createStHeader + statement + createStFooter;
     }
 
     public int insert(String rowKey, ColumnFamily cf)
@@ -202,7 +211,7 @@ public class HSMySQLInstance extends DBSchemafulInstance
         }
     }
 
-    // Init MySQL Table for Keyspaces
+    // Init MySQL Table for ColumnFamily
     public synchronized int create(int rowKeySize, int columnFamilySize, String storageSize, String storageEngine)
     {
         try {
@@ -216,13 +225,38 @@ public class HSMySQLInstance extends DBSchemafulInstance
                 if (rs.getString(1).equals(cfName))
                     return 0;
 
-            return 1;
+            return getCreatePreparedSt(rowKeySize, columnFamilySize, storageSize, storageEngine).executeUpdate();
         }
         catch (SQLException e) 
         {
             errorMsg("db table creation error", e);
             return -1;
         }
+    }
+
+    private PreparedStatement getCreatePreparedSt (int rowKeySize, int columnFamilySize, String storageSize, String storageEngine)
+    {
+        PreparedStatement pst = null;
+        try {
+            if (storageSize.contains(BLOB))
+            {
+                pst = conn.prepareStatement(getCreateSt(storageSize));
+                pst.setInt(1, rowKeySize);
+                pst.setString(2, storageEngine);
+            }
+            else
+            {
+                pst = conn.prepareStatement(getCreateSt(storageSize + "(?)"));
+                pst.setInt(1, rowKeySize);
+                pst.setInt(2, columnFamilySize);
+                pst.setString(3, storageEngine);
+            }
+        }
+        catch (SQLException e)
+        {
+            errorMsg("db table create statement error", e);
+        }
+        return pst;
     }
 
     public int createProcedure(int rowKeySize, int columnFamilySize)
