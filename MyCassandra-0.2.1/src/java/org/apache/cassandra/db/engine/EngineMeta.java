@@ -39,7 +39,7 @@ public class EngineMeta
     public static Map<String, Integer> engineKSMap = new HashMap<String, Integer>();
     
     // schema used se number
-    public static final int[] schemaUsedTypes = {MYSQL, RANGEMYSQL};
+    public static final int[] schemaUsedTypes = {MYSQL, RANGEMYSQL, HSMYSQL};
     public static final int[] needSetupTypes = {KYOTOCABINET};
 
     // for mysql's column family data type params
@@ -186,11 +186,15 @@ public class EngineMeta
                 rdbi.createProcedure(maxKeySize, maxCFSize);
                 engine = rdbi;
                 break;
+            case HSMYSQL:
+                DBSchemafulInstance hdbi = new HSMySQLInstance(tableName, cfName);
+                if(isSystem) hdbi.create(maxKeySize, maxCFSize, BLOB, SYSTEM_MYSQL_ENGINE);
+                else hdbi.create(maxKeySize, maxCFSize, storageSize, mysqlEngine);
+                hdbi.createProcedure(maxKeySize, maxCFSize);
+                engine = hdbi;
+                break;
             case MONGODB:
                 engine = new MongoInstance(tableName, cfName);
-                break;
-            case HSMYSQL:
-                engine = new HSMySQLInstance(tableName, cfName);
                 break;
             case KYOTOCABINET:
                 engine = kcDBClass != null 
