@@ -346,12 +346,12 @@ public class HandlerSocket {
             writeToken(dos, OPERATOR_INSERT);
             writeTokenSeparator(dos);
             //key nums
-            writeToken(dos, "1");
+            writeToken(dos, "2");
             writeTokenSeparator(dos);
             writeToken(dos, key == null ? null : key.getBytes(encoding));
             writeTokenSeparator(dos);
             // value
-            writeToken(dos, val);
+            writeToken(dos, val == null ? null : val.toString().getBytes(encoding));
             
             writeCommandTerminate(dos);
             
