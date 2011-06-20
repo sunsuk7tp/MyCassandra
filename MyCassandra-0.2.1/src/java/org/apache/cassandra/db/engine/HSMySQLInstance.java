@@ -37,7 +37,7 @@ public class HSMySQLInstance extends DBSchemafulInstance
     HandlerSocket hs;
     Connection conn;
 
-    private final String PREFIX = "";
+    private final String PREFIX = "_";
     private final String ID = "1";
     private final String KEY = "rkey";
     private final String VALUE = "cf";
