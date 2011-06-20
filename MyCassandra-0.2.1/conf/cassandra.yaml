@@ -48,10 +48,12 @@ engines:
       port: 3306
       user: root
       pass:
+    - name: HSMySQL
+      host: localhost
+      port: 9998
+      user: root
+      pass: 
     - name: Bigtable
-      host: 
-      user:
-      pass:
     - name: Redis
       host: localhost
       port: 6379

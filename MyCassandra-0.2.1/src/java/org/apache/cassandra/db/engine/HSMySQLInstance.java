@@ -34,7 +34,7 @@ import org.apache.cassandra.db.DecoratedKey;
 
 public class HSMySQLInstance extends DBSchemafulInstance
 {
-    HandlerSocket hs;
+    HandlerSocket hsR, hsW;
     Connection conn;
 
     private final String PREFIX = "_";
@@ -58,10 +58,16 @@ public class HSMySQLInstance extends DBSchemafulInstance
         
         try
         {
-            hs = new HandlerSocket();
-            hs.open(host, port);
-            hs.command().openIndex(ID, this.ksName, this.cfName, "PRIMARY", KEY + "," + VALUE);
-            hs.execute();
+            /* HandlerSocket uses three ports. */
+            conn = new MySQLConfigure().connect(this.ksName, host, 3306, user, pass);
+            hsR = new HandlerSocket();
+            hsR.open(host, port); // default port 9998
+            hsR.command().openIndex(ID, this.ksName, this.cfName, "PRIMARY", KEY + "," + VALUE);
+            hsR.execute();
+            hsW = new HandlerSocket();
+            hsW.open(host, port+1); // default port 9999
+            hsW.command().openIndex(ID, this.ksName, this.cfName, "PRIMARY", KEY + "," + VALUE);
+            hsW.execute();
         }
         catch (IOException e)
         {
@@ -107,8 +113,8 @@ public class HSMySQLInstance extends DBSchemafulInstance
     {
        try
        {
-           hs.command().find(ID, rowKey);
-           List<HandlerSocketResult> res = hs.execute();
+           hsR.command().find(ID, rowKey);
+           List<HandlerSocketResult> res = hsR.execute();
            return res.isEmpty() ? null : res.get(0).getMessages();
        }
        catch (IOException e)
@@ -150,8 +156,8 @@ public class HSMySQLInstance extends DBSchemafulInstance
     {
         try
         {
-            hs.command().findModifyDelete(ID, rowKey, "=", "1", "0");
-            List<HandlerSocketResult> Results =  hs.execute();
+            hsW.command().findModifyDelete(ID, rowKey, "=", "1", "0");
+            List<HandlerSocketResult> Results =  hsW.execute();
             return SUCCESS;
         }
         catch (IOException e)
@@ -268,8 +274,8 @@ public class HSMySQLInstance extends DBSchemafulInstance
 
     private synchronized int doUpdate(String rowKey, byte[] cfValue) throws IOException
     {
-        hs.command().findModifyUpdate(ID, rowKey, "=", "1", "0", cfValue);
-        List<HandlerSocketResult> res = hs.execute();
+        hsW.command().findModifyUpdate(ID, rowKey, "=", "1", "0", cfValue);
+        List<HandlerSocketResult> res = hsW.execute();
         return res.get(0).getStatus();
     }
 }
