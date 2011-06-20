@@ -124,7 +124,7 @@ public class HSMySQLInstance extends DBSchemafulInstance
        {
            hsR.command().find(ID, rowKey);
            List<HandlerSocketResult> res = hsR.execute();
-           return res.isEmpty() ? null : res.get(0).getMessages();
+           return res.isEmpty() ? null : res.get(0).getMessages().get(1);
        }
        catch (IOException e)
        {
