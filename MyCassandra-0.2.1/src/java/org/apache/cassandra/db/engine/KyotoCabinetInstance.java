@@ -16,6 +16,7 @@
 
 package org.apache.cassandra.db.engine;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.DecoratedKey;
+import org.apache.cassandra.io.util.FileUtils;
 
 import kyotocabinet.*;
 
@@ -67,6 +69,12 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
 
         db = new DB();
         dbFormat = dbClass != null ? getFileFormatForDBClass(dbClass) : getFileFormatForDBClass(this.kcclass);
+        try {
+            FileUtils.createDirectory(kcdir);
+        } catch (IOException e) {
+            System.err.println("DB connection error" + db.error());
+            System.exit(1);
+        }
         String dbFile = kcdir + "/" + this.ksName + "-" + this.cfName + "." + dbFormat;
         if(!db.open(dbFile, DB.OWRITER | DB.OCREATE | DB.OTRYLOCK))
         {
