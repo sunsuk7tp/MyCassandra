@@ -85,8 +85,7 @@ public class EngineMeta
 
     public String getStorageLabel(int storageType)
     {
-        if (storageType < 0 || storageType > storageLabels.length) return null;
-        return storageLabels[storageType - 1];
+        return storageType <= 0 || storageType > storageLabels.length ? storageLabels[defaultStorageType - 1] : storageLabels[storageType - 1];
     }
 
     public String getStorageLabel()
