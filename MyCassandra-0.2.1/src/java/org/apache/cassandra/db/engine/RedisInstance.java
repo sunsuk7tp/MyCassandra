@@ -30,6 +30,7 @@ public class RedisInstance extends DBSchemalessInstance
     BinaryJedis conn;
 
     final String KEYSEPARATOR = ":";
+    final int timeout = 300;
 
     public RedisInstance(String ksName, String cfName, int dbIndex)
     {
@@ -39,16 +40,19 @@ public class RedisInstance extends DBSchemalessInstance
 
         setConfiguration();
 
-        conn = new BinaryJedis(host, port);
+        conn = new BinaryJedis(host, port, timeout);
         if(!auth()) System.exit(1);
     }
 
     public RedisInstance(String ksName, String cfName)
     {
+        engineName = "Redis";
         this.ksName = ksName;
         this.cfName = cfName;
+
         setConfiguration();
-        conn = new BinaryJedis(host, port);
+
+        conn = new BinaryJedis(host, port, timeout);
         if(!auth()) System.exit(1);
     }
 
@@ -71,7 +75,7 @@ public class RedisInstance extends DBSchemalessInstance
 
     public byte[] select(String rowKey)
     {
-            return conn.get(makeRowKey(rowKey));
+        return conn.get(makeRowKey(rowKey));
     }
 
     public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults)
@@ -89,19 +93,19 @@ public class RedisInstance extends DBSchemalessInstance
         return FAILURE;
     }
 
-    public synchronized int dropDB()
+    synchronized public int dropDB()
     {
         conn.flushDB();
         return SUCCESS;
     }
 
-    public synchronized int delete(String rowKey)
+    synchronized public int delete(String rowKey)
     {
         conn.del(makeRowKey(rowKey));
         return SUCCESS;
     }
 
-    private synchronized int doInsert(byte[] rowKey, byte[] cfValue)
+    synchronized private int doInsert(byte[] rowKey, byte[] cfValue)
     {
         conn.set(rowKey, cfValue);
         return SUCCESS;

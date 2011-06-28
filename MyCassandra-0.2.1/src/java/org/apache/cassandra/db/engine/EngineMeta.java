@@ -35,7 +35,7 @@ public class EngineMeta
     // label name specified in cassandra.yaml 
     public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "RangeMySQL", "HSMySQL", "MongoDB", "KyotoCabinet"};
     public static final Map<Integer, EngineInfo> enginesInfo = new HashMap<Integer, EngineInfo>(storageLabels.length);
-    
+
     public static Map<String, Integer> engineKSMap = new HashMap<String, Integer>();
     
     // schema used se number
@@ -83,7 +83,7 @@ public class EngineMeta
         return defaultStorageType;
     }
 
-    public String getStorageLabel(int storageType)
+    public static String getStorageLabel(int storageType)
     {
         return storageType <= 0 || storageType > storageLabels.length ? storageLabels[defaultStorageType - 1] : storageLabels[storageType - 1];
     }
@@ -201,6 +201,7 @@ public class EngineMeta
                                    : new KyotoCabinetInstance(tableName, cfName);
                 break;
         }
+
         return engine;
     }
 }

@@ -814,7 +814,7 @@ public final class CFMetaData
         if (cf_def.rowkey_size == null)
             cf_def.rowkey_size = CFMetaData.DEFAULT_ROWKEY_SIZE;
         if (cf_def.columnfamily_size == null)
-            cf_def.rowkey_size = CFMetaData.DEFAULT_COLUMNFAMILY_SIZE;
+            cf_def.columnfamily_size = CFMetaData.DEFAULT_COLUMNFAMILY_SIZE;
         if (cf_def.columnfamily_type == null)
             cf_def.columnfamily_type = CFMetaData.DEFAULT_COLUMNFAMILY_TYPE;
         if (cf_def.mysql_engine == null)
