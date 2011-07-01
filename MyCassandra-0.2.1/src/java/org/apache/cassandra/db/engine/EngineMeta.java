@@ -59,7 +59,7 @@ public class EngineMeta
     public static final String defaultKCDBClass = "HashDB";
 
     // default se type (SystemTable and not specified Keyspace)
-    private int defaultStorageType;
+    private static int defaultStorageType;
 
     // se map
     public static final Map<String, Integer> storageKSMap = new HashMap<String, Integer>();
