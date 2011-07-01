@@ -81,7 +81,7 @@ public class MySQLInstance extends DBSchemafulInstance
         truncateSt = "TRUNCATE TABLE " + this.cfName;
         dropTableSt = "DROP TABLE IF EXISTS " + this.cfName;
         dropDBSt = "DROP DATABASE IF EXISTS " + this.ksName;
-        createDBSt = "CREATE DATABASE IF EXISTS " + this.ksName;
+        createDBSt = "CREATE DATABASE IF NOT EXISTS " + this.ksName;
         setPr = "CREATE PROCEDURE IF NOT EXISTS " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
         getPr = "CREATE PROCEDURE IF NOT EXISTS " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
         rangePr = "CREATE PROCEDURE IF NOT EXISTS " + RANGEPR + this.cfName + "(IN begin VARCHAR(?),IN end VARCHAR(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
