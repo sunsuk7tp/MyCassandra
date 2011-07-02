@@ -85,7 +85,7 @@ public class HSMySQLInstance extends DBSchemafulInstance
         dropTableSt = "DROP TABLE IF EXISTS " + this.cfName;
         dropDBSt = "DROP DATABASE IF EXISTS " + this.ksName;
         createDBSt = "CREATE DATABASE IF NOT EXISTS " + this.ksName;
-        rangePr = "CREATE PROCEDURE IF NOT EXISTS " + RANGEPR + this.cfName + "(IN begin VARCHAR(?),IN end VARCHAR(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
+        rangePr = "CREATE PROCEDURE " + RANGEPR + this.cfName + "(IN begin VARCHAR(?),IN end VARCHAR(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
     }
 
     private String getCreateSt(String statement)
@@ -253,6 +253,11 @@ public class HSMySQLInstance extends DBSchemafulInstance
     public int createProcedure(int rowKeySize, int columnFamilySize)
     {
         try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SHOW PROCEDURE STATUS");
+            while (rs.next())
+                if (rs.getString(1).equals(ksName))
+                    return 0;
             PreparedStatement rst = conn.prepareStatement(rangePr);
             
             rst.setInt(1, rowKeySize);
