@@ -46,7 +46,7 @@ public class HSMySQLInstance extends DBSchemafulInstance
     private final String BINARY = "BINARY";
     private final String BLOB = "BLOB";
 
-    private String rangeSt, truncateSt, dropTableSt, dropDBSt, rangePr;
+    private String rangeSt, truncateSt, dropTableSt, dropDBSt, createDBSt, rangePr;
 
     int debug = 0;
 
@@ -82,14 +82,15 @@ public class HSMySQLInstance extends DBSchemafulInstance
         /* define statements */
         rangeSt = !this.ksName.equals(SYSTEM) ? "CALL " + RANGEPR + this.cfName + "(?,?,?)" : "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " >= ? AND " + KEY + " < ? LIMIT ?";
         truncateSt = "TRUNCATE TABLE " + this.cfName;
-        dropTableSt = "DROP TABLE" + this.cfName;
-        dropDBSt = "DROP DATABASE" + this.ksName;
-        rangePr = "CREATE PROCEDURE " + RANGEPR + this.cfName + "(IN begin VARCHAR(?),IN end VARCHAR(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
+        dropTableSt = "DROP TABLE IF EXISTS " + this.cfName;
+        dropDBSt = "DROP DATABASE IF EXISTS " + this.ksName;
+        createDBSt = "CREATE DATABASE IF NOT EXISTS " + this.ksName;
+        rangePr = "CREATE PROCEDURE IF NOT EXISTS " + RANGEPR + this.cfName + "(IN begin VARCHAR(?),IN end VARCHAR(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
     }
 
     private String getCreateSt(String statement)
     {
-        String createStHeader = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` ";
+        String createStHeader = "CREATE TABLE IF NOT EXISTS "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` ";
         String createStFooter = ", PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         return createStHeader + statement + createStFooter;
     }
@@ -215,16 +216,6 @@ public class HSMySQLInstance extends DBSchemafulInstance
     public synchronized int create(int rowKeySize, int columnFamilySize, String storageSize, String storageEngine)
     {
         try {
-            Statement stmt = conn.createStatement();
-            
-            if (debug > 0)
-                stmt.executeUpdate(truncateSt);
-            
-            ResultSet rs = stmt.executeQuery("SHOW TABLES");
-            while (rs.next()) 
-                if (rs.getString(1).equals(cfName))
-                    return 0;
-
             return getCreatePreparedSt(rowKeySize, columnFamilySize, storageSize, storageEngine).executeUpdate();
         }
         catch (SQLException e) 
@@ -262,12 +253,6 @@ public class HSMySQLInstance extends DBSchemafulInstance
     public int createProcedure(int rowKeySize, int columnFamilySize)
     {
         try {
-            Statement stmt = conn.createStatement();
-            
-            ResultSet rs = stmt.executeQuery("SHOW PROCEDURE STATUS");
-            while (rs.next())
-                if (rs.getString(1).equals(ksName))
-                    return SUCCESS;
             PreparedStatement rst = conn.prepareStatement(rangePr);
             
             rst.setInt(1, rowKeySize);
@@ -285,12 +270,8 @@ public class HSMySQLInstance extends DBSchemafulInstance
     {
         try
         {
-          Statement stmt = new MySQLConfigure().connect("", host, port, user, pass).createStatement();
-          ResultSet rs = stmt.executeQuery("SHOW DATABASES");
-          while (rs.next())
-              if (rs.getString(1).equals(ksName))
-                  return 1;
-          return stmt.executeUpdate("CREATE DATABASE " + ksName);
+            Statement stmt = new MySQLConfigure().connect("", host, port, user, pass).createStatement();
+            return stmt.executeUpdate(createDBSt);
         }
         catch (SQLException e) 
         {

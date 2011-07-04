@@ -44,7 +44,7 @@ public class MySQLInstance extends DBSchemafulInstance
     private final String BINARY = "BINARY";
     private final String BLOB = "BLOB";
 
-    private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, dropTableSt, dropDBSt, getPr, setPr, rangePr;
+    private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, dropTableSt, dropDBSt, createDBSt, getPr, setPr, rangePr;
 
     String bsql;
  
@@ -79,16 +79,17 @@ public class MySQLInstance extends DBSchemafulInstance
         rangeSt = !this.ksName.equals(SYSTEM) ? "CALL " + RANGEPR + this.cfName + "(?,?,?)" : "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " >= ? AND " + KEY + " < ? LIMIT ?";
         deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
         truncateSt = "TRUNCATE TABLE " + this.cfName;
-        dropTableSt = "DROP TABLE" + this.cfName;
-        dropDBSt = "DROP DATABASE" + this.ksName;
-        setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
-        getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
-        rangePr = "CREATE PROCEDURE " + RANGEPR + this.cfName + "(IN begin VARCHAR(?),IN end VARCHAR(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
+        dropTableSt = "DROP TABLE IF EXISTS " + this.cfName;
+        dropDBSt = "DROP DATABASE IF EXISTS " + this.ksName;
+        createDBSt = "CREATE DATABASE IF EXISTS " + this.ksName;
+        setPr = "CREATE PROCEDURE IF NOT EXISTS " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
+        getPr = "CREATE PROCEDURE IF NOT EXISTS " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
+        rangePr = "CREATE PROCEDURE IF NOT EXISTS " + RANGEPR + this.cfName + "(IN begin VARCHAR(?),IN end VARCHAR(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
     }
 
     private String getCreateSt(String statement)
     {
-        String createStHeader = "CREATE Table "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` ";
+        String createStHeader = "CREATE TABLE IF NOT EXISTS "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` ";
         String createStFooter = ", PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         return createStHeader + statement + createStFooter;
     }
@@ -237,11 +238,7 @@ public class MySQLInstance extends DBSchemafulInstance
         try
         {
           Statement stmt = new MySQLConfigure().connect("", host, port, user, pass).createStatement();
-          ResultSet rs = stmt.executeQuery("SHOW DATABASES");
-          while (rs.next())
-              if (rs.getString(1).equals(ksName))
-                  return SUCCESS;
-          return stmt.executeUpdate("CREATE DATABASE " + ksName);
+          return stmt.executeUpdate(createDBSt);
         }
         catch (SQLException e) 
         {
@@ -253,15 +250,9 @@ public class MySQLInstance extends DBSchemafulInstance
     public synchronized int create(int rowKeySize, int columnFamilySize, String storageSize, String storageEngine)
     {
         try {
-            Statement stmt = conn.createStatement();
             
             if (debug > 0)
-                stmt.executeUpdate(truncateSt);
-            
-            ResultSet rs = stmt.executeQuery("SHOW TABLES");
-            while (rs.next()) 
-                if (rs.getString(1).equals(cfName))
-                    return SUCCESS;
+                conn.createStatement().executeUpdate(truncateSt);
 
             return getCreatePreparedSt(rowKeySize, columnFamilySize, storageSize, storageEngine).executeUpdate();
         }
@@ -299,16 +290,9 @@ public class MySQLInstance extends DBSchemafulInstance
     public synchronized int createProcedure(int rowKeySize, int columnFamilySize)
     {
         try {
-            Statement stmt = conn.createStatement();
-            
-            ResultSet rs = stmt.executeQuery("SHOW PROCEDURE STATUS");
-            while (rs.next())
-                if (rs.getString(1).equals(ksName) && ( rs.getString(2).equals(GETPR + cfName) || rs.getString(2).equals(SETPR + cfName) || rs.getString(2).equals(RANGEPR + cfName)))
-                    return SUCCESS;
             PreparedStatement gst = conn.prepareStatement(getPr);
             PreparedStatement sst = conn.prepareStatement(setPr);
             PreparedStatement rst = conn.prepareStatement(rangePr);
-            
 
             gst.setInt(1, rowKeySize);
             sst.setInt(1, columnFamilySize);
