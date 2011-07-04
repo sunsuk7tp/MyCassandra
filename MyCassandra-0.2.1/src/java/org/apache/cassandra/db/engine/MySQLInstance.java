@@ -82,9 +82,9 @@ public class MySQLInstance extends DBSchemafulInstance
         dropTableSt = "DROP TABLE IF EXISTS " + this.cfName;
         dropDBSt = "DROP DATABASE IF EXISTS " + this.ksName;
         createDBSt = "CREATE DATABASE IF EXISTS " + this.ksName;
-        setPr = "CREATE PROCEDURE IF NOT EXISTS " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
-        getPr = "CREATE PROCEDURE IF NOT EXISTS " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
-        rangePr = "CREATE PROCEDURE IF NOT EXISTS " + RANGEPR + this.cfName + "(IN begin VARCHAR(?),IN end VARCHAR(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
+        setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
+        getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
+        rangePr = "CREATE PROCEDURE " + RANGEPR + this.cfName + "(IN begin VARCHAR(?),IN end VARCHAR(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
     }
 
     private String getCreateSt(String statement)
@@ -290,6 +290,12 @@ public class MySQLInstance extends DBSchemafulInstance
     public synchronized int createProcedure(int rowKeySize, int columnFamilySize)
     {
         try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SHOW PROCEDURE STATUS");
+            while (rs.next())
+            if (rs.getString(1).equals(ksName) && ( rs.getString(2).equals(GETPR + cfName) || rs.getString(2).equals(SETPR + cfName)))
+                return 0;
+
             PreparedStatement gst = conn.prepareStatement(getPr);
             PreparedStatement sst = conn.prepareStatement(setPr);
             PreparedStatement rst = conn.prepareStatement(rangePr);

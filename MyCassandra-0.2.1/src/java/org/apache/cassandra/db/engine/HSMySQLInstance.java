@@ -253,6 +253,11 @@ public class HSMySQLInstance extends DBSchemafulInstance
     public int createProcedure(int rowKeySize, int columnFamilySize)
     {
         try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SHOW PROCEDURE STATUS");
+            while (rs.next())
+            if (rs.getString(1).equals(ksName))
+                return 0;
             PreparedStatement rst = conn.prepareStatement(rangePr);
             
             rst.setInt(1, rowKeySize);
