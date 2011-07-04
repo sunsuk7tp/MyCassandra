@@ -73,7 +73,12 @@ public class RedisInstance extends DBSchemalessInstance
         return doInsert(makeRowKey(rowKey), newcf.toBytes());
     }
 
-    public byte[] select(String rowKey)
+    /* XXX Redis is not multithreaded on the current new version.
+     * If you do not use 'synchronized', it happens much connection timeout exceptions.
+     * If you want not to use 'synchronized' for performance with concurrent processing,
+     * you should create a instance by an operation and adjust the max file discriptor on your environments.
+     */
+    synchronized public byte[] select(String rowKey)
     {
         return conn.get(makeRowKey(rowKey));
     }
