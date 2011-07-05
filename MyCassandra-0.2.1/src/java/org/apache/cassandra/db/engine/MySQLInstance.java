@@ -246,7 +246,7 @@ public class MySQLInstance extends DBSchemafulInstance
         }
     }
 
-    // Init MySQL Table for Keyspaces
+    // Initialize MySQL Table for Keyspaces
     public synchronized int create(int rowKeySize, int columnFamilySize, String storageSize, String storageEngine)
     {
         try {
@@ -262,6 +262,7 @@ public class MySQLInstance extends DBSchemafulInstance
         }
     }
 
+    // Get a prepared statement for table creation.
     private PreparedStatement getCreatePreparedSt (int rowKeySize, int columnFamilySize, String storageSize, String storageEngine)
     {
         PreparedStatement pst = null;
