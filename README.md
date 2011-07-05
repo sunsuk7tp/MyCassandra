@@ -1,24 +1,29 @@
 # MyCassandra
 
 > Cassandra = Dynamo + Bigtable    
-> **MyCassandra = Dynamo + MySQL (or Bigtable or Redis or MongoDB or etc...)**  
+> **MyCassandra = Dynamo + ( MySQL | Bigtable | Redis | MongoDB | etc... )**  
 
 MyCassandra is a **modular** NoSQL.  
-MyCassandra is the project branched from Cassandra.  
+MyCassandra is a project branched from Cassandra.  
 
-MyCassandra has an exchangeable **Storage Engine** component like MySQL.    
-With MyCassandra, you can exchange Cassandra's storage like Bigtable (commitlog, memtable, sstable) with MySQL, Redis and others.  
+MyCassandra has an exchangeable component, **Storage Engine** as with MySQL.    
+MyCassandra is a modular NoSQL project branched from Apache Cassandra. 
+MyCassandra is an exchangeable component, Storage Engine as with MySQL. 
+Storage Engine of Cassandra is Bigtable-like structure (commitlog, memtable, sstable), through with MyCassandra, you can exchange this Bigtable Storage Engine with MySQL, Redis, and the others. 
 This means that you can select one or more Storage Engine for according to the followings:
 
 - I/O pattern of applications and the persistence.   
 - persistent or in-memory cache
-- your skills for a data store
+- your skills for the storage engine
 
-Also with MyCassandra, you can apply any data store which do not support distributed model for the cloud to the decentralized archetecture of Cassandra.    
+Also with MyCassandra, you can apply any data store which does not support distributed model for the cloud to the decentralized archetecture of Cassandra.    
 # Release Note
-- [2011.06.??] MyCassandra-0.2.1
+- [2011.0?.??] MyCassandra-0.2.2
     - It will support the following functions:
         - secondary index
+- [2011.07.0?] MyCassandra-0.2.1
+    - It supports a new storage engine
+        - KyotoCabinet
 - [2011.06.13] MyCassandra-0.2.0    
     - It is based on Cassandra-0.7.5.    
     - It supports the following functions:
