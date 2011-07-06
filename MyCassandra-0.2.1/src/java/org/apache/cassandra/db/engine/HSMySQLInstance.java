@@ -85,17 +85,17 @@ public class HSMySQLInstance extends DBSchemafulInstance
         dropTableSt = "DROP TABLE IF EXISTS " + this.cfName;
         dropDBSt = "DROP DATABASE IF EXISTS " + this.ksName;
         createDBSt = "CREATE DATABASE IF NOT EXISTS " + this.ksName;
-        rangePr = "CREATE PROCEDURE IF NOT EXISTS " + RANGEPR + this.cfName + "(IN begin VARCHAR(?),IN end VARCHAR(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
+        rangePr = "CREATE PROCEDURE IF NOT EXISTS " + RANGEPR + this.cfName + "(IN begin VARBINARY(?),IN end VARBINARY(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
     }
 
     private String getCreateSt(String statement)
     {
-        String createStHeader = "CREATE TABLE IF NOT EXISTS "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` ";
+        String createStHeader = "CREATE TABLE IF NOT EXISTS "+ this.cfName + "(" +"`" + KEY + "` VARBINARY(?) NOT NULL," + "`" + VALUE + "` ";
         String createStFooter = ", PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         return createStHeader + statement + createStFooter;
     }
 
-    public int insert(String rowKey, ColumnFamily cf)
+    public int insert(byte[] rowKey, ColumnFamily cf)
     {
         try
         {
@@ -107,7 +107,7 @@ public class HSMySQLInstance extends DBSchemafulInstance
         }
     }
 
-    public int update(String rowKey, ColumnFamily newcf)
+    public int update(byte[] rowKey, ColumnFamily newcf)
     {
         try
         {
@@ -119,11 +119,11 @@ public class HSMySQLInstance extends DBSchemafulInstance
         }
     }
 
-    public byte[] select(String rowKey)
+    public byte[] select(byte[] rowKey)
     {
        try
        {
-           hsR.command().find(ID, rowKey);
+           hsR.command().find(ID, new String(rowKey));
            List<HandlerSocketResult> res = hsR.execute();
            return res.isEmpty() ? null : res.get(0).getMessages().get(1);
        }
@@ -140,8 +140,8 @@ public class HSMySQLInstance extends DBSchemafulInstance
         try
         {
             PreparedStatement pstRange = conn.prepareStatement(rangeSt);
-            pstRange.setString(1, new String(startWith.getTokenBytes()));
-            pstRange.setString(2, new String(stopAt.getTokenBytes()));
+            pstRange.setBytes(1, startWith.getTokenBytes());
+            pstRange.setBytes(2, stopAt.getTokenBytes());
             pstRange.setInt(3, maxResults);
             ResultSet rs = pstRange.executeQuery();
             if (rs != null)
@@ -162,11 +162,11 @@ public class HSMySQLInstance extends DBSchemafulInstance
         return null;
     }
 
-    public synchronized int delete(String rowKey)
+    public synchronized int delete(byte[] rowKey)
     {
         try
         {
-            hsW.command().findModifyDelete(ID, rowKey, "=", "1", "0");
+            hsW.command().findModifyDelete(ID, new String(rowKey), "=", "1", "0");
             List<HandlerSocketResult> Results =  hsW.execute();
             return SUCCESS;
         }
@@ -284,17 +284,17 @@ public class HSMySQLInstance extends DBSchemafulInstance
         }
     }
 
-    private int doInsert(String rowKey, byte[] cfValue) throws IOException
+    private int doInsert(byte[] rowKey, byte[] cfValue) throws IOException
     {
-        hsW.command().insert(ID, rowKey, cfValue);
+        hsW.command().insert(ID, new String(rowKey), cfValue);
         List<HandlerSocketResult> res = hsW.execute();
         return res.get(0).getStatus();
         //return doUpdate(rowKey, cfValue);
     }
 
-    private synchronized int doUpdate(String rowKey, byte[] cfValue) throws IOException
+    private synchronized int doUpdate(byte[] rowKey, byte[] cfValue) throws IOException
     {
-        hsW.command().findModifyUpdate(ID, rowKey, "=", "1", "0", cfValue);
+        hsW.command().findModifyUpdate(ID, new String(rowKey), "=", "1", "0", cfValue);
         List<HandlerSocketResult> res = hsW.execute();
         return res.get(0).getStatus();
     }

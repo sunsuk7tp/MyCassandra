@@ -82,14 +82,14 @@ public class MySQLInstance extends DBSchemafulInstance
         dropTableSt = "DROP TABLE IF EXISTS " + this.cfName;
         dropDBSt = "DROP DATABASE IF EXISTS " + this.ksName;
         createDBSt = "CREATE DATABASE IF EXISTS " + this.ksName;
-        setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARCHAR(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
-        getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARCHAR(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
-        rangePr = "CREATE PROCEDURE " + RANGEPR + this.cfName + "(IN begin VARCHAR(?),IN end VARCHAR(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
+        setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARBINARY(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
+        getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARBINARY(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
+        rangePr = "CREATE PROCEDURE " + RANGEPR + this.cfName + "(IN begin VARBINARY(?),IN end VARBINARY(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
     }
 
     private String getCreateSt(String statement)
     {
-        String createStHeader = "CREATE TABLE IF NOT EXISTS "+ this.cfName + "(" +"`" + KEY + "` VARCHAR(?) NOT NULL," + "`" + VALUE + "` ";
+        String createStHeader = "CREATE TABLE IF NOT EXISTS "+ this.cfName + "(" +"`" + KEY + "` VARBINARY(?) NOT NULL," + "`" + VALUE + "` ";
         String createStFooter = ", PRIMARY KEY (`" + KEY + "`)" + ") ENGINE = ?";
         return createStHeader + statement + createStFooter;
     }
@@ -107,7 +107,7 @@ public class MySQLInstance extends DBSchemafulInstance
         }
     }
 
-    public int insert(String rowKey, ColumnFamily cf)
+    public int insert(byte[] rowKey, ColumnFamily cf)
     {
         try
         {
@@ -119,7 +119,7 @@ public class MySQLInstance extends DBSchemafulInstance
         }
     }
 
-    public int update(String rowKey, ColumnFamily newcf)
+    public int update(byte[] rowKey, ColumnFamily newcf)
     {
         try
         {
@@ -131,12 +131,12 @@ public class MySQLInstance extends DBSchemafulInstance
         }
     }
 
-    public byte[] select(String rowKey)
+    public byte[] select(byte[] rowKey)
     {
         try
         {
             PreparedStatement pstSelect = conn.prepareStatement(getSt);
-            pstSelect.setString(1, rowKey);
+            pstSelect.setBytes(1, rowKey);
             ResultSet rs = pstSelect.executeQuery();
             byte[] b = null;
             if (rs != null)
@@ -159,8 +159,8 @@ public class MySQLInstance extends DBSchemafulInstance
         try
         {
             PreparedStatement pstRange = conn.prepareStatement(rangeSt);
-            pstRange.setString(1, new String(startWith.getTokenBytes()));
-            pstRange.setString(2, new String(stopAt.getTokenBytes()));
+            pstRange.setBytes(1, startWith.getTokenBytes());
+            pstRange.setBytes(2, stopAt.getTokenBytes());
             pstRange.setInt(3, maxResults);
             ResultSet rs = pstRange.executeQuery();
             if (rs != null)
@@ -181,12 +181,12 @@ public class MySQLInstance extends DBSchemafulInstance
         return null;
     }
 
-    public synchronized int delete(String rowKey)
+    public synchronized int delete(byte[] rowKey)
     {
         try
         {
             PreparedStatement pstDelete = conn.prepareStatement(deleteSt);
-            pstDelete.setString(1, rowKey);
+            pstDelete.setBytes(1, rowKey);
             int res = pstDelete.executeUpdate();
             pstDelete.close();
             return res;
@@ -330,18 +330,18 @@ public class MySQLInstance extends DBSchemafulInstance
         return 1;
     }
     */
-    private synchronized int doInsert(String rowKey, byte[] cfValue) throws SQLException
+    private synchronized int doInsert(byte[] rowKey, byte[] cfValue) throws SQLException
     {
-        pstInsert.setString(1, rowKey);
+        pstInsert.setBytes(1, rowKey);
         pstInsert.setBytes(2, cfValue);
         pstInsert.setBytes(3, cfValue);
         return pstInsert.executeUpdate();
     }
 
-    private synchronized int doUpdate(String rowKey, byte[] cfValue) throws SQLException
+    private synchronized int doUpdate(byte[] rowKey, byte[] cfValue) throws SQLException
     {
         pstUpdate.setBytes(1, cfValue);
-        pstUpdate.setString(2, rowKey);
+        pstUpdate.setBytes(2, rowKey);
         return pstUpdate.executeUpdate();
     }
 }

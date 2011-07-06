@@ -89,27 +89,27 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
     }
 
     @Override
-    public int update(String rowKey, ColumnFamily newcf)
+    public int update(byte[] rowKey, ColumnFamily newcf)
     {
-        return doUpdate(makeRowKey(rowKey), newcf.toBytes());
+        return doUpdate(rowKey, newcf.toBytes());
     }
     
     @Override
-    public int insert(String rowKey, ColumnFamily cf)
+    public int insert(byte[] rowKey, ColumnFamily cf)
     {
-        return doInsert(makeRowKey(rowKey), cf.toBytes());
+        return doInsert(rowKey, cf.toBytes());
     }
 
     @Override
-    public byte[] select(String rowKey)
+    public byte[] select(byte[] rowKey)
     {
-        return db.get(makeRowKey(rowKey));
+        return db.get(rowKey);
     }
     
     @Override
-    public synchronized int delete(String rowKey)
+    public synchronized int delete(byte[] rowKey)
     {
-        return db.remove(makeRowKey(rowKey)) ? SUCCESS : FAILURE;
+        return db.remove(rowKey) ? SUCCESS : FAILURE;
     }
 
     @Override

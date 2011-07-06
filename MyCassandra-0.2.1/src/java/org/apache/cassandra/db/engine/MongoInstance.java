@@ -51,17 +51,17 @@ public class MongoInstance extends DBSchemalessInstance
         coll.createIndex(new BasicDBObject(KEY, 1).append("unique", true));
     }
 
-    public int update(String rowKey, ColumnFamily newcf)
+    public int update(byte[] rowKey, ColumnFamily newcf)
     {
         return doUpdate(rowKey, newcf.toBytes());
     }
 
-    public int insert(String rowKey, ColumnFamily cf)
+    public int insert(byte[] rowKey, ColumnFamily cf)
     {
         return doInsert(rowKey, cf.toBytes());
     }
 
-    public byte[] select(String rowKey)
+    public byte[] select(byte[] rowKey)
     {
         BasicDBObject query = new BasicDBObject();
         query.put(KEY, rowKey);
@@ -92,14 +92,14 @@ public class MongoInstance extends DBSchemalessInstance
         return SUCCESS;
     }
     
-    public synchronized int delete(String rowKey)
+    public synchronized int delete(byte[] rowKey)
     {
         DBObject doc = new BasicDBObject();
         doc.put(KEY, rowKey);
         return resResult(coll.remove(doc));
     }
 
-    private synchronized int doUpdate(String rowKey, byte[] cfValue)
+    private synchronized int doUpdate(byte[] rowKey, byte[] cfValue)
     {
         DBObject olddoc = new BasicDBObject();
         DBObject newdoc = new BasicDBObject();
@@ -108,7 +108,7 @@ public class MongoInstance extends DBSchemalessInstance
         return resResult(coll.update(olddoc, newdoc));
     }
 
-    private synchronized int doInsert(String rowKey, byte[] cfValue)
+    private synchronized int doInsert(byte[] rowKey, byte[] cfValue)
     {
         DBObject doc = new BasicDBObject();
         doc.put(KEY, rowKey);

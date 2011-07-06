@@ -36,8 +36,8 @@ public abstract class DBSchemalessInstance extends DBInstance
     public abstract int dropTable();
     public abstract int dropDB();
 
-    public abstract int delete(String rowKey);
-    public abstract int insert(String rowKey, ColumnFamily cf);
-    public abstract int update(String rowKey, ColumnFamily newcf);
-    public abstract byte[] select(String rowKey);
+    public abstract int delete(byte[] rowKey);
+    public abstract int insert(byte[] rowKey, ColumnFamily cf);
+    public abstract int update(byte[] rowKey, ColumnFamily newcf);
+    public abstract byte[] select(byte[] rowKey);
 }

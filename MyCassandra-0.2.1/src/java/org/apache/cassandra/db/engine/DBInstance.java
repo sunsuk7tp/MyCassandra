@@ -52,7 +52,7 @@ public abstract class DBInstance implements StorageEngine
 
     public int put(DecoratedKey key, ColumnFamily cf)
     {
-        String rowKey = key.getTxtKey();
+        byte[] rowKey = key.getTokenBytes();
         if (cf.isMarkedForDelete())
         {
             return delete(rowKey);
@@ -78,10 +78,10 @@ public abstract class DBInstance implements StorageEngine
 
     public ColumnFamily get(DecoratedKey key)
     {
-        return get(key.getTxtKey());
+        return get(key.getTokenBytes());
     }
 
-    public ColumnFamily get(String key)
+    public ColumnFamily get(byte[] key)
     {
         try
         {
@@ -99,10 +99,10 @@ public abstract class DBInstance implements StorageEngine
     public abstract int dropTable();
     public abstract int dropDB();
 
-    public abstract int delete(String rowKey);
-    public abstract int insert(String rowKey, ColumnFamily cf);
-    public abstract int update(String rowKey, ColumnFamily newcf);
-    public abstract byte[] select(String rowKey);
+    public abstract int delete(byte[] rowKey);
+    public abstract int insert(byte[] rowKey, ColumnFamily cf);
+    public abstract int update(byte[] rowKey, ColumnFamily newcf);
+    public abstract byte[] select(byte[] rowKey);
 
     public ColumnFamily mergeColumnFamily(ColumnFamily cf, ColumnFamily newcf)
     {

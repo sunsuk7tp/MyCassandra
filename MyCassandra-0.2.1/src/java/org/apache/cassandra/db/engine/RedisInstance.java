@@ -63,12 +63,12 @@ public class RedisInstance extends DBSchemalessInstance
         return status.equals("OK") ? true : false;
     }
 
-    public int insert(String rowKey, ColumnFamily cf)
+    public int insert(byte[] rowKey, ColumnFamily cf)
     {
         return doInsert(makeRowKey(rowKey), cf.toBytes());
     }
 
-    public int update(String rowKey, ColumnFamily newcf)
+    public int update(byte[] rowKey, ColumnFamily newcf)
     {
         return doInsert(makeRowKey(rowKey), newcf.toBytes());
     }
@@ -78,7 +78,7 @@ public class RedisInstance extends DBSchemalessInstance
      * If you want not to use 'synchronized' for performance with concurrent processing,
      * you should create a instance by an operation and adjust the max file discriptor on your environments.
      */
-    synchronized public byte[] select(String rowKey)
+    synchronized public byte[] select(byte[] rowKey)
     {
         return conn.get(makeRowKey(rowKey));
     }
@@ -104,7 +104,7 @@ public class RedisInstance extends DBSchemalessInstance
         return SUCCESS;
     }
 
-    synchronized public int delete(String rowKey)
+    synchronized public int delete(byte[] rowKey)
     {
         conn.del(makeRowKey(rowKey));
         return SUCCESS;
@@ -116,7 +116,7 @@ public class RedisInstance extends DBSchemalessInstance
         return SUCCESS;
     }
 
-    public byte[] makeRowKey(String rowKey)
+    public byte[] makeRowKey(byte[] rowKey)
     {
         try
         {
