@@ -37,9 +37,6 @@ public class MySQLInstance extends DBSchemafulInstance
     private final String KEY = "rkey";
     private final String VALUE = "cf";
     private final String SYSTEM = "system";
-    private final String SETPR = "set_row";
-    private final String GETPR = "get_row";
-    private final String RANGEPR = "range_get_row";
     
     private final String BINARY = "BINARY";
     private final String BLOB = "BLOB";
@@ -82,9 +79,6 @@ public class MySQLInstance extends DBSchemafulInstance
         dropTableSt = "DROP TABLE IF EXISTS " + this.cfName;
         dropDBSt = "DROP DATABASE IF EXISTS " + this.ksName;
         createDBSt = "CREATE DATABASE IF EXISTS " + this.ksName;
-        //setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARBINARY(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
-        //getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARBINARY(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
-        //rangePr = "CREATE PROCEDURE " + RANGEPR + this.cfName + "(IN begin VARBINARY(?),IN end VARBINARY(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
     }
 
     private String getCreateSt(String statement)
