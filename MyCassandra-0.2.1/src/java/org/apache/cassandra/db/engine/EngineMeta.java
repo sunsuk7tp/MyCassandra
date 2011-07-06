@@ -27,19 +27,18 @@ public class EngineMeta
     public static final int BIGTABLE = 1;
     public static final int REDIS = 2;
     public static final int MYSQL = 3;
-    public static final int RANGEMYSQL = 4;
-    public static final int HSMYSQL = 5;
-    public static final int MONGODB = 6;
-    public static final int KYOTOCABINET = 7;
+    public static final int HSMYSQL = 4;
+    public static final int MONGODB = 5;
+    public static final int KYOTOCABINET = 6;
 
     // label name specified in cassandra.yaml 
-    public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "RangeMySQL", "HSMySQL", "MongoDB", "KyotoCabinet"};
+    public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "HSMySQL", "MongoDB", "KyotoCabinet"};
     public static final Map<Integer, EngineInfo> enginesInfo = new HashMap<Integer, EngineInfo>(storageLabels.length);
 
     public static Map<String, Integer> engineKSMap = new HashMap<String, Integer>();
     
-    // schema used se number
-    public static final int[] schemaUsedTypes = {MYSQL, RANGEMYSQL, HSMYSQL};
+    // schema used SE number
+    public static final int[] schemaUsedTypes = {MYSQL, HSMYSQL};
     public static final int[] needSetupTypes = {KYOTOCABINET};
 
     // for mysql's column family data type params
@@ -175,21 +174,12 @@ public class EngineMeta
                 DBSchemafulInstance dbi = new MySQLInstance(tableName, cfName);
                 if(isSystem) dbi.create(maxKeySize, maxCFSize, BLOB, SYSTEM_MYSQL_ENGINE);
                 else dbi.create(maxKeySize, maxCFSize, storageSize, mysqlEngine);
-                dbi.createProcedure(maxKeySize, maxCFSize);
                 engine = dbi;
-                break;
-            case RANGEMYSQL:
-                RangeMySQLInstance rdbi = new RangeMySQLInstance(tableName, cfName);
-                if(isSystem) rdbi.create(maxKeySize, maxCFSize, BLOB, SYSTEM_MYSQL_ENGINE);
-                else rdbi.create(maxKeySize, maxCFSize, storageSize, mysqlEngine);
-                rdbi.createProcedure(maxKeySize, maxCFSize);
-                engine = rdbi;
                 break;
             case HSMYSQL:
                 DBSchemafulInstance hdbi = new HSMySQLInstance(tableName, cfName);
                 if(isSystem) hdbi.create(maxKeySize, maxCFSize, BLOB, SYSTEM_MYSQL_ENGINE);
                 else hdbi.create(maxKeySize, maxCFSize, storageSize, mysqlEngine);
-                hdbi.createProcedure(maxKeySize, maxCFSize);
                 engine = hdbi;
                 break;
             case MONGODB:

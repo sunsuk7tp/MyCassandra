@@ -46,7 +46,7 @@ public class HSMySQLInstance extends DBSchemafulInstance
     private final String BINARY = "BINARY";
     private final String BLOB = "BLOB";
 
-    private String rangeSt, truncateSt, dropTableSt, dropDBSt, createDBSt, rangePr;
+    private String rangeSt, truncateSt, dropTableSt, dropDBSt, createDBSt;
 
     int debug = 0;
 
@@ -80,12 +80,12 @@ public class HSMySQLInstance extends DBSchemafulInstance
     private void setStatementDefinition()
     {
         /* define statements */
-        rangeSt = !this.ksName.equals(SYSTEM) ? "CALL " + RANGEPR + this.cfName + "(?,?,?)" : "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " >= ? AND " + KEY + " < ? LIMIT ?";
+        rangeSt = "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " >= ? AND " + KEY + " < ? LIMIT ?";
         truncateSt = "TRUNCATE TABLE " + this.cfName;
         dropTableSt = "DROP TABLE IF EXISTS " + this.cfName;
         dropDBSt = "DROP DATABASE IF EXISTS " + this.ksName;
         createDBSt = "CREATE DATABASE IF NOT EXISTS " + this.ksName;
-        rangePr = "CREATE PROCEDURE IF NOT EXISTS " + RANGEPR + this.cfName + "(IN begin VARBINARY(?),IN end VARBINARY(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
+        //rangePr = "CREATE PROCEDURE IF NOT EXISTS " + RANGEPR + this.cfName + "(IN begin VARBINARY(?),IN end VARBINARY(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
     }
 
     private String getCreateSt(String statement)
@@ -250,7 +250,7 @@ public class HSMySQLInstance extends DBSchemafulInstance
         return pst;
     }
 
-    public int createProcedure(int rowKeySize, int columnFamilySize)
+    /*public int createProcedure(int rowKeySize, int columnFamilySize)
     {
         try {
             Statement stmt = conn.createStatement();
@@ -269,7 +269,7 @@ public class HSMySQLInstance extends DBSchemafulInstance
         {
             return errorMsg("db procedure creation error", e);
         }
-    }
+    }*/
 
     public synchronized int createDB()
     {

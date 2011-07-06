@@ -44,7 +44,7 @@ public class MySQLInstance extends DBSchemafulInstance
     private final String BINARY = "BINARY";
     private final String BLOB = "BLOB";
 
-    private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, dropTableSt, dropDBSt, createDBSt, getPr, setPr, rangePr;
+    private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, dropTableSt, dropDBSt, createDBSt;
 
     String bsql;
  
@@ -74,17 +74,17 @@ public class MySQLInstance extends DBSchemafulInstance
     {
         /* define CRUD statements */
         insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + VALUE + " = ?"; 
-        setSt = !this.ksName.equals(SYSTEM) ? "CALL " + SETPR + this.cfName + "(?,?)" : "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
-        getSt = !this.ksName.equals(SYSTEM) ? "CALL " + GETPR + this.cfName + "(?)" : "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
-        rangeSt = !this.ksName.equals(SYSTEM) ? "CALL " + RANGEPR + this.cfName + "(?,?,?)" : "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " >= ? AND " + KEY + " < ? LIMIT ?";
+        setSt = "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
+        getSt = "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
+        rangeSt = "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " >= ? AND " + KEY + " < ? LIMIT ?";
         deleteSt = "DELETE FROM " + this.cfName + " WHERE " + KEY + " = ?";
         truncateSt = "TRUNCATE TABLE " + this.cfName;
         dropTableSt = "DROP TABLE IF EXISTS " + this.cfName;
         dropDBSt = "DROP DATABASE IF EXISTS " + this.ksName;
         createDBSt = "CREATE DATABASE IF EXISTS " + this.ksName;
-        setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARBINARY(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
-        getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARBINARY(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
-        rangePr = "CREATE PROCEDURE " + RANGEPR + this.cfName + "(IN begin VARBINARY(?),IN end VARBINARY(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
+        //setPr = "CREATE PROCEDURE " + SETPR + this.cfName + "(IN cfval VARBINARY(?),IN id VARBINARY(?)) BEGIN UPDATE " + this.cfName + " SET " + VALUE + " = cfval WHERE " + KEY + " = id; END";
+        //getPr = "CREATE PROCEDURE " + GETPR + this.cfName + "(IN id VARBINARY(?)) BEGIN SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = id; END";
+        //rangePr = "CREATE PROCEDURE " + RANGEPR + this.cfName + "(IN begin VARBINARY(?),IN end VARBINARY(?),IN limitNum INT) BEGIN SET SQL_SELECT_LIMIT = limitNum; SELECT " + KEY + "," + VALUE + " FROM " + this.cfName + " WHERE " +  KEY + " >= begin AND " + KEY + "< end; END";
     }
 
     private String getCreateSt(String statement)
@@ -288,7 +288,7 @@ public class MySQLInstance extends DBSchemafulInstance
         return pst;
     }
 
-    public synchronized int createProcedure(int rowKeySize, int columnFamilySize)
+    /*public synchronized int createProcedure(int rowKeySize, int columnFamilySize)
     {
         try {
             Statement stmt = conn.createStatement();
@@ -313,7 +313,7 @@ public class MySQLInstance extends DBSchemafulInstance
         {
             return errorMsg("db procedure creation error", e);
         }
-    }
+    }*/
     /*
     int doMultipleInsert(String rowKey, byte[] cfValue) throws SQLException {
         if (multiCount < multiMax) {

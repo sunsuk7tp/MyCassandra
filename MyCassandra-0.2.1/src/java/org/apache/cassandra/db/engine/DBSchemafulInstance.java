@@ -39,7 +39,7 @@ public abstract class DBSchemafulInstance extends DBInstance
 
     public abstract int delete(byte[] rowKey);
     public abstract int create(int rowKeySize, int columnFamilySize, String columnFamilyType, String storageEngineType);
-    public abstract int createProcedure(int rowKeySize, int columnFamilySize);
+    //public abstract int createProcedure(int rowKeySize, int columnFamilySize);
     public abstract int insert(byte[] rowKey, ColumnFamily cf);
     public abstract int update(byte[] rowKey, ColumnFamily newcf);
     public abstract byte[] select(byte[] rowKey);
