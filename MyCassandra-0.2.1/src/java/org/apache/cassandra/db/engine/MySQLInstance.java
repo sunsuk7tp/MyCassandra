@@ -246,7 +246,7 @@ public class MySQLInstance extends DBSchemafulInstance
         }
     }
 
-    // Init MySQL Table for Keyspaces
+    // Initialize MySQL Table for Keyspaces
     public synchronized int create(int rowKeySize, int columnFamilySize, String storageSize, String storageEngine)
     {
         try {
@@ -262,6 +262,7 @@ public class MySQLInstance extends DBSchemafulInstance
         }
     }
 
+    // Get a prepared statement for table creation.
     private PreparedStatement getCreatePreparedSt (int rowKeySize, int columnFamilySize, String storageSize, String storageEngine)
     {
         PreparedStatement pst = null;
@@ -295,6 +296,7 @@ public class MySQLInstance extends DBSchemafulInstance
             while (rs.next())
                 if (rs.getString(1).equals(ksName) && ( rs.getString(2).equals(GETPR + cfName) || rs.getString(2).equals(SETPR + cfName)))
                     return 0;
+
             PreparedStatement gst = conn.prepareStatement(getPr);
             PreparedStatement sst = conn.prepareStatement(setPr);
             PreparedStatement rst = conn.prepareStatement(rangePr);
