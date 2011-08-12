@@ -108,7 +108,7 @@ public final class KSMetaData
         ks.cf_defs = SerDeUtils.createArray(cfMetaData.size(), org.apache.cassandra.avro.CfDef.SCHEMA$);
         for (CFMetaData cfm : cfMetaData.values())
             ks.cf_defs.add(cfm.deflate());
-        ks.storage_engine = storageEngine != null ? new Utf8(storageEngine) : new Utf8(DatabaseDescriptor.getStorageLabel());
+        ks.storage_engine = storageEngine != null ? new Utf8(storageEngine) : null;
         return ks;
     }
 
@@ -156,8 +156,7 @@ public final class KSMetaData
         for (int i = 0; i < cfsz; i++)
             cfMetaData[i] = CFMetaData.inflate(cfiter.next());
         
-        String storageEngine = ks.storage_engine.toString();
-        if (storageEngine == null) storageEngine = DatabaseDescriptor.getStorageLabel();
+        String storageEngine = ks.storage_engine != null ? ks.storage_engine.toString() : DatabaseDescriptor.getStorageLabel();
 
         return new KSMetaData(ks.name.toString(), repStratClass, strategyOptions, ks.replication_factor, storageEngine, cfMetaData);
     }
