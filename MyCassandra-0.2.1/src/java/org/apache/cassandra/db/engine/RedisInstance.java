@@ -1,4 +1,4 @@
-/*                                                                                                                                                                                 
+/*
  * Copyright 2011 Shunsuke Nakamura, and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -63,11 +63,13 @@ public class RedisInstance extends DBSchemalessInstance
         return status.equals("OK") ? true : false;
     }
 
+    @Override
     public int insert(String rowKey, ColumnFamily cf)
     {
         return doInsert(makeRowKey(rowKey), cf.toBytes());
     }
 
+    @Override
     public int update(String rowKey, ColumnFamily newcf)
     {
         return doInsert(makeRowKey(rowKey), newcf.toBytes());
@@ -78,36 +80,48 @@ public class RedisInstance extends DBSchemalessInstance
      * If you want not to use 'synchronized' for performance with concurrent processing,
      * you should create a instance by an operation and adjust the max file discriptor on your environments.
      */
+    @Override
     synchronized public byte[] select(String rowKey)
     {
         return conn.get(makeRowKey(rowKey));
     }
 
+    @Override
     public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults)
     {
         return null;
     }
-    
+
+    @Override
     synchronized public int truncate()
     {
         return FAILURE;
     }
 
+    @Override
     synchronized public int dropTable()
     {
         return FAILURE;
     }
 
+    @Override
     synchronized public int dropDB()
     {
         conn.flushDB();
         return SUCCESS;
     }
 
+    @Override
     synchronized public int delete(String rowKey)
     {
         conn.del(makeRowKey(rowKey));
         return SUCCESS;
+    }
+
+    @Override
+    public void buildSecondaryIndexes(String columnName)
+    {
+        // yet not implemented.
     }
 
     synchronized private int doInsert(byte[] rowKey, byte[] cfValue)

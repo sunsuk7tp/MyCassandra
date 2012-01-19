@@ -1,4 +1,4 @@
-/*                                                                                                                                                                                 
+/*
  * Copyright 2011 Shunsuke Nakamura, and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -57,7 +57,7 @@ public class HSMySQLInstance extends DBSchemafulInstance
         setConfiguration();
         setStatementDefinition();
         createDB();
-        
+
         try
         {
             /* HandlerSocket uses three ports. */
@@ -76,7 +76,7 @@ public class HSMySQLInstance extends DBSchemafulInstance
             errorMsg("can't open hs", e);
         }
     }
-    
+
     private void setStatementDefinition()
     {
         /* define statements */
@@ -199,7 +199,7 @@ public class HSMySQLInstance extends DBSchemafulInstance
             return errorMsg("db dropTable error", e);
         }
     }
-    
+
     public synchronized int dropDB()
     {
         try
@@ -218,11 +218,17 @@ public class HSMySQLInstance extends DBSchemafulInstance
         try {
             return getCreatePreparedSt(rowKeySize, columnFamilySize, storageSize, storageEngine).executeUpdate();
         }
-        catch (SQLException e) 
+        catch (SQLException e)
         {
             errorMsg("db table creation error", e);
             return -1;
         }
+    }
+
+    @Override
+    public void buildSecondaryIndexes(String columnName)
+    {
+        // yet not implemented.
     }
 
     private PreparedStatement getCreatePreparedSt (int rowKeySize, int columnFamilySize, String storageSize, String storageEngine)
@@ -259,10 +265,10 @@ public class HSMySQLInstance extends DBSchemafulInstance
             if (rs.getString(1).equals(ksName))
                 return 0;
             PreparedStatement rst = conn.prepareStatement(rangePr);
-            
+
             rst.setInt(1, rowKeySize);
             rst.setInt(2, rowKeySize);
-            
+
             return rst.executeUpdate();
         }
         catch (SQLException e)
@@ -278,7 +284,7 @@ public class HSMySQLInstance extends DBSchemafulInstance
             Statement stmt = new MySQLConfigure().connect("", host, port, user, pass).createStatement();
             return stmt.executeUpdate(createDBSt);
         }
-        catch (SQLException e) 
+        catch (SQLException e)
         {
             return errorMsg("db database creation error", e);
         }
