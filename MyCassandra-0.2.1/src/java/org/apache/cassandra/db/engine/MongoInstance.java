@@ -71,7 +71,7 @@ public class MongoInstance extends DBSchemalessInstance
 
     public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults)
     {
-       
+
         return null;
     }
 
@@ -91,12 +91,18 @@ public class MongoInstance extends DBSchemalessInstance
         conn.dropDatabase();
         return SUCCESS;
     }
-    
+
     public synchronized int delete(String rowKey)
     {
         DBObject doc = new BasicDBObject();
         doc.put(KEY, rowKey);
         return resResult(coll.remove(doc));
+    }
+
+    @Override
+    public void buildSecondaryIndexes(String columnName)
+    {
+        // yet not implemented.
     }
 
     private synchronized int doUpdate(String rowKey, byte[] cfValue)

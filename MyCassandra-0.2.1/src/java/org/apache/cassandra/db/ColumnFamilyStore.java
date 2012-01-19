@@ -100,7 +100,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                                                new NamedThreadFactory("FlushWriter"),
                                                "internal");
     public static final ExecutorService postFlushExecutor = new JMXEnabledThreadPoolExecutor("MemtablePostFlusher");
-    
+
     private Set<Memtable> memtablesPendingFlush = new ConcurrentSkipListSet<Memtable>();
 
     public final Table table;
@@ -149,11 +149,11 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
     /** Lock to allow migrations to block all flushing, so we can be sure not to write orphaned data files */
     public final Lock flushLock = new ReentrantLock();
-    
+
     // Locally held row/key cache scheduled tasks
     private volatile ScheduledFuture<?> saveRowCacheTask;
     private volatile ScheduledFuture<?> saveKeyCacheTask;
-    
+
     private int rowkeySize = EngineMeta.defaultRowKeySize;
     private int columnfamilySize = EngineMeta.defaultColumnFamilySize;
     private String columnfamilyType = EngineMeta.defaultColumnFamilyType;
@@ -163,7 +163,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     public void reload()
     {
         // metadata object has been mutated directly. make all the members jibe with new settings.
-        
+
         // only update these runtime-modifiable settings if they have not been modified.
         if (!minCompactionThreshold.isModified())
             for (ColumnFamilyStore cfs : concatWithIndexes())
@@ -184,10 +184,10 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             rowCacheSaveInSeconds = new DefaultInteger(metadata.getRowCacheSavePeriodInSeconds());
         if (!keyCacheSaveInSeconds.isModified())
             keyCacheSaveInSeconds = new DefaultInteger(metadata.getKeyCacheSavePeriodInSeconds());
-        
+
         ssTables.updateCacheSizes();
         scheduleCacheSaving(rowCacheSaveInSeconds.value(), keyCacheSaveInSeconds.value());
-        
+
         // figure out what needs to be added and dropped.
         // future: if/when we have modifiable settings for secondary indexes, they'll need to be handled here.
         for (ByteBuffer indexedColumn : indexedColumns.keySet())
@@ -354,6 +354,14 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                                         ? BytesType.instance
                                         : new LocalByPartionerType(StorageService.getPartitioner());
         final CFMetaData indexedCfMetadata = CFMetaData.newIndexMetadata(metadata, info, columnComparator);
+
+        return DatabaseDescriptor.isBigtable()
+               ? addIndexForBigtable(info, indexedCfMetadata)
+               : addIndexForDB(info, indexedCfMetadata);
+    }
+
+    public Future<?> addIndexForBigtable(final ColumnDefinition info, final CFMetaData indexedCfMetadata)
+    {
         ColumnFamilyStore indexedCfs = ColumnFamilyStore.createColumnFamilyStore(table,
                                                                                  indexedCfMetadata.cfName,
                                                                                  new LocalPartitioner(metadata.getColumn_metadata().get(info.name).getValidator()),
@@ -392,7 +400,34 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             }
         };
         FutureTask<?> f = new FutureTask<Object>(runnable, null);
-        new Thread(f, "Create index " + indexedCfMetadata.cfName).start();
+        new Thread(f, "Create index for Bigtable " + indexedCfMetadata.cfName).start();
+        return f;
+    }
+
+    public Future<?> addIndexForDB(final ColumnDefinition info, final CFMetaData indexedCfMetadata)
+    {
+        Runnable runnable = new Runnable()
+        {
+            public void run()
+            {
+                try
+                {
+                    forceBlockingFlush();
+                }
+                catch (ExecutionException e)
+                {
+                    throw new RuntimeException(e);
+                }
+                catch (InterruptedException e)
+                {
+                    throw new AssertionError(e);
+                }
+                getDBInstance().buildSecondaryIndexes(indexedCfMetadata.cfName);
+                SystemTable.setIndexBuilt(table.name, indexedCfMetadata.cfName);
+            }
+        };
+        FutureTask<?> f = new FutureTask<Object>(runnable, null);
+        new Thread(f, "Create index for DB " + indexedCfMetadata.cfName).start();
         return f;
     }
 
@@ -424,7 +459,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     {
         try
         {
-            invalid = true;   
+            invalid = true;
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
             ObjectName nameObj = new ObjectName(mbeanName);
             if (mbs.isRegistered(nameObj))
@@ -523,7 +558,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
         return new ColumnFamilyStore(table, columnFamily, partitioner, value, metadata);
     }
-    
+
     /**
      * Removes unnecessary files from the cf directory at startup: these include temp files, orphans, zero-length files
      * and compacted sstables. Files that cannot be recognized will be ignored.
@@ -574,7 +609,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                     if (!file.delete())
                         logger.warn("could not delete " + file.getAbsolutePath());
         }
-        
+
         // also clean out any index leftovers.
         CFMetaData cfm = DatabaseDescriptor.getCFMetaData(table, columnFamily);
         if (cfm != null) // secondary indexes aren't stored in DD.
@@ -1101,7 +1136,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     {
         ssTables.replace(sstables, replacements);
     }
-    
+
     public boolean isInvalid()
     {
         return invalid;
@@ -1356,7 +1391,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         ColumnFamily cached = cacheRow(filter.key);
         if (cached == null)
             return null;
- 
+
         return filterColumnFamily(cached, filter, gcBefore);
     }
 
@@ -1399,7 +1434,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
                     // top-level columns
                     if (sliceFilter.count >= cached.getColumnCount())
                     {
-                        removeDeletedColumnsOnly(cached, gcBefore);                    
+                        removeDeletedColumnsOnly(cached, gcBefore);
                         return removeDeletedCF(cached, gcBefore);
                     }
                 }
@@ -1436,7 +1471,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
             if (iter != null)
             {
                 returnCF.delete(iter.getColumnFamily());
-                    
+
                 iterators.add(iter);
             }
 
@@ -1468,11 +1503,11 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
             Comparator<IColumn> comparator = filter.filter.getColumnComparator(getComparator());
             Iterator collated = IteratorUtils.collatedIterator(comparator, iterators);
-          
-                     
+
+
             filter.collectCollatedColumns(returnCF, collated, gcBefore);
-          
-            
+
+
             // Caller is responsible for final removeDeletedCF.  This is important for cacheRow to work correctly:
             // we need to distinguish between "there is no data at all for this row" (BF will let us rebuild that efficiently)
             // and "there used to be data, but it's gone now" (we should cache the empty CF so we don't need to rebuild that slower)
@@ -1501,7 +1536,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
     /**
       * Fetch a range of rows and columns from memtables/sstables.
-      * 
+      *
       * @param superColumn optional SuperColumn to slice subcolumns of; null to slice top-level columns
       * @param range Either a Bounds, which includes start key, or a Range, which does not.
       * @param maxResults Maximum rows to return
@@ -1520,8 +1555,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         DecoratedKey stopAt = new DecoratedKey(range.right, null);
 
         QueryFilter filter = new QueryFilter(null, new QueryPath(columnFamily, superColumn, null), columnFilter);
-        
-        return DatabaseDescriptor.isBigtable(table.name) ? 
+
+        return DatabaseDescriptor.isBigtable(table.name) ?
                    getRangeSliceAtBigtable(filter, startWith, stopAt, range, maxResults)
                    : getRangeSliceAtDB(filter, startWith, stopAt, maxResults);
     }
@@ -1530,7 +1565,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     throws ExecutionException, InterruptedException
     {
         List<Row> rows = new ArrayList<Row>();
-        
+
         Collection<Memtable> memtables = new ArrayList<Memtable>();
         memtables.add(getMemtableThreadSafe());
         memtables.addAll(memtablesPendingFlush);
@@ -1544,7 +1579,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
         try
         {
             // pull rows out of the iterator
-            boolean first = true; 
+            boolean first = true;
             while (iterator.hasNext())
             {
                 Row current = iterator.next();
@@ -1841,8 +1876,8 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
     /**
      * Take a snap shot of this columnfamily store.
-     * 
-     * @param snapshotName the name of the associated with the snapshot 
+     *
+     * @param snapshotName the name of the associated with the snapshot
      */
     public void snapshot(String snapshotName)
     {
@@ -2153,7 +2188,7 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
     {
         return minCompactionThreshold.value();
     }
-    
+
     public void setMinimumCompactionThreshold(int minCompactionThreshold)
     {
         if ((minCompactionThreshold > this.maxCompactionThreshold.value()) && this.maxCompactionThreshold.value() != 0)

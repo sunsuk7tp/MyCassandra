@@ -1,4 +1,4 @@
-/*                                                                                                                                                                                 
+/*
  * Copyright 2011 Shunsuke Nakamura, and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,32 +28,32 @@ import org.apache.cassandra.db.ColumnFamily;
  */
 public interface StorageEngine
 {
-    /** 
-     * Puts cf in a row specified by a key. 
+    /**
+     * Puts cf in a row specified by a key.
      * Includes INSERT, UPDATE and DELETE operations to a row.
      * With DELETE, cf.isMarkedForDelte() is true or cf.getRemovedColumnNames() is not null.
-     * 
+     *
      * @param key a row key
      * @param cf a ColumnFamily value
      */
     public int put(DecoratedKey key, ColumnFamily cf);
 
-    /** 
+    /**
      * Gets a column family specified by a key
-     * 
+     *
      * @param key a row key
      */
     public ColumnFamily get(DecoratedKey key);
 
-    /** 
+    /**
      * Range query from startWith to stopAt limit maxResults.
-     * 
+     *
      * @param startWith range start key
      * @param stopAt range end key (This key is not included)
      */
-    public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults); 
+    public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults);
 
-    /** 
+    /**
      * Truncate table.
      */
     public int truncate();
@@ -67,4 +67,11 @@ public interface StorageEngine
      * Drop database.
      */
     public int dropDB();
+
+    /**
+     * Build secondary index for the specified columnName.
+     *
+     * @param columnName build indexed column name
+     */
+    public void buildSecondaryIndexes(String columnName);
 }

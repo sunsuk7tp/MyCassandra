@@ -1,4 +1,4 @@
-/*                                                                                                                                                                                 
+/*
  * Copyright 2011 Shunsuke Nakamura, and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,12 +29,13 @@ import org.apache.cassandra.io.util.FileUtils;
 
 import kyotocabinet.*;
 
-public class KyotoCabinetInstance extends DBSchemalessInstance {
-
+public class KyotoCabinetInstance extends DBSchemalessInstance
+{
     DB db;
     String defaultDBFormat = "kch";
     String dbFormat;
-    Map<String, String> dbClassFormatMap = new HashMap() {
+    Map<String, String> dbClassFormatMap = new HashMap()
+    {
         {
             put("ProtoHashDB", "kcph");
             put("ProtoTreeDB", "kcpt");
@@ -93,7 +94,7 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
     {
         return doUpdate(makeRowKey(rowKey), newcf.toBytes());
     }
-    
+
     @Override
     public int insert(String rowKey, ColumnFamily cf)
     {
@@ -105,7 +106,7 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
     {
         return db.get(makeRowKey(rowKey));
     }
-    
+
     @Override
     public synchronized int delete(String rowKey)
     {
@@ -113,31 +114,41 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
     }
 
     @Override
-    public int dropDB() {
+    public int dropDB()
+    {
         return FAILURE;
     }
 
     @Override
-    public int dropTable() {
+    public int dropTable()
+    {
         return db.clear() ? SUCCESS : FAILURE;
     }
 
     @Override
     public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith,
-            DecoratedKey stopAt, int maxResults) {
+            DecoratedKey stopAt, int maxResults)
+    {
         return null;
     }
 
     @Override
-    public int truncate() {
+    public int truncate()
+    {
         return dropTable();
     }
-    
+
+    @Override
+    public void buildSecondaryIndexes(String columnName)
+    {
+        // yet not implemented.
+    }
+
     private synchronized int doInsert(byte[] rowKey, byte[] cfValue)
     {
         return db.append(rowKey, cfValue) ? SUCCESS : FAILURE;
     }
-    
+
     private synchronized int doUpdate(byte[] rowKey, byte[] cfValue)
     {
         return db.replace(rowKey, cfValue) ? SUCCESS : FAILURE;
