@@ -1,4 +1,4 @@
-/*                                                                                                                                                                                 
+/*
  * Copyright 2011 Shunsuke Nakamura, and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,8 +29,8 @@ public class RedisInstance extends DBSchemalessInstance
 {
     BinaryJedis conn;
 
-    final String KEYSEPARATOR = ":";
-    final int timeout = 300;
+    private static final String KEYSEPARATOR = ":";
+    private static final int timeout = 300;
 
     public RedisInstance(String ksName, String cfName, int dbIndex)
     {
@@ -63,11 +63,13 @@ public class RedisInstance extends DBSchemalessInstance
         return status.equals("OK") ? true : false;
     }
 
+    @Override
     public int insert(String rowKey, ColumnFamily cf)
     {
         return doInsert(makeRowKey(rowKey), cf.toBytes());
     }
 
+    @Override
     public int update(String rowKey, ColumnFamily newcf)
     {
         return doInsert(makeRowKey(rowKey), newcf.toBytes());
@@ -78,32 +80,38 @@ public class RedisInstance extends DBSchemalessInstance
      * If you want not to use 'synchronized' for performance with concurrent processing,
      * you should create a instance by an operation and adjust the max file discriptor on your environments.
      */
+    @Override
     synchronized public byte[] select(String rowKey)
     {
         return conn.get(makeRowKey(rowKey));
     }
 
+    @Override
     public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults)
     {
         return null;
     }
-    
+
+    @Override
     synchronized public int truncate()
     {
         return FAILURE;
     }
 
+    @Override
     synchronized public int dropTable()
     {
         return FAILURE;
     }
 
+    @Override
     synchronized public int dropDB()
     {
         conn.flushDB();
         return SUCCESS;
     }
 
+    @Override
     synchronized public int delete(String rowKey)
     {
         conn.del(makeRowKey(rowKey));
@@ -116,7 +124,7 @@ public class RedisInstance extends DBSchemalessInstance
         return SUCCESS;
     }
 
-    public byte[] makeRowKey(String rowKey)
+    private byte[] makeRowKey(String rowKey)
     {
         try
         {

@@ -1,4 +1,4 @@
-/*                                                                                                                                                                                 
+/*
  * Copyright 2011 Shunsuke Nakamura, and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,13 +31,22 @@ public class EngineMeta
     public static final int HSMYSQL = 5;
     public static final int MONGODB = 6;
     public static final int KYOTOCABINET = 7;
+    public static final int MEMCACHED = 8;
 
-    // label name specified in cassandra.yaml 
-    public static final String[] storageLabels = {"Bigtable", "Redis", "MySQL", "RangeMySQL", "HSMySQL", "MongoDB", "KyotoCabinet"};
+    // label name specified in cassandra.yaml
+    public static final String[] storageLabels = {
+        "Bigtable",
+        "Redis",
+        "MySQL",
+        "RangeMySQL",
+        "HSMySQL",
+        "MongoDB",
+        "KyotoCabinet",
+        "Memcached"};
     public static final Map<Integer, EngineInfo> enginesInfo = new HashMap<Integer, EngineInfo>(storageLabels.length);
 
     public static Map<String, Integer> engineKSMap = new HashMap<String, Integer>();
-    
+
     // schema used se number
     public static final int[] schemaUsedTypes = {MYSQL, RANGEMYSQL, HSMYSQL};
     public static final int[] needSetupTypes = {KYOTOCABINET};
@@ -156,7 +165,7 @@ public class EngineMeta
         if(ksName == null)
             return getStorageType();
         return storageKSMap.containsKey(ksName) ? storageKSMap.get(ksName) : getStorageType();
-       
+
     }
 
     // init setup and return the instance specified in storageType
@@ -196,9 +205,12 @@ public class EngineMeta
                 engine = new MongoInstance(tableName, cfName);
                 break;
             case KYOTOCABINET:
-                engine = kcDBClass != null 
+                engine = kcDBClass != null
                                    ? new KyotoCabinetInstance(tableName, cfName, kcDBClass)
                                    : new KyotoCabinetInstance(tableName, cfName);
+                break;
+            case MEMCACHED:
+                engine = new MemcacheInstance(tableName, cfName);
                 break;
         }
 
