@@ -1,4 +1,4 @@
-/*
+/*                                                                                                                                                                                 
  * Copyright 2011 Shunsuke Nakamura, and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +43,7 @@ public class RangeMySQLInstance extends RangeDBInstance
     private final String SETPR = "set_row";
     private final String GETPR = "get_row";
     private final String RANGEPR = "range_get_row";
-
+    
     private final String BINARY = "BINARY";
     private final String BLOB = "BLOB";
 
@@ -74,7 +74,7 @@ public class RangeMySQLInstance extends RangeDBInstance
     // Define CRUD statements.
     private void setStatementDefinition()
     {
-        insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + TOKEN + ", " + VALUE +") VALUES (?,?,?) ON DUPLICATE KEY UPDATE " + VALUE + " = ?";
+        insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + TOKEN + ", " + VALUE +") VALUES (?,?,?) ON DUPLICATE KEY UPDATE " + VALUE + " = ?"; 
         setSt = !this.ksName.equals(SYSTEM) ? "CALL " + SETPR + this.cfName + "(?,?)" : "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
         getSt = !this.ksName.equals(SYSTEM) ? "CALL " + GETPR + this.cfName + "(?)" : "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
         rangeSt = !this.ksName.equals(SYSTEM) ? "CALL " + RANGEPR + this.cfName + "(?,?,?)" : "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + " WHERE " + TOKEN + " >= ? AND " + TOKEN + " < ? LIMIT ?";
@@ -228,7 +228,7 @@ public class RangeMySQLInstance extends RangeDBInstance
           Statement stmt = new MySQLConfigure().connect("", host, port, user, pass).createStatement();
           return stmt.executeUpdate(createDBSt);
         }
-        catch (SQLException e)
+        catch (SQLException e) 
         {
             return errorMsg("db database creation error", e);
         }
@@ -240,16 +240,10 @@ public class RangeMySQLInstance extends RangeDBInstance
         try {
             return getCreatePreparedSt(rowKeySize, columnFamilySize, storageSize, storageEngine).executeUpdate();
         }
-        catch (SQLException e)
+        catch (SQLException e) 
         {
             return errorMsg("db table creation error", e);
         }
-    }
-
-    @Override
-    public void buildSecondaryIndexes(String columnName)
-    {
-        // yet not implemented.
     }
 
     private PreparedStatement getCreatePreparedSt (int rowKeySize, int columnFamilySize, String storageSize, String storageEngine)
@@ -295,7 +289,7 @@ public class RangeMySQLInstance extends RangeDBInstance
             sst.setInt(2, rowKeySize);
             rst.setInt(1, rowKeySize);
             rst.setInt(2, rowKeySize);
-
+            
             return gst.executeUpdate() * sst.executeUpdate() * rst.executeUpdate();
         }
         catch (SQLException e)

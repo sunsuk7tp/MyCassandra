@@ -1,4 +1,4 @@
-/*
+/*                                                                                                                                                                                 
  * Copyright 2011 Shunsuke Nakamura, and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -103,8 +103,6 @@ public abstract class DBInstance implements StorageEngine
     public abstract int insert(String rowKey, ColumnFamily cf);
     public abstract int update(String rowKey, ColumnFamily newcf);
     public abstract byte[] select(String rowKey);
-
-    public abstract void buildSecondaryIndexes(String columnName);
 
     public ColumnFamily mergeColumnFamily(ColumnFamily cf, ColumnFamily newcf)
     {
