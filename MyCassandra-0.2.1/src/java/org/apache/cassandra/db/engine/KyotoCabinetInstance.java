@@ -1,4 +1,4 @@
-/*                                                                                                                                                                                 
+/*
  * Copyright 2011 Shunsuke Nakamura, and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +31,7 @@ import kyotocabinet.*;
 
 public class KyotoCabinetInstance extends DBSchemalessInstance {
 
+    private static final String engineName = "KyotoCabinet";
     DB db;
     String defaultDBFormat = "kch";
     String dbFormat;
@@ -52,20 +53,18 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
 
     public KyotoCabinetInstance(String ksName, String cfName, String dbClass)
     {
+        super(engineName, ksName, cfName);
         setup(ksName, cfName, dbClass);
     }
 
     public KyotoCabinetInstance(String ksName, String cfName)
     {
+        super(engineName, ksName, cfName);
         setup(ksName, cfName, null);
     }
 
     private void setup(String ksName, String cfName, String dbClass)
     {
-        engineName = "KyotoCabinet";
-        this.ksName = ksName;
-        this.cfName = cfName;
-        setConfiguration();
 
         db = new DB();
         dbFormat = dbClass != null ? getFileFormatForDBClass(dbClass) : getFileFormatForDBClass(this.kcclass);
@@ -93,7 +92,7 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
     {
         return doUpdate(makeRowKey(rowKey), newcf.toBytes());
     }
-    
+
     @Override
     public int insert(String rowKey, ColumnFamily cf)
     {
@@ -105,7 +104,7 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
     {
         return db.get(makeRowKey(rowKey));
     }
-    
+
     @Override
     public synchronized int delete(String rowKey)
     {
@@ -132,12 +131,12 @@ public class KyotoCabinetInstance extends DBSchemalessInstance {
     public int truncate() {
         return dropTable();
     }
-    
+
     private synchronized int doInsert(byte[] rowKey, byte[] cfValue)
     {
         return db.append(rowKey, cfValue) ? SUCCESS : FAILURE;
     }
-    
+
     private synchronized int doUpdate(byte[] rowKey, byte[] cfValue)
     {
         return db.replace(rowKey, cfValue) ? SUCCESS : FAILURE;

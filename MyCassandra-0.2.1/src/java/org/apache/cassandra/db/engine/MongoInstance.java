@@ -30,7 +30,7 @@ import com.mongodb.DBObject;
 
 public class MongoInstance extends DBSchemalessInstance
 {
-
+    private static final String engineName = "MongoDB";
     DB conn;
     DBCollection coll;
 
@@ -40,11 +40,7 @@ public class MongoInstance extends DBSchemalessInstance
 
     public MongoInstance(String ksName, String cfName)
     {
-        engineName = "MongoDB";
-        this.ksName = PREFIX + ksName;
-        this.cfName = cfName;
-
-        setConfiguration();
+        super(engineName, PREFIX + ksName, cfName);
 
         conn = new MongoConfigure().connect(this.ksName, host, port, user, pass);
         coll = conn.getCollection(this.cfName);
@@ -71,7 +67,7 @@ public class MongoInstance extends DBSchemalessInstance
 
     public Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults)
     {
-       
+
         return null;
     }
 
@@ -91,7 +87,7 @@ public class MongoInstance extends DBSchemalessInstance
         conn.dropDatabase();
         return SUCCESS;
     }
-    
+
     public synchronized int delete(String rowKey)
     {
         DBObject doc = new BasicDBObject();

@@ -27,6 +27,7 @@ import redis.clients.jedis.BinaryJedis;
 
 public class RedisInstance extends DBSchemalessInstance
 {
+    private static final String engineName = "Redis";
     BinaryJedis conn;
 
     private static final String KEYSEPARATOR = ":";
@@ -34,11 +35,7 @@ public class RedisInstance extends DBSchemalessInstance
 
     public RedisInstance(String ksName, String cfName, int dbIndex)
     {
-        engineName = "Redis";
-        this.ksName = ksName;
-        this.cfName = cfName;
-
-        setConfiguration();
+        super(engineName, ksName, cfName);
 
         conn = new BinaryJedis(host, port, timeout);
         if(!auth()) System.exit(1);
@@ -46,11 +43,7 @@ public class RedisInstance extends DBSchemalessInstance
 
     public RedisInstance(String ksName, String cfName)
     {
-        engineName = "Redis";
-        this.ksName = ksName;
-        this.cfName = cfName;
-
-        setConfiguration();
+        super(engineName, ksName, cfName);
 
         conn = new BinaryJedis(host, port, timeout);
         if(!auth()) System.exit(1);

@@ -1,4 +1,4 @@
-/*                                                                                                                                                                                 
+/*
  * Copyright 2011 Shunsuke Nakamura, and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,34 +27,31 @@ import org.apache.cassandra.db.DecoratedKey;
 
 public class MySQLInstance extends DBSchemafulInstance
 {
-
+    private static final String engineName = "MySQL";
     Connection conn;
     PreparedStatement pstInsert, pstUpdate, pstDelete;
 
     int debug = 0;
 
-    private final String PREFIX = "_";
-    private final String KEY = "rkey";
-    private final String VALUE = "cf";
-    private final String SYSTEM = "system";
-    private final String SETPR = "set_row";
-    private final String GETPR = "get_row";
-    private final String RANGEPR = "range_get_row";
-    
-    private final String BINARY = "BINARY";
-    private final String BLOB = "BLOB";
+    private static final String PREFIX = "_";
+    private static final String KEY = "rkey";
+    private static final String VALUE = "cf";
+    private static final String SYSTEM = "system";
+    private static final String SETPR = "set_row";
+    private static final String GETPR = "get_row";
+    private static final String RANGEPR = "range_get_row";
+
+    private static final String BINARY = "BINARY";
+    private static final String BLOB = "BLOB";
 
     private String insertSt, setSt, getSt, rangeSt, deleteSt, truncateSt, dropTableSt, dropDBSt, createDBSt, getPr, setPr, rangePr;
 
     String bsql;
- 
+
     public MySQLInstance(String ksName, String cfName)
     {
-        engineName = "MySQL";
-        this.ksName = ksName;
-        this.cfName = PREFIX + cfName;
+        super(engineName, ksName, PREFIX + cfName);
 
-        setConfiguration();
         setStatementDefinition();
         createDB();
         conn = new MySQLConfigure().connect(this.ksName, host, port, user, pass);
@@ -73,7 +70,7 @@ public class MySQLInstance extends DBSchemafulInstance
     private void setStatementDefinition()
     {
         /* define CRUD statements */
-        insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + VALUE + " = ?"; 
+        insertSt = "INSERT INTO " + this.cfName + " (" + KEY +", " + VALUE +") VALUES (?,?) ON DUPLICATE KEY UPDATE " + VALUE + " = ?";
         setSt = !this.ksName.equals(SYSTEM) ? "CALL " + SETPR + this.cfName + "(?,?)" : "UPDATE " + this.cfName + " SET " + VALUE  +" = ? WHERE " + KEY + " = ?";
         getSt = !this.ksName.equals(SYSTEM) ? "CALL " + GETPR + this.cfName + "(?)" : "SELECT " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " = ?";
         rangeSt = !this.ksName.equals(SYSTEM) ? "CALL " + RANGEPR + this.cfName + "(?,?,?)" : "SELECT " + KEY + ", " + VALUE + " FROM " + this.cfName + " WHERE " + KEY + " >= ? AND " + KEY + " < ? LIMIT ?";
@@ -240,7 +237,7 @@ public class MySQLInstance extends DBSchemafulInstance
           Statement stmt = new MySQLConfigure().connect("", host, port, user, pass).createStatement();
           return stmt.executeUpdate(createDBSt);
         }
-        catch (SQLException e) 
+        catch (SQLException e)
         {
             return errorMsg("db database creation error", e);
         }
@@ -250,13 +247,13 @@ public class MySQLInstance extends DBSchemafulInstance
     public synchronized int create(int rowKeySize, int columnFamilySize, String storageSize, String storageEngine)
     {
         try {
-            
+
             if (debug > 0)
                 conn.createStatement().executeUpdate(truncateSt);
 
             return getCreatePreparedSt(rowKeySize, columnFamilySize, storageSize, storageEngine).executeUpdate();
         }
-        catch (SQLException e) 
+        catch (SQLException e)
         {
             return errorMsg("db table creation error", e);
         }
@@ -306,7 +303,7 @@ public class MySQLInstance extends DBSchemafulInstance
             sst.setInt(2, rowKeySize);
             rst.setInt(1, rowKeySize);
             rst.setInt(2, rowKeySize);
-            
+
             return gst.executeUpdate() * sst.executeUpdate() * rst.executeUpdate();
         }
         catch (SQLException e)

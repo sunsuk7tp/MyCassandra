@@ -14,6 +14,7 @@ import net.spy.memcached.internal.OperationFuture;
 
 public class MemcacheInstance extends DBSchemalessInstance
 {
+    private static final String engineName = "Memcached";
     MemcachedClient cli;
 
     private static final String KEYSEPARATOR = ":";
@@ -21,7 +22,7 @@ public class MemcacheInstance extends DBSchemalessInstance
 
     public MemcacheInstance (String ksName, String cfName)
     {
-        super("Memcached", ksName, cfName);
+        super(engineName, ksName, cfName);
 
         try {
             cli = new MemcachedClient(new InetSocketAddress(host, port));
