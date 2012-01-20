@@ -102,6 +102,11 @@ public class EngineMeta
         return getStorageLabel(defaultStorageType);
     }
 
+    public void putEngineInfo(int storageType, EngineInfo einfo)
+    {
+        enginesInfo.put(storageType, einfo);
+    }
+
     public EngineInfo getEngineInfo(int storageType)
     {
         return storageType > 0 ? enginesInfo.get(storageType) : enginesInfo.get(this.defaultStorageType);

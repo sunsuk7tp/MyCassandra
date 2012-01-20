@@ -91,7 +91,7 @@ public class DatabaseDescriptor
     public static final UUID INITIAL_VERSION = new UUID(4096, 0); // has type nibble set to 1, everything else to zero.
     private static volatile UUID defsVersion = INITIAL_VERSION;
 
-    public static EngineMeta engineMeta;
+    public static EngineMeta engineMeta = new EngineMeta();
 
     /**
      * Inspect the classpath to find storage configuration file
@@ -345,12 +345,8 @@ public class DatabaseDescriptor
             }
 
             for (EngineInfo einfo : conf.engines)
-            {
-                int storageType = engineMeta.getEngineMeta(einfo.name).getStorageType();
-                engineMeta.enginesInfo.put(storageType, einfo);
-            }
-            engineMeta = EngineMeta.getEngineMeta(conf.defaultengine);
-            if (engineMeta.isBigtable())
+                engineMeta.putEngineInfo(engineMeta.getEngineMeta(einfo.name).getStorageType(), einfo);
+            if (engineMeta.getEngineMeta(conf.defaultengine).isBigtable())
             {
                /* data file and commit log directories. they get created later, when they're needed. */
                if (conf.commitlog_directory != null && conf.data_file_directories != null && conf.saved_caches_directory != null)

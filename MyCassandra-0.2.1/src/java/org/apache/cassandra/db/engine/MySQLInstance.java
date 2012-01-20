@@ -291,8 +291,8 @@ public class MySQLInstance extends DBSchemafulInstance
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery("SHOW PROCEDURE STATUS");
             while (rs.next())
-            if (rs.getString(1).equals(ksName) && ( rs.getString(2).equals(GETPR + cfName) || rs.getString(2).equals(SETPR + cfName)))
-                return 0;
+                if (rs.getString(1).equals(ksName) && ( rs.getString(2).equals(GETPR + cfName) || rs.getString(2).equals(SETPR + cfName)))
+                    return 0;
 
             PreparedStatement gst = conn.prepareStatement(getPr);
             PreparedStatement sst = conn.prepareStatement(setPr);

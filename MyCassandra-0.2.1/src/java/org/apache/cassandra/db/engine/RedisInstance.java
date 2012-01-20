@@ -24,6 +24,7 @@ import org.apache.cassandra.db.DecoratedKey;
 import org.apache.cassandra.db.ColumnFamily;
 
 import redis.clients.jedis.BinaryJedis;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 public class RedisInstance extends DBSchemalessInstance
 {
@@ -76,7 +77,14 @@ public class RedisInstance extends DBSchemalessInstance
     @Override
     synchronized public byte[] select(String rowKey)
     {
-        return conn.get(makeRowKey(rowKey));
+       try {
+          return conn.get(makeRowKey(rowKey));
+       }
+       catch (JedisConnectionException e)
+       {
+          conn = new BinaryJedis(host, port, timeout);
+          return conn.get(makeRowKey(rowKey));
+       }
     }
 
     @Override
