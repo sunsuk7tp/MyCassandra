@@ -67,6 +67,9 @@ engines:
     - name: KyotoCabinet
       kcdir: /var/cassandra/kyotocabinet
       kcclass: HashDB
+    - name: Memcached
+      host: localhost
+      port: 11211
 
 defaultengine: MySQL
 # See http://wiki.apache.org/cassandra/HintedHandoff
