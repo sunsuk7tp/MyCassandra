@@ -80,7 +80,7 @@ public class MemcacheInstance extends DBSchemalessInstance
 
     synchronized private int doUpdate(String rowKey, byte[] cfValue)
     {
-        OperationFuture<Boolean> f = cli.replace(rowKey, -1, cfValue);
+        OperationFuture<Boolean> f = cli.replace(rowKey, expire, cfValue);
         try
         {
             boolean isUpdate = f.get(timeout, TimeUnit.SECONDS);
@@ -95,7 +95,7 @@ public class MemcacheInstance extends DBSchemalessInstance
 
     synchronized private int doInsert(String rowKey,  byte[] cfValue)
     {
-        OperationFuture<Boolean> f = cli.add(rowKey, -1, cfValue);
+        OperationFuture<Boolean> f = cli.add(rowKey, expire, cfValue);
         try
         {
             boolean isInsert = f.get(timeout, TimeUnit.SECONDS);

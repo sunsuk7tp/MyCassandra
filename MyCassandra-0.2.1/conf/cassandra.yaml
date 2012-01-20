@@ -70,6 +70,7 @@ engines:
     - name: Memcached
       host: localhost
       port: 11211
+      expire: 0
 
 defaultengine: MySQL
 # See http://wiki.apache.org/cassandra/HintedHandoff

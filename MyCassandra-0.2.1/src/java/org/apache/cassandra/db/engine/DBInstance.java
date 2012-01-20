@@ -47,8 +47,12 @@ public abstract class DBInstance implements StorageEngine
     String user;
     String pass;
 
+    // kyoto cabinet
     String kcdir;
     String kcclass;
+
+    // memcached
+    int expire;
 
     public DBInstance (String engineName, String ksName, String cfName) {
         this.engineName = engineName;
@@ -139,6 +143,8 @@ public abstract class DBInstance implements StorageEngine
             kcdir = einfo.kcdir;
         if (einfo.kcclass != null)
             kcclass = einfo.kcclass;
+        if (einfo.expire > 0)
+            expire = einfo.expire;
     }
 
     public int errorMsg(String msg, Exception e)

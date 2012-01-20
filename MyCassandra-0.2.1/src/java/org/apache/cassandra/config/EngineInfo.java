@@ -20,4 +20,9 @@ public class EngineInfo
     */
     public String kcdir;
     public String kcclass;
+
+    /*
+     *  For memcached
+     */
+    public int expire;
 }
