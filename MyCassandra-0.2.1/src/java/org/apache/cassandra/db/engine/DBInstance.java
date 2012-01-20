@@ -1,4 +1,4 @@
-/*                                                                                                                                                                                 
+/*
  * Copyright 2011 Shunsuke Nakamura, and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,6 +49,14 @@ public abstract class DBInstance implements StorageEngine
 
     String kcdir;
     String kcclass;
+
+    public DBInstance (String engineName, String ksName, String cfName) {
+        this.engineName = engineName;
+        this.ksName = ksName;
+        this.cfName = cfName;
+
+        setConfiguration();
+    }
 
     public int put(DecoratedKey key, ColumnFamily cf)
     {

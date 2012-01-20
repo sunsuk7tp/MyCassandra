@@ -1,4 +1,4 @@
-/*                                                                                                                                                                                 
+/*
  * Copyright 2011 Shunsuke Nakamura, and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +31,10 @@ import org.apache.cassandra.db.DecoratedKey;
 
 public abstract class DBSchemalessInstance extends DBInstance
 {
+    public DBSchemalessInstance (String engineName, String ksName, String cfName)
+    {
+        super(engineName, ksName, cfName);
+    }
     public abstract Map<ByteBuffer, ColumnFamily> getRangeSlice(DecoratedKey startWith, DecoratedKey stopAt, int maxResults);
     public abstract int truncate();
     public abstract int dropTable();

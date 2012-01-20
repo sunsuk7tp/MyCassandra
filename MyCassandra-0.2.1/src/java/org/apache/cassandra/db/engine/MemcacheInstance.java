@@ -21,16 +21,14 @@ public class MemcacheInstance extends DBSchemalessInstance
 
     public MemcacheInstance (String ksName, String cfName)
     {
-        setConfiguration();
+        super("Memcached", ksName, cfName);
+
         try {
             cli = new MemcachedClient(new InetSocketAddress(host, port));
         } catch (IOException e) {
             super.errorMsg(String.format("memcached connection failed, %s, %s", host, port), e);
             System.exit(1);
         }
-        engineName = "Memcached";
-        this.ksName = ksName;
-        this.cfName = cfName;
     }
 
     @Override
