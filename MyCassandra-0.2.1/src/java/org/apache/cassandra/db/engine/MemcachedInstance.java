@@ -12,7 +12,7 @@ import org.apache.cassandra.db.DecoratedKey;
 import net.spy.memcached.MemcachedClient;
 import net.spy.memcached.internal.OperationFuture;
 
-public class MemcacheInstance extends DBSchemalessInstance
+public class MemcachedInstance extends DBSchemalessInstance
 {
     private static final String engineName = "Memcached";
     MemcachedClient cli;
@@ -20,7 +20,7 @@ public class MemcacheInstance extends DBSchemalessInstance
     private static final String KEYSEPARATOR = ":";
     private static final int timeout = 5;
 
-    public MemcacheInstance (String ksName, String cfName)
+    public MemcachedInstance (String ksName, String cfName)
     {
         super(engineName, ksName, cfName);
 
