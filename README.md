@@ -18,20 +18,22 @@ This means that you can select one or more Storage Engine for according to the f
 
 Also with MyCassandra, you can apply any data store which does not support distributed model for the cloud to the decentralized archetecture of Cassandra.    
 # Release Note
-- [2011.0?.??] MyCassandra-0.2.2
+- [2012.0?.??] MyCassandra-0.3.0
+    - It is based on Cassandra-1.X.
+- [2012.0?.??] MyCassandra-0.2.2
     - It will support the following functions:
         - secondary index
-- [2011.07.0?] MyCassandra-0.2.1
+- [2011.12.10] MyCassandra-0.2.1 (done)
     - It supports a new storage engine
         - KyotoCabinet
-- [2011.06.13] MyCassandra-0.2.0    
+- [2011.06.13] MyCassandra-0.2.0 (done)
     - It is based on Cassandra-0.7.5.    
     - It supports the following functions:
         - the basic CRUD method for MySQL, Redis and MongoDB
         - range query for only MySQL
         - dynamic add or update keyspace/columnfamily
         - select a storage engine by a keyspace
-- [2011.06.13] MyCassandra-0.1.0    
+- [2011.06.13] MyCassandra-0.1.0 (done) 
     - It is based on Cassandra-0.6.2.    
     - It is a experimental version.    
 
@@ -173,10 +175,16 @@ If you know more about MyCassandra, please look [https://github.com/sunsuk7tp/My
 # Contact
 If you have something, please contact me!!
 
+- Author: Shunsuke Nakamura (Tokyo Tech.)
+
 - Issue Reports: [https://github.com/sunsuk7tp/MyCassandra/issues](https://github.com/sunsuk7tp/MyCassandra/issues "github-issues")
 
 - Google Group: [http://groups.google.com/group/my-cassandra/](http://groups.google.com/group/my-cassandra/ "http://groups.google.com/group/my-cassandra/")
 
-- E-mail: sunsuk7tp at gmail.com
+- Author (Shunsuke Nakamura) E-mail: sunsuk7tp at gmail.com
 
 - Twitter: [@sunsuk7tp](http://twitter.com/sunsuk7tp "@sunsuk7tp"), [@_MyCassandra](http://twitter.com/_MyCassandra "@_MyCassandra"), [@MyCassandraJP](http://twitter.com/MyCassandraJP "@MyCassandraJP"),
+
+******
+last update: 2012.02.22
+******
